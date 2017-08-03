@@ -3,38 +3,7 @@ The [@groupagreebot](https://t.me/groupagreebot) is an advanced poll bot for Tel
 
 An example: You want to hang out with your friends, but you want to find out when they have time. Normally, you would just ask when to meet, resulting in dozens of messages being send and staying on top of it becomes very hard. So, instead of whipping out the old pen and paper and counting people by hand, just ask the GroupAgree Bot kindly to do that for you:
 
-📊 **Weekend barbecue?**
-Let's meet next weekend to have barbecue, when are you free?
-
-**Saturday [3]**
-
-├ Jan 🇹🇰
-
-├ riccardo
-
-└ Jonas
-
-**Sunday [6]**
-
-├ Jan 🇹🇰
-
-├ Corbi
-
-├ M R
-
-├ riccardo
-
-├ Jeff
-
-├ Sajil CK
-
-└ Jonas
-
-**Sorry, I don't have time [1]**
-
-└ @MelisaLilPanda [OFF]
-
-👥 8 people have voted so far
+![Screenshot](telegra.ph/file/ab7f9a071c55c4d42b1b2.png)
  
 Just try it out yourself: Visit https://telegram.me/groupagreebot
  
