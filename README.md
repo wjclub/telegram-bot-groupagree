@@ -7,25 +7,35 @@ An example: You want to hang out with your friends, but you want to find out whe
 Let's meet next weekend to have barbecue, when are you free?
 
 **Saturday [3]**
+
 ├ Jan 🇹🇰
+
 ├ riccardo
+
 └ Jonas
 
 **Sunday [6]**
+
 ├ Jan 🇹🇰
+
 ├ Corbi
+
 ├ M R
+
 ├ riccardo
+
 ├ Jeff
+
 ├ Sajil CK
+
 └ Jonas
 
 **Sorry, I don't have time [1]**
+
 └ @MelisaLilPanda [OFF]
 
 👥 8 people have voted so far
-
+ 
 Just try it out yourself: Visit https://telegram.me/groupagreebot
-
-
+ 
 The **license** for this project is AGPLv3, please read the license file in this repo before modifying or cloning this repo.
