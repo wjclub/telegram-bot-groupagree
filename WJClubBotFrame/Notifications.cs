@@ -7,8 +7,8 @@ using System.Collections.Generic;
 
 namespace WJClubBotFrame {
 	public class Notifications {
-		public static string botkey { get; } = "112582573:AAH5NwSyZtmclh9tQRf6XgBsY2Qjy2Kn3_8";
-		public static string logChatId { get; } = "-1001108267237";
+		public static string botkey { get; } = ""; //Your botkey
+		public static string logChatId { get; } = ""; //Your logging chat
 
 
 		public static void MakeWebRequest(string apikey, string json) {
@@ -106,23 +106,7 @@ static class DictionaryExtensions {
 	/// Template for a multipart/form-data item.
 	/// </summary>
 	public const string FormDataTemplate = "--{0}\r\nContent-Disposition: form-data; name=\"{1}\"\r\n\r\n{2}\r\n";
-
-	/// <summary>
-	/// Writes a dictionary to a stream as a multipart/form-data set.
-	/// </summary>
-	/// <param name="dictionary">The dictionary of form values to write to the stream.</param>
-	/// <param name="stream">The stream to which the form data should be written.</param>
-	/// <param name="mimeBoundary">The MIME multipart form boundary string.</param>
-	/// <exception cref="System.ArgumentNullException">
-	/// Thrown if <paramref name="stream" /> or <paramref name="mimeBoundary" /> is <see langword="null" />.
-	/// </exception>
-	/// <exception cref="System.ArgumentException">
-	/// Thrown if <paramref name="mimeBoundary" /> is empty.
-	/// </exception>
-	/// <remarks>
-	/// If <paramref name="dictionary" /> is <see langword="null" /> or empty,
-	/// nothing wil be written to the stream.
-	/// </remarks>
+	
 	public static void WriteMultipartFormData(
 	  this Dictionary<string, string> dictionary,
 	  Stream stream,
@@ -148,29 +132,7 @@ static class DictionaryExtensions {
 }
 
 static class FileInfoExtensions {
-	/// <summary>
-	/// Template for a file item in multipart/form-data format.
-	/// </summary>
 	public const string HeaderTemplate = "--{0}\r\nContent-Disposition: form-data; name=\"{1}\"; filename=\"{2}\"\r\nContent-Type: {3}\r\n\r\n";
-
-	/// <summary>
-	/// Writes a file to a stream in multipart/form-data format.
-	/// </summary>
-	/// <param name="file">The file that should be written.</param>
-	/// <param name="stream">The stream to which the file should be written.</param>
-	/// <param name="mimeBoundary">The MIME multipart form boundary string.</param>
-	/// <param name="mimeType">The MIME type of the file.</param>
-	/// <param name="formKey">The name of the form parameter corresponding to the file upload.</param>
-	/// <exception cref="System.ArgumentNullException">
-	/// Thrown if any parameter is <see langword="null" />.
-	/// </exception>
-	/// <exception cref="System.ArgumentException">
-	/// Thrown if <paramref name="mimeBoundary" />, <paramref name="mimeType" />,
-	/// or <paramref name="formKey" /> is empty.
-	/// </exception>
-	/// <exception cref="System.IO.FileNotFoundException">
-	/// Thrown if <paramref name="file" /> does not exist.
-	/// </exception>
 	public static void WriteMultipartFormData(
 	  this FileInfo file,
 	  Stream stream,
