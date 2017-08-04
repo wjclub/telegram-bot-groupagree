@@ -7,6 +7,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WJClubBotFrame", "WJClubBot
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomJsonStuff", "JsonHelper\CustomJsonStuff.csproj", "{C541C42A-68F8-4408-B692-0051571F908C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8D0EE667-4711-46B7-9D44-49B728E80C2A}"
+	ProjectSection(SolutionItems) = preProject
+		groupagreebot_v_4_0_database.sql = groupagreebot_v_4_0_database.sql
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
