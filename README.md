@@ -15,6 +15,8 @@ The **license** for this project is AGPLv3, please read the license file in this
 
 Xamarin Studio: http://www.monodevelop.com/download/ (or another C# IDE)
 
+(Windows: .NET 4.5.X Developer Pack)
+
 MySQL: https://dev.mysql.com/downloads/
 
 JSON.NET: http://www.newtonsoft.com/json
