@@ -6,7 +6,7 @@ namespace telegrambotgroupagree {
     //Use only the name prefix, for example groupagree instead of groupagreebot
     //Put your bot's names in here
 		#if DEBUG
-			""
+			"testing"
 		#elif NIGHTLY
 			""
 		#elif RELEASE
