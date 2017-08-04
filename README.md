@@ -8,3 +8,15 @@ An example: You want to hang out with your friends, but you want to find out whe
 Just try it out yourself: Visit https://telegram.me/groupagreebot
  
 The **license** for this project is AGPLv3, please read the license file in this repo before modifying or cloning this repo.
+
+# How to set it up:
+
+**You need**
+
+Xamarin Studio: http://www.monodevelop.com/download/ (or another C# IDE)
+MySQL: https://dev.mysql.com/downloads/
+JSON.NET: http://www.newtonsoft.com/json
+
+**Database layout**
+
+Incoming
