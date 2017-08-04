@@ -27,7 +27,7 @@ This is a C# project, so you need mono for non Microsoft operating systems or .N
 
 Start by installing Xamarin / MonoDevelop and MySQL.
 
-Set you bot up through (@botfather)[https://t.me/botfather].
+Set you bot up through [@botfather](https://t.me/botfather).
 	Allow inline queries, disable groups and set inline query feedback to 100%.
 
 Use the chat id as mysql username and the key as password (format: chat_id:botkey, like `1122334455:AABBCCDDEEFFGG11223344`).
@@ -46,7 +46,7 @@ Now **release your source code** (seriously, once you start the bot you have to 
 
 Click start in your IDE and you should be good to go, your bot should be up and running :D
 
-Any questions or concerns, ask in (@groupagreebotdevelopment)[https://t.me/groupagreebotdevelopment] or pm us (@wjclub)[https://t.me/wjclub]
+Any questions or concerns, ask in [@groupagreebotdevelopment](https://t.me/groupagreebotdevelopment) or pm us [@wjclub](https://t.me/wjclub)
 If you found bugs, want to contribute to this project etc, use GitHubs features, we love to see them in action. (And have no fear, we won't laugh at you for stupid issues)
 
 Happy polling
