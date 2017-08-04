@@ -48,7 +48,9 @@ Click start in your IDE and you should be good to go, your bot should be up and 
 
 Any questions or concerns, ask in [@groupagreebotdevelopment](https://t.me/groupagreebotdevelopment) or pm us [@wjclub](https://t.me/wjclub)
 If you found bugs, want to contribute to this project etc, use GitHubs features, we love to see them in action. (And have no fear, we won't laugh at you for stupid issues)
+	
+	
 
-Happy polling
+**Happy polling**
 
 browny99, the guy who wrote this whole piece of dark art
