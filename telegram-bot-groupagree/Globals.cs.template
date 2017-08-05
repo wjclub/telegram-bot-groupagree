@@ -1,7 +1,7 @@
 namespace telegrambotgroupagree {
 	public static class Globals {
     //We have three configurations to compile the bot: As local test, nightly or release
-    //To test the bot locally you need to provide the 
+    //To use the bot you have to provide the apikey and botname for your configuration
 		public static string Botname =
     //Use only the name prefix, for example groupagree instead of groupagreebot
     //Put your bot's names in here
