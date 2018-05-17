@@ -156,7 +156,13 @@ namespace telegrambotgroupagree {
             clone,
             creatingBoardWannaAddDescription,
 			addInstanceSendToken,
-			addInstanceSetParameters
+			addInstanceSetParameters,
+			addInstanceParameterList,
+			addInstanceToQueueButton,
+			addInstanceBePatientText,
+			addInstanceApproved,
+			addInstanceRejected,
+			addInstanceTechnicalIssue,
 		};
 
 

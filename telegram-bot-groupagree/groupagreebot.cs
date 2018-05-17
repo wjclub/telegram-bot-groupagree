@@ -457,6 +457,7 @@ namespace telegrambotgroupagree
 												};
 												dBHandler.AddInstance(newInstance.chatID, newInstance.key, newInstance.creator);
 												instances.Add(newInstance);
+												Api.SendMessage(currentInstance.apikey, update.Message.Chat.Id, strings.GetString(Strings.StringsList.addInstanceSetParameters), replyMarkup:InlineMarkupGenerator.GetOneButtonMarkup(InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.addInstanceToQueueButton))));
 											} break;
 										}
 									}
