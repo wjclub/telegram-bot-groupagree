@@ -15,8 +15,8 @@ namespace telegrambotgroupagree {
 			return "NOT IMPLEMENTED";
 		}
 
-		public void Add(int chatId) {
-			Pointer pointer = new Pointer(chatId);
+		public void Add(int chatId, string languageCode) {
+			Pointer pointer = new Pointer(chatId, languageCode);
 			dBHandler.AddToQueue(pointer);
 		}
 
@@ -24,17 +24,16 @@ namespace telegrambotgroupagree {
 			dBHandler.AddToQueue(pointer);
 		}
 
-		public Pointer GetPointer (int chatId) {
-			Pointer pointer;
-			try {
+		public Pointer GetPointer (int chatId, string languageCode) {
+			Pointer pointer = dBHandler.PointerQueue.Find(x => x.ChatId == chatId);
+			if (pointer == null) {
 				pointer = dBHandler.GetPointer(chatId);
-				if (pointer == null)
-					throw new NullReferenceException();
-			} catch (NullReferenceException) {
-				pointer = dBHandler.PointerQueue.Find(x => x.ChatId == chatId);
-				if (pointer == null)
-					pointer = new Pointer(chatId);
+				if (pointer == null) {
+					pointer = new Pointer(chatId, languageCode);
+				}
 			}
+			if (pointer.Lang == Strings.Langs.none)
+				pointer.Lang = Strings.GetLangFromIEFT(languageCode);
 			dBHandler.AddToQueue(pointer);
 			return pointer;
 		}

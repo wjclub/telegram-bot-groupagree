@@ -6,7 +6,8 @@ namespace telegrambotgroupagree {
 	public enum ENeedle : short {
 		nothing, pollText, pollDescription, firstOption, furtherOptions, closePoll, archivePoll, deletePoll, board, boardVote, messageAll, banned,
 		limitedDoodleMaxVotes,
-		addOption
+		addOption,
+		addInstanceToken
 	}
 
 	public enum EAnony {
@@ -19,9 +20,9 @@ namespace telegrambotgroupagree {
 	}
 
 	public class Pointer {
-		public Pointer(int chatId) : this(chatId, EPolls.vote, ENeedle.pollText, EAnony.personal, null, null, 0, Strings.langs.en) { }
+		public Pointer(int chatId, string ieftLang) : this(chatId, EPolls.vote, ENeedle.pollText, EAnony.personal, null, null, 0, Strings.GetLangFromIEFT(ieftLang)) { }
 
-		public Pointer(int chatId, EPolls pollType, ENeedle needle, EAnony anony, int? boardChatId, int? boardPollId, int lastPollId, Strings.langs lang) {
+		public Pointer(int chatId, EPolls pollType, ENeedle needle, EAnony anony, int? boardChatId, int? boardPollId, int lastPollId, Strings.Langs lang) {
 			this.ChatId = chatId;
 			this.PollType = pollType;
 			this.Needle = needle;
@@ -39,7 +40,7 @@ namespace telegrambotgroupagree {
 		public int? BoardChatId;
 		public int? BoardPollId;
 		public int LastPollId;
-		public Strings.langs Lang;
+		public Strings.Langs Lang;
 
 		public MySqlCommand GenerateCommand(MySqlConnection connection) {
 			MySqlCommand command = new MySqlCommand();

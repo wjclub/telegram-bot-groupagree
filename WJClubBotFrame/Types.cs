@@ -2,6 +2,7 @@
 
 namespace WJClubBotFrame.Types {
 	using Newtonsoft.Json;
+	using System.ComponentModel;
 
 	public class Response {
 		[JsonProperty(PropertyName = "ok",  Required = Required.Always)]
@@ -54,6 +55,9 @@ namespace WJClubBotFrame.Types {
 		public string LastName;
 		[JsonProperty(PropertyName = "username",  Required = Required.Default)]
 		public string Username;
+		[DefaultValue("none")]
+		[JsonProperty(PropertyName = "language_code", Required = Required.Default, DefaultValueHandling = DefaultValueHandling.Populate)]
+		public string LanguageCode;
 	}
 
 	public class Chat {
@@ -431,8 +435,9 @@ namespace WJClubBotFrame.Types {
 		public User From;
 		[JsonProperty(PropertyName = "location",  Required = Required.Default)]
 		public Location Location;
-		[JsonProperty(PropertyName = "query",  Required = Required.Always)]
-		public string Query;
+		[JsonProperty(PropertyName = "query", Required = Required.Always)]
+		public string Query { get => HtmlSpecialChars.Decode(query); set => query = value; }
+		private string query;
 		[JsonProperty(PropertyName = "offset",  Required = Required.Always)]
 		public string Offset;
 	}
@@ -494,8 +499,9 @@ namespace WJClubBotFrame.Types {
 		public string ResultId;
 		[JsonProperty(PropertyName = "from",  Required = Required.Always)]
 		public User From;
-		[JsonProperty(PropertyName = "query",  Required = Required.Always)]
-		public string Query;
+		[JsonProperty(PropertyName = "query", Required = Required.Always)]
+		public string Query { get => HtmlSpecialChars.Decode(query); set => query = value; }
+		private string query;
 		[JsonProperty(PropertyName = "location",  Required = Required.Default)]
 		public Location Location;
 		[JsonProperty(PropertyName = "inline_message_id",  Required = Required.Default)]

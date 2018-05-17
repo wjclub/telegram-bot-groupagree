@@ -6,10 +6,10 @@ using WJClubBotFrame.Methods;
 namespace telegrambotgroupagree {
 	public static class LangMessage {
 		private static ContentParts prepare(Strings strings, Pointer pointer) {
-			string text = strings.GetString(Strings.stringsList.setLanguage);
+			string text = strings.GetString(Strings.StringsList.setLanguage);
 			InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup();
 			inlineKeyboard.InlineKeyboard = new List<List<InlineKeyboardButton>>();
-			var values = Enum.GetValues(typeof(Strings.langs));
+			var values = Enum.GetValues(typeof(Strings.Langs));
 			int j = -1;
 			for (int i = 1; i < values.Length; i++) {
 				int wI = i - 1;
@@ -17,12 +17,12 @@ namespace telegrambotgroupagree {
 					inlineKeyboard.InlineKeyboard.Add(new List<InlineKeyboardButton>());
 					j++;
 				}
-				inlineKeyboard.InlineKeyboard[j].Add(InlineKeyboardButton.Create(strings.GetLangName((Strings.langs)values.GetValue(i)) + (values.GetValue(i).Equals(pointer.Lang) ? " ✅" : ""), callbackData:("comm:lang:" + values.GetValue(i))));
+				inlineKeyboard.InlineKeyboard[j].Add(InlineKeyboardButton.Create(strings.GetLangName((Strings.Langs)values.GetValue(i)) + (values.GetValue(i).Equals(pointer.Lang) ? " ✅" : ""), callbackData:("comm:lang:" + values.GetValue(i))));
 			}
 			inlineKeyboard.InlineKeyboard.Add(new List<InlineKeyboardButton> {
-				InlineKeyboardButton.Create("\ud83d\udcbe " + strings.GetString(Strings.stringsList.done), callbackData:"comm:showWelcome")
+				InlineKeyboardButton.Create("\ud83d\udcbe " + strings.GetString(Strings.StringsList.done), callbackData:"comm:showWelcome")
 			});
-			return new ContentParts(text, inlineKeyboard, null);
+			return new ContentParts(text, inlineKeyboard, null, null);
 		}
 		public static void Refresh (string apikey, Strings strings, Pointer pointer, long chatId, int messageId) {
 			ContentParts content = prepare(strings, pointer);

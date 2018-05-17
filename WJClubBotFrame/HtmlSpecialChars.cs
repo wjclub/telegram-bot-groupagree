@@ -5,5 +5,9 @@ namespace WJClubBotFrame {
 		public static string Encode (string input) {
 			return HttpUtility.HtmlAttributeEncode (input);
 		}
+
+		public static string Decode (string input) {
+			return HttpUtility.HtmlDecode(input);
+		}
 	}
 }
