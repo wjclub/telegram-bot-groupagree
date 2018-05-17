@@ -11,10 +11,10 @@ using StringEdit = System.Globalization.CultureInfo;
 namespace telegrambotgroupagree {
 	public class LimitedDoodle : Doodle {
 		#region constructors
-		public LimitedDoodle(int chatId, int pollId, string pollText, EAnony anony, DBHandler dBHandler, Strings.langs lang) : base(chatId, pollId, pollText, anony, dBHandler, lang) {
+		public LimitedDoodle(int chatId, int pollId, string pollText, EAnony anony, DBHandler dBHandler, Strings.Langs lang) : base(chatId, pollId, pollText, anony, dBHandler, lang) {
 			this.pollType = EPolls.limitedDoodle;
 		}
-		public LimitedDoodle(int chatId, int pollId, string pollText, string pollDescription, EAnony anony, bool closed, PercentageBars.Bars percentageBar, bool appendable, bool sorted, bool archived, Dictionary<string, List<User>> pollVotes, List<MessageID> messageIds, List<User> people, int maxVotes, DBHandler dBHandler, Strings.langs lang) : base(chatId, pollId, pollText, pollDescription, anony, closed, percentageBar, appendable, sorted, archived, pollVotes, messageIds, people, dBHandler, lang) {
+		public LimitedDoodle(int chatId, int pollId, string pollText, string pollDescription, EAnony anony, bool closed, PercentageBars.Bars percentageBar, bool appendable, bool sorted, bool archived, Dictionary<string, List<User>> pollVotes, List<MessageID> messageIds, List<User> people, int maxVotes, DBHandler dBHandler, Strings.Langs lang) : base(chatId, pollId, pollText, pollDescription, anony, closed, percentageBar, appendable, sorted, archived, pollVotes, messageIds, people, dBHandler, lang) {
 			this.pollType = EPolls.limitedDoodle;
 			this.MaxVotes = maxVotes;
 		}
@@ -59,16 +59,17 @@ namespace telegrambotgroupagree {
 			throw new NotImplementedException("Buddy\nPlease just use the other method provided");
 		}
 
-		protected override ContentParts GetContent(Strings strings, string apikey, bool channel = false, int? offset = default(int?), bool moderatePane = true) {
-			ContentParts content = base.GetContent(strings, apikey, channel, offset);
-			Strings.langs oldLang = strings.CurrentLang;
-			strings.SetLanguage(this.lang);
-			content.Text += "\nℹ️ " + string.Format(strings.GetString(Strings.stringsList.limitedDoodleYouCanChooseSoMany), MaxVotes, pollVotes.Count);
-			strings.SetLanguage(oldLang);
-			return content;
+		public override string RenderPollConfig(Strings strings) {
+			if (Anony == EAnony.personal)
+				return strings.GetString(Strings.StringsList.inlineDescriptionPersonalLimitedDoodle);
+			return strings.GetString(Strings.StringsList.inlineDescriptionAnonymousLimitedDoodle);
 		}
 
-		public override MySqlCommand GenerateCommand(MySqlConnection connection, string apikey, Strings strings, bool change = true) {
+		public override string RenderOptionalInsert(Strings strings) {
+			return "ℹ️ " + string.Format(strings.GetString(Strings.StringsList.limitedDoodleYouCanChooseSoMany), MaxVotes, pollVotes.Count) + "\n";
+		}
+
+		public override MySqlCommand GenerateCommand(MySqlConnection connection, long currentBotChatID, Strings strings, List<Instance> instances, bool change = true) {
 			MySqlCommand command = new MySqlCommand();
 			command.Connection = connection;
 			if (delete) {
@@ -94,7 +95,7 @@ namespace telegrambotgroupagree {
 				command.Parameters.AddWithValue("?people", JsonConvert.SerializeObject(people));
 				command.Parameters.AddWithValue("?maxVotes", MaxVotes);
 				if (change)
-					Update(apikey, strings);
+					Update(instances, currentBotChatID, strings);
 			}
 			return command;
 		}

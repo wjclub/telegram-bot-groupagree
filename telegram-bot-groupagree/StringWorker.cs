@@ -11,6 +11,7 @@ namespace telegrambotgroupagree {
 				return strInfo.LengthInTextElements <= maxLength ? strInfo.String : strInfo.SubstringByTextElements(0, maxLength);
 			return strInfo.LengthInTextElements <= maxLength ? strInfo.String : strInfo.SubstringByTextElements(0, maxLength - 3) + "...";
 		}
+
 		public static string UnmarkupUsernames(this string value, string markup = "b") {
 			string front = "</" + markup + ">";
 			string back = "<" + markup + ">";
@@ -25,6 +26,13 @@ namespace telegrambotgroupagree {
 			}
 
 			return returnValue;
+		}
+
+		public static string RemoveAppendingText(this string input, Match match = null) {
+			match = (match ?? Poll.GetAppendingMatch(input));
+			if (match.Success)
+				return input.Substring(match.Index + match.Length + 2);
+			return input;
 		}
 	}
 }

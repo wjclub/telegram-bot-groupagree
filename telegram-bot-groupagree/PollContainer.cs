@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections;
 using Newtonsoft.Json;
 using System.Globalization;
 namespace telegrambotgroupagree {
@@ -79,15 +78,15 @@ namespace telegrambotgroupagree {
 		}
 
 		public string GetPollPretty(int chatId) {
-			string text = strings.GetString(Strings.stringsList.listYourPolls);
+			string text = strings.GetString(Strings.StringsList.listYourPolls);
 			List<Poll> polls = GetPolls(chatId);
 			if (polls.Count == 0) {
-				text = strings.GetString(Strings.stringsList.listNothingHere);
+				text = strings.GetString(Strings.StringsList.listNothingHere);
 			} else {
 				polls.ForEach(x => {
-					text += "\n<b>" + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(strings.GetString((Strings.stringsList)Enum.Parse(typeof(Strings.stringsList), x.PollType.ToString()))) + "</b> " + HtmlSpecialChars.Encode(x.PollText.Replace("\u200F", "").Replace("\u202B", "").Replace("\u202E", "").Truncate(25)) + "\n-> /" + x.PollId + "\n";
+					text += "\n<b>" + CultureInfo.CurrentCulture.TextInfo.ToTitleCase(strings.GetString((Strings.StringsList)Enum.Parse(typeof(Strings.StringsList), x.PollType.ToString()))) + "</b> " + HtmlSpecialChars.Encode(x.PollText.Replace("\u200F", "").Replace("\u202B", "").Replace("\u202E", "").Truncate(25)) + "\n-> /" + x.PollId + "\n";
 				});
-				text += strings.GetString(Strings.stringsList.deleteAllFooter);
+				text += strings.GetString(Strings.StringsList.deleteAllFooter);
 			}
 			return text;
 		}

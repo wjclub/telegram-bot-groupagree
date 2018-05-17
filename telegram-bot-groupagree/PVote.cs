@@ -8,15 +8,15 @@ using StringEdit = System.Globalization.CultureInfo;
 
 namespace telegrambotgroupagree {
 	public class PVote : Poll {
-		public PVote(int chatId, int pollId, string pollText, EAnony anony, DBHandler dBHandler, Strings.langs lang) : base(chatId, pollId, pollText, null, anony, false, PercentageBars.Bars.none, false, false, false, dBHandler, new Dictionary<string, List<User>>(), new List<MessageID>(), lang, EPolls.vote) {
+		public PVote(int chatId, int pollId, string pollText, EAnony anony, DBHandler dBHandler, Strings.Langs lang) : base(chatId, pollId, pollText, null, anony, false, PercentageBars.Bars.none, false, false, false, dBHandler, new Dictionary<string, List<User>>(), new List<MessageID>(), lang, EPolls.vote) {
 
 		}
 
-		public PVote(int chatId, int pollId, string pollText, string pollDescription, EAnony anony, bool closed, PercentageBars.Bars percentageBar, bool appendable, bool sorted, bool archived, Dictionary<string, List<User>> pollVotes, List<MessageID> messageIds, DBHandler dBHandler, Strings.langs lang) : base(chatId, pollId, pollText, pollDescription, anony, closed, percentageBar, appendable, sorted, archived, dBHandler, pollVotes, messageIds, lang, EPolls.vote) {
+		public PVote(int chatId, int pollId, string pollText, string pollDescription, EAnony anony, bool closed, PercentageBars.Bars percentageBar, bool appendable, bool sorted, bool archived, Dictionary<string, List<User>> pollVotes, List<MessageID> messageIds, DBHandler dBHandler, Strings.Langs lang) : base(chatId, pollId, pollText, pollDescription, anony, closed, percentageBar, appendable, sorted, archived, dBHandler, pollVotes, messageIds, lang, EPolls.vote) {
 
 		}
 
-		protected override ContentParts GetContent(Strings strings, string apikey, bool channel = false, int? offset = null, bool moderatePane = true) {
+		/*protected ContentParts GetContent2(Strings strings, string apikey, bool channel = false, int? offset = null, bool moderatePane = true) {
 			Strings.langs oldLang = strings.CurrentLang;
 			strings.SetLanguage(lang);
 			string text;
@@ -27,7 +27,7 @@ namespace telegrambotgroupagree {
 				int userCount = 0;
 				int optionCount = 0;
 				int percentageUserCount = 0;
-				text = "\ud83d\udcca <b>" + HtmlSpecialChars.Encode(pollText).UnmarkupUsernames() + "</b>" + (!string.IsNullOrEmpty(pollDescription) ? ("\n" + HtmlSpecialChars.Encode(pollDescription) + "\n") : "\n");
+				text = " <b>" + HtmlSpecialChars.Encode(pollText).UnmarkupUsernames() + "</b>" + (!string.IsNullOrEmpty(pollDescription) ? ("\n" + HtmlSpecialChars.Encode(pollDescription) + "\n") : "\n");
 				Dictionary<string, List<User>> newVotes;
 				if (this.Sorted) {
 					newVotes = pollVotes.CloneDictionary();
@@ -79,11 +79,11 @@ namespace telegrambotgroupagree {
 				description = "Personal vote - " + userCount + " participants\n" + description;
 				if (!closed && channel)
 					inlineKeyboard.InlineKeyboard.Add(new List<InlineKeyboardButton> {
-					InlineKeyboardButton.Create(strings.GetString(Strings.stringsList.buttonVote), url:"https://telegram.me/" + Globals.Botname + "bot?start=" + Cryptography.Encrypt("vote:" + ChatId + ":" + PollId, apikey))
+					//InlineKeyboardButton.Create(strings.GetString(Strings.stringsList.buttonVote), url:"https://telegram.me/" + Globals.Botname + "?start=" + Cryptography.Encrypt("vote:" + ChatId + ":" + PollId, apikey))
 					});
 				if (!closed && Appendable)
 					inlineKeyboard.InlineKeyboard.Add(new List<InlineKeyboardButton> {
-					InlineKeyboardButton.Create(strings.GetString(Strings.stringsList.buttonAppend), url:"https://telegram.me/" + Globals.Botname + "bot?start=" + Cryptography.Encrypt("append:" + ChatId + ":" + PollId, apikey))
+					//InlineKeyboardButton.Create(strings.GetString(Strings.stringsList.buttonAppend), url:"https://telegram.me/" + Globals.Botname + "?start=" + Cryptography.Encrypt("append:" + ChatId + ":" + PollId, apikey))
 					});
 				if (delete)
 					inlineKeyboard = null;
@@ -94,8 +94,13 @@ namespace telegrambotgroupagree {
 			}
 			strings.SetLanguage(oldLang);
 			return new ContentParts(text, inlineKeyboard, description);
-		}
+		}*/
 
+		public override string RenderPollConfig(Strings strings) {
+			if (Anony == EAnony.personal)
+				return strings.GetString(Strings.StringsList.inlineDescriptionPersonalVote);
+			return strings.GetString(Strings.StringsList.inlineDescriptionAnonymousVote);
+		}
 
 		public override bool Vote(string apikey, int optionNr, User user, Message message, string inlineMessageId = null) {
 			dBHandler.AddToQueue(this);

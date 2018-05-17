@@ -34,5 +34,5 @@ Thumbs.db
 *.Resharper
 #dotCover
 *.dotCover
+WJClubBotFrame/Globals.cs
 /.vs/telegram-bot-groupagree/v15/Server/sqlite3
-/WJClubBotFrame/Globals.cs

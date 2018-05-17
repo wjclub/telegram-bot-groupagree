@@ -5,7 +5,18 @@ using Newtonsoft.Json;
 namespace telegrambotgroupagree {
 	public class MainBotFrame {
 		public static void Main(string[] args) {
-			var groupagreebot = new GroupAgreeBot(Globals.Apikey);
+			Globals.GlobalOptions = new Globals.Options();
+			string dbuser, dbpw, dbname;
+			try {
+				dbuser = args[0];
+				dbpw = args[1];
+				dbname = args[2];
+			} catch (IndexOutOfRangeException) {
+				Console.WriteLine("Syntax: telegram-bot-groupagree.exe <dbuser> <dbpw> <dbname>");
+				Environment.Exit(0);
+				return;
+			}
+			GroupAgreeBot groupagreebot = new GroupAgreeBot(dbname, dbuser, dbpw);
 			try {
 				groupagreebot.Run();
 			} catch (Exception e) {

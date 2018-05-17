@@ -11,17 +11,23 @@ using StringEdit = System.Globalization.CultureInfo;
 
 namespace telegrambotgroupagree {
 	public class Doodle : Poll {
-		public Doodle(int chatId, int pollId, string pollText, EAnony anony, DBHandler dBHandler, Strings.langs lang) : this(chatId, pollId, pollText, null, anony, false, PercentageBars.Bars.none, false, false, false, new Dictionary<string, List<User>>(), new List<MessageID>(), new List<User>(), dBHandler, lang) {
+		public Doodle(int chatId, int pollId, string pollText, EAnony anony, DBHandler dBHandler, Strings.Langs lang) : this(chatId, pollId, pollText, null, anony, false, PercentageBars.Bars.none, false, false, false, new Dictionary<string, List<User>>(), new List<MessageID>(), new List<User>(), dBHandler, lang) {
 			
 		}
 
-		public Doodle(int chatId, int pollId, string pollText, string pollDescription, EAnony anony, bool closed, PercentageBars.Bars percentageBar, bool appendable, bool sorted, bool archived, Dictionary<string, List<User>> pollVotes, List<MessageID> messageIds, List<User> people, DBHandler dBHandler, Strings.langs lang) : base(chatId, pollId, pollText, pollDescription, anony, closed, percentageBar, appendable, sorted, archived, dBHandler, pollVotes, messageIds, lang, EPolls.doodle) {
+		public Doodle(int chatId, int pollId, string pollText, string pollDescription, EAnony anony, bool closed, PercentageBars.Bars percentageBar, bool appendable, bool sorted, bool archived, Dictionary<string, List<User>> pollVotes, List<MessageID> messageIds, List<User> people, DBHandler dBHandler, Strings.Langs lang) : base(chatId, pollId, pollText, pollDescription, anony, closed, percentageBar, appendable, sorted, archived, dBHandler, pollVotes, messageIds, lang, EPolls.doodle) {
 			this.people = people;
 		}
 
 		protected List<User> people;
 
-		protected override ContentParts GetContent(Strings strings, string apikey, bool channel = false, int? offset = null, bool moderatePane = true) {
+
+		public override List<int> CountVotes(out int peopleCount) {
+			peopleCount = people.Count;
+			int tellMeHowICanDoThisDifferentlyButForNowItIsLikeThisSoLiveWithIt = 0;
+			return base.CountVotes(out tellMeHowICanDoThisDifferentlyButForNowItIsLikeThisSoLiveWithIt);
+		}
+		/*protected override ContentParts GetContent(Strings strings, string apikey, bool channel = false, int? offset = null, bool moderatePane = true) {
 			Strings.langs oldLang = strings.CurrentLang;
 			strings.SetLanguage(lang);
 			string text;
@@ -55,7 +61,7 @@ namespace telegrambotgroupagree {
 				int userCount = people.Count;
 				if (channel)
 					inlineKeyboard.InlineKeyboard.Add(new List<InlineKeyboardButton> {
-					InlineKeyboardButton.Create(strings.GetString(Strings.stringsList.buttonVote), url:"https://telegram.me/" + Globals.Botname + "bot?start=" + Cryptography.Encrypt("vote:" + ChatId.ToString() + ":" + PollId.ToString(), apikey))
+					InlineKeyboardButton.Create(strings.GetString(Strings.stringsList.buttonVote), url:"https://telegram.me/" + Globals.GlobalOptions.Botname + "?start=" + Cryptography.Encrypt("vote:" + ChatId.ToString() + ":" + PollId.ToString(), apikey))
 					});
 				text += "\n" + string.Format(strings.GetString(userCount == 0 ? Strings.stringsList.rendererZeroVotedSoFar : (userCount == 1 ? Strings.stringsList.rendererSingleVotedSoFar : Strings.stringsList.rendererMultiVotedSoFar)), userCount);
 				if (delete || closed) {
@@ -65,6 +71,12 @@ namespace telegrambotgroupagree {
 			}
 			strings.SetLanguage(oldLang);
 			return new ContentParts(text, inlineKeyboard, description);
+		}*/
+
+		public override string RenderPollConfig(Strings strings) {
+			if (Anony == EAnony.personal)
+				return strings.GetString(Strings.StringsList.inlineDescriptionPersonalDoodle);
+			return strings.GetString(Strings.StringsList.inlineDescriptionAnonymousDoodle);
 		}
 
 		public override bool Vote(string apikey, int optionNr, User user, Message message, string inlineMessageId = null) {
@@ -89,7 +101,7 @@ namespace telegrambotgroupagree {
 			return result;
 		}
 
-		public override MySqlCommand GenerateCommand(MySqlConnection connection, string apikey, Strings strings, bool change = true) {
+		public override MySqlCommand GenerateCommand(MySqlConnection connection, long currentBotChatID, Strings strings, List<Instance> instances, bool change = true) {
 			var command = new MySqlCommand();
 			command.Connection = connection;
 			if (delete) {
@@ -114,7 +126,7 @@ namespace telegrambotgroupagree {
 				command.Parameters.AddWithValue("?lang", lang);
 				command.Parameters.AddWithValue("?people", JsonConvert.SerializeObject(people));
 				if (change)
-					Update(apikey, strings);
+					Update(instances, currentBotChatID, strings);
 			}
 			return command;
 		}

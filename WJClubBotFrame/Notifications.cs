@@ -7,8 +7,8 @@ using System.Collections.Generic;
 
 namespace WJClubBotFrame {
 	public class Notifications {
-		public static string botkey { get; } = ""; //Your botkey
-		public static string logChatId { get; } = ""; //Your logging chat
+		public static string botkey { get; } = Globals.LoggingKey; //Your botkey
+		public static string logChatId { get; } = Globals.LoggingChat; //Your logging chat
 
 
 		public static void MakeWebRequest(string apikey, string json) {
@@ -28,12 +28,15 @@ namespace WJClubBotFrame {
 			}
 
 			try {
-				using (StreamReader reader = new StreamReader(request.GetResponse().GetResponseStream())) {
-					response = reader.ReadToEnd();
-					reader.Close();
+				using (StreamReader reader = new StreamReader (request.GetResponse ().GetResponseStream ())) {
+					response = reader.ReadToEnd ();
+					reader.Close ();
 				}
 			} catch (WebException e) {
-				Console.WriteLine(e.Message);
+				Console.WriteLine (e.Message);
+			} catch (System.Net.ProtocolViolationException e) {
+				Console.WriteLine ("You probably don't have an internet connection or your firewall etc blocks me...\nOr something is seriously wrong, in that case here is the error: \n\n" + e.Message);
+				Console.Beep();
 			}
 		}
 

@@ -3,28 +3,48 @@ using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
 using WJClubBotFrame;
+using System.Linq;
 
 namespace telegrambotgroupagree {
 	public class Strings {
-		public enum langs {
+		public enum Langs {
 			none,
 			en,
 			de,
 			it,
-			ptBR,
+			ptBR, //pt-BR
 			he,
 			uk,
-			nb_NO,
+			nb_NO, //nb-NO
 			fa,
-			sp,
-			zh_TW,
-			zh_HK,
-			zh_CN,
-			rus,
+			sp, //es
+			zh_TW, //zh-TW
+			zh_HK, //zh-HK
+			zh_CN, //zh-CN
+			rus, //ru
 			fr,
 			uz,
 		};
-		public enum stringsList {
+
+		public static Dictionary<string, Langs> IeftLookupTable = new Dictionary<string, Langs> {
+			{ "en" , Langs.en },
+			{ "de" , Langs.de },
+			{ "it" , Langs.it },
+			{ "pt-BR" , Langs.ptBR },
+			{ "he" , Langs.he },
+			{ "uk" , Langs.uk },
+			{ "nb-NO" , Langs.nb_NO },
+			{ "fa" , Langs.fa },
+			{ "sp" , Langs.sp },
+			{ "zh-TW" , Langs.zh_TW },
+			{ "zh-HK" , Langs.zh_HK },
+			{ "zh-CN" , Langs.zh_CN },
+			{ "ru" , Langs.rus },
+			{ "fr" , Langs.fr },
+			{ "uz" , Langs.uz },
+		};
+		
+		public enum StringsList {
 			nothingToCancel,
 			canceledThat,
 			hasCanceled,
@@ -112,15 +132,40 @@ namespace telegrambotgroupagree {
 			addOptionTooManyChars,
 			moderate,
 			pollBeingEdited,
+			inlineDescriptionPersonalVote,
+			inlineDescriptionAnonymousVote,
+			inlineDescriptionPersonalDoodle,
+			inlineDescriptionAnonymousDoodle,
+			inlineDescriptionPersonalLimitedDoodle,
+			inlineDescriptionAnonymousLimitedDoodle,
+			inlineDescriptionPersonalBoard,
+			inlineDescriptionAnonymousBoard,
+			viewInBrowserExpansion,
+			inlineDescriptionFirstLine,
+			pollAlreadyDeleted,
+			optionNotFound,
+			optionDeleteSuccess,
+			optionDeleteNonSuccess,
+			dontMessWithTheCommands,
+			pollOptionDeleteErrorButPollStillFound,
+			aPollHasToHaveAtLeastOneOption,
+			optionAlreadyExists,
+			creatingPollWannaAddDescription,
+			addDescription,
+			sendPollDescription,
+            clone,
+            creatingBoardWannaAddDescription,
+			addInstanceSendToken,
+			addInstanceSetParameters
 		};
 
 
-		private langs currentLang = langs.en;
-		public langs CurrentLang { get { return this.currentLang; } }
+		private Langs currentLang = Langs.en;
+		public Langs CurrentLang { get { return this.currentLang; } }
 
-		Dictionary<langs, Dictionary<stringsList, string>> langStrings;
-		public Dictionary<stringsList, string> StringsEn { get { return langStrings[langs.en]; } }
-		Dictionary<langs, string> langNames;
+		Dictionary<Langs, Dictionary<StringsList, string>> langStrings;
+		public Dictionary<StringsList, string> StringsEn { get { return langStrings[Langs.en]; } }
+		Dictionary<Langs, string> langNames;
 
 		public Strings() {
 			string stringsFile = "";
@@ -131,7 +176,7 @@ namespace telegrambotgroupagree {
 			} catch (FileNotFoundException) {
 				
 			}
-			langStrings = JsonConvert.DeserializeObject<Dictionary<langs,Dictionary<stringsList, string>>>(stringsFile);
+			langStrings = JsonConvert.DeserializeObject<Dictionary<Langs,Dictionary<StringsList, string>>>(stringsFile);
 			string langNamesFile = "";
 			try {
 				using (StreamReader reader = new StreamReader(@"langnames.json")) {
@@ -140,41 +185,49 @@ namespace telegrambotgroupagree {
 			} catch (FileNotFoundException) {
 
 			}
-			langNames = JsonConvert.DeserializeObject<Dictionary<langs, string>>(langNamesFile);
+			langNames = JsonConvert.DeserializeObject<Dictionary<Langs, string>>(langNamesFile);
 		}
 
-		public void SetLanguage(langs lang) {
+		public void SetLanguage(Langs lang) {
 			this.currentLang = lang;
 		}
 
-		internal string GetLangName(langs lang) {
+		internal string GetLangName(Langs lang) {
 			return langNames[lang];
 		}
 
-		public string GetString(stringsList name) {
+		public string GetString(StringsList name) {
 			try {
-				return langStrings[(currentLang == langs.none ? langs.en : currentLang)][name];
+				return langStrings[(currentLang == Langs.none ? Langs.en : currentLang)][name];
 			} catch (System.Collections.Generic.KeyNotFoundException) {
 				/*#if DEBUG
 				Notifications.log(string.Format("I couldn't find {1} in strings {0}", currentLang.ToString(), name.ToString()));
 				#endif*/
-				return langStrings[langs.en][name];
+				return langStrings[Langs.en][name];
 			}
 		}
 
-		public Dictionary<langs, Dictionary<stringsList, string>> GetMissingStrings() {
-			Dictionary<langs, Dictionary<stringsList, string>> output = new Dictionary<langs, Dictionary<stringsList, string>>();
+		public Dictionary<Langs, Dictionary<StringsList, string>> GetMissingStrings() {
+			Dictionary<Langs, Dictionary<StringsList, string>> output = new Dictionary<Langs, Dictionary<StringsList, string>>();
 			for (int i = 1; i <= langNames.Count; i++) {
-				output.Add((langs)i, new Dictionary<stringsList, string>());
-				for (int j = 0; j < Enum.GetNames(typeof(stringsList)).Length; j++) {
+				output.Add((Langs)i, new Dictionary<StringsList, string>());
+				for (int j = 0; j < Enum.GetNames(typeof(StringsList)).Length; j++) {
 					try {
-						string temp = langStrings[(langs)i][(stringsList)j];
+						string temp = langStrings[(Langs)i][(StringsList)j];
 					} catch (System.Collections.Generic.KeyNotFoundException) {
-						output[(langs)i].Add((stringsList)j, this.GetString((stringsList)j));
+						output[(Langs)i].Add((StringsList)j, this.GetString((StringsList)j));
 					}
 				}
 			}
 			return output;
+		}
+
+		public static Langs GetLangFromIEFT(string ieftTag) {
+			Langs outputLang = Langs.none;
+			if (!IeftLookupTable.TryGetValue(ieftTag, out outputLang))
+				if (IeftLookupTable.Any(x => x.Key.StartsWith(ieftTag.Substring(0,2))))
+					outputLang = IeftLookupTable.First(x => x.Key.StartsWith(ieftTag.Substring(0,2))).Value;
+			return outputLang;
 		}
 	}
 }
