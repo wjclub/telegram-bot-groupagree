@@ -134,7 +134,7 @@ namespace telegrambotgroupagree {
 		public void AddInstance(long chatID, string key, User owner) {
 			connection.Open();
 			MySqlCommand command = connection.CreateCommand();
-			command.CommandText = "INSERT INTO instances (`chat_id`, `key`, `owner`) VALUES (?chat_id, ?key, ?owner);";
+			command.CommandText = "INSERT INTO instances (`chat_id`, `key`, `owner`, `creation_date`) VALUES (?chat_id, ?key, ?owner, CURRENT_TIMESTAMP());";
 			command.Parameters.AddWithValue("?chat_id", chatID);
 			command.Parameters.AddWithValue("?key", key);
 			command.Parameters.AddWithValue("?owner", JsonConvert.SerializeObject(owner));

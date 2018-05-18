@@ -53,29 +53,33 @@ namespace telegrambotgroupagree
 			} catch (Exception e) {
 				Notifications.log("SHIT\n\n" + e.ToString());
 			}
+			string instancesLog = "Starting instances:\n\n";
 			List<Instance> constructorInstances = dBHandler.GetInstances();
 			foreach (Instance currentLoopInstance in constructorInstances) {
 				Task<Update[]> currentUpdate;
+				User currentBotUser;
 				try {
 					Api.DeleteWebhook(currentLoopInstance.apikey);
-					if (Api.GetMe(currentLoopInstance.apikey) == null) {
+					if ((currentBotUser = Api.GetMe(currentLoopInstance.apikey)) == null) {
 						continue;
 					}
 					currentUpdate = Api.GetUpdatesAsync(currentLoopInstance.apikey, currentLoopInstance.offset);
 				} catch (Exception e) {
 					//TODO What exception?
-					Notifications.log(e.ToString());
+					Notifications.log("Instances setup fail: \n" + e.ToString());
 					continue;
 				}
 				this.instances.Add(new Instance {
 					apikey = currentLoopInstance.apikey,
 					offset = currentLoopInstance.offset,
-					botUser = Api.GetMe(currentLoopInstance.apikey),
+					botUser = currentBotUser,
 					creator = currentLoopInstance.creator,
 					update = currentUpdate,
 				});
 				this.instanceTasks.Add(currentUpdate);
+				instancesLog += $"{currentBotUser.FirstName} (@{currentBotUser.Username})\n\n";
 			}
+			Notifications.log(instancesLog);
 			/*
 			this.apikey = apikey;
 			this.BotInfo = Api.GetMe(apikey);
@@ -104,21 +108,12 @@ namespace telegrambotgroupagree
 
 		public async void Run() {
 			while (!System.IO.File.Exists(@"cancer.wjdummy") && instances != null && instances.Count > 0) {
-				long currentInstanceChatID = 0;
 				Instance currentInstance = instances[Task.WaitAny(instances.Select(x => x.update).ToArray())];
-				//foreach (Instance currentInstance in instances) {
-				//TODO await update
 				Update[] updates = await currentInstance.update;
 					string apikey = currentInstance.apikey;
 					int offset = currentInstance.offset;
 					Globals.GlobalOptions.Apikey = currentInstance.apikey;
 					Globals.GlobalOptions.Botname = currentInstance.botUser.Username;
-					//Update[] updates = Api.GetUpdates(apikey, offset);
-					//if (currentInstance.update.IsCompleted) {
-					//	updates = await currentInstance.update;
-					//} else {
-					//	continue;
-					//}
 					if (updates != null) {
 						foreach (Update update in updates) {
 							CurrentUpdate = update;
