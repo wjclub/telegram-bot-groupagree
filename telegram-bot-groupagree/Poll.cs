@@ -194,7 +194,7 @@ namespace telegrambotgroupagree {
 			Match match = GetAppendingMatch(option.Key);
 			string[] lines = option.Key.Split('\n');
 			//TODO Display Name
-			string output = "\n" + (match.Success ? (moderate ? RenderUserForModeration(match.Value, displayName:null) : "") : "") + string.Format("<b>{0}</b> [{1}]\n", HtmlSpecialChars.Encode((match.Success ? lines[0].Substring(match.Index + match.Length + 2) : lines[0])).UnmarkupUsernames(), option.Value.Count);
+			string output = "\n" + (match.Success ? (moderate ? RenderUserForModeration(match.Value, displayName:null) : "") : "") + string.Format("<b>{0}</b> [{1}]\n", HtmlSpecialChars.Encode((match.Success ? lines[0].Substring(match.Index + match.Length + 2) : lines[0])).UnmarkupUsernames(), RenderNumberUpdateFriendly(option.Value.Count));
 			for (int i = 1; i < lines.Length; i++)
 				output += (option.Value.Count != 0 ? "┆ " : "") + HtmlSpecialChars.Encode(lines[i]) + "\n";
 			return output;
@@ -219,7 +219,32 @@ namespace telegrambotgroupagree {
 		}
 
 		public virtual string RenderPeopleCount(Strings strings, int peopleCount) {
-			return string.Format(strings.GetString(peopleCount == 0 ? Strings.StringsList.rendererZeroVotedSoFar : (peopleCount == 1 ? Strings.StringsList.rendererSingleVotedSoFar : Strings.StringsList.rendererMultiVotedSoFar)), peopleCount);
+			return string.Format(strings.GetString(peopleCount == 0 ? Strings.StringsList.rendererZeroVotedSoFar : (peopleCount == 1 ? Strings.StringsList.rendererSingleVotedSoFar : Strings.StringsList.rendererMultiVotedSoFar)), RenderNumberUpdateFriendly(peopleCount));
+		}
+
+		public virtual string RenderNumberUpdateFriendly(int input) {
+			int[] lookupTable = {
+				10, 15, 20, 30, 50, 100, 200, 300, 500, 750, 1000,
+			};
+			int power = 0;
+			while (input > 1000) {
+				input /= 1000;
+				power += 1;
+			}
+			string[] powerLookup = { "", "K", "M", "B"};
+			string output = "";
+			if (input <= lookupTable[0]) {
+				output = input.ToString();
+			} else {
+				for (int i = 1; i < lookupTable.Length; i++) {
+					if (input - lookupTable[i] <= 0) {
+						output = lookupTable[i - 1].ToString() + "+";
+						break;
+					}
+				}
+			}
+			output += powerLookup[power];
+			return output;
 		}
 
 		public virtual string RenderOptionalInsert(Strings strings) {
@@ -263,7 +288,7 @@ namespace telegrambotgroupagree {
 				oneLineTitle = oneLineTitle.Substring(match.Index + match.Length + 2);
 			}
 			var inlineKeyboardRow = new List<InlineKeyboardButton> {
-				InlineKeyboardButton.Create(oneLineTitle.Truncate(30) + " - " + votersCount, callbackData: Cryptography.Encrypt(chatId + ":" + pollId + ":" + optionCount, Globals.GlobalOptions.Apikey))
+				InlineKeyboardButton.Create(oneLineTitle.Truncate(30) + " - " + RenderNumberUpdateFriendly(votersCount), callbackData: Cryptography.Encrypt(chatId + ":" + pollId + ":" + optionCount, Globals.GlobalOptions.Apikey))
 			};
 			return inlineKeyboardRow;
 		}
