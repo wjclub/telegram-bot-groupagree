@@ -99,7 +99,7 @@ namespace telegrambotgroupagree {
 					foreach (Update update in updates) {
 						CurrentUpdate = update;
 						currentInstance.offset = offset = update.UpdateId + 1;
-						dBHandler.SetOffset(currentInstance.chatID, currentInstance.offset);
+						dBHandler.UpdateInstance(currentInstance.chatID, currentInstance.offset);
 						if (update.Message != null) {
 							Pointer pointer = pointerContainer.GetPointer(update.Message.From.Id, update.Message.From.LanguageCode);
 							if (pointer != null)

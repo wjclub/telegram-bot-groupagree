@@ -15,8 +15,10 @@ namespace telegrambotgroupagree {
 	}
 
 	public enum EPolls {
-		vote, doodle, board,
-		limitedDoodle
+		vote = 0,
+		doodle = 1,
+		//Removed board
+		limitedDoodle = 3
 	}
 
 	public class Pointer {

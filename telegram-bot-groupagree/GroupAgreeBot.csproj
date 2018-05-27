@@ -82,9 +82,10 @@
     <Compile Include="PollContainer.cs" />
     <Compile Include="HtmlSpecialChars.cs" />
     <Compile Include="Doodle.cs" />
+    <Compile Include="RequestHandler.cs" />
     <Compile Include="WelcomeMessage.cs" />
-    <Compile Include="Board.cs" />
-    <Compile Include="BoardVote.cs" />
+    <None Include="Board.cs.bak" />
+    <None Include="BoardVote.cs.bak" />
     <Compile Include="IPollVote.cs" />
     <Compile Include="PVote.cs" />
     <Compile Include="InlineMarkupGenerator.cs" />

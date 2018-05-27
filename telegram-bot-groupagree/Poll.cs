@@ -114,7 +114,7 @@ namespace telegrambotgroupagree {
 			dBHandler.AddToQueue(this, false);
 		}
 
-		protected virtual ContentParts GetContent(Strings strings, string apikey, bool channel = false, int? offset = null, bool moderatePane = false) {
+		protected virtual ContentParts GetContent(Strings strings, string apikey, bool noApproximation, bool channel = false, int? offset = null, bool moderatePane = false) {
             List<int> pollVotesCount = CountVotes(out int peopleCount);
             ContentParts output;
 			if (moderatePane) {
@@ -122,7 +122,7 @@ namespace telegrambotgroupagree {
 			} else {
 				Strings.Langs oldLang = strings.CurrentLang;
 				strings.SetLanguage(lang);
-				output = GetPollOutput(strings, peopleCount, pollVotesCount, channel);
+				output = GetPollOutput(strings, peopleCount, pollVotesCount, noApproximation, channel:channel);
 				strings.SetLanguage(oldLang);
 			}
 			return output;
@@ -139,16 +139,16 @@ namespace telegrambotgroupagree {
 		}
 
 		#region GetPollOutput
-		protected virtual ContentParts GetPollOutput(Strings strings, int peopleCount, List<int> pollVotesCount, bool channel = false) {
-			return new ContentParts(RenderText(strings, peopleCount, pollVotesCount),RenderInlineKeyboard(pollVotesCount, strings, channel), RenderInlineQueryTitle(), RenderInlineQueryDescription(strings, peopleCount));
+		protected virtual ContentParts GetPollOutput(Strings strings, int peopleCount, List<int> pollVotesCount, bool noApproximation, bool channel = false) {
+			return new ContentParts(RenderText(strings, peopleCount, pollVotesCount, noApproximation), RenderInlineKeyboard(pollVotesCount, strings, noApproximation, channel: channel), RenderInlineQueryTitle(), RenderInlineQueryDescription(strings, peopleCount));
 		}
 
 		#region RenderText
-		public virtual string RenderText(Strings strings, int peopleCount, List<int> pollVotesCount) {
+		public virtual string RenderText(Strings strings, int peopleCount, List<int> pollVotesCount, bool noApproximation) {
 			return RenderTitleEmoji(strings) + " " + RenderTitle() + "\n" +
 			RenderDescription() +
-			RenderVotes(pollVotesCount, peopleCount) + "\n" +
-			RenderPeopleCount(strings, peopleCount) + "\n" +
+			RenderVotes(pollVotesCount, peopleCount, noApproximation) + "\n" +
+			RenderPeopleCount(strings, peopleCount, noApproximation) + "\n" +
 			RenderOptionalInsert(strings) +
 			//RenderExpansion(strings) +
 			RenderClosed(strings);
@@ -166,7 +166,7 @@ namespace telegrambotgroupagree {
 			return (!string.IsNullOrEmpty(this.PollDescription) ? (HtmlSpecialChars.Encode(this.PollDescription) + "\n") : "");
 		}
 
-		public virtual string RenderVotes(List<int> pollVotesCount, int peopleCount) {
+		public virtual string RenderVotes(List<int> pollVotesCount, int peopleCount, bool noApproximation) {
 			string output = "";
 			Dictionary<string, List<User>> MaybeSortedPollVotes;
 			if (this.Sorted) {
@@ -176,7 +176,7 @@ namespace telegrambotgroupagree {
 				MaybeSortedPollVotes = pollVotes;
 			}
 			foreach (KeyValuePair<string, List<User>> currentOption in MaybeSortedPollVotes) {
-				output += RenderOptionTitle(currentOption);
+				output += RenderOptionTitle(currentOption, noApproximation:noApproximation);
 				if (this.PercentageBar != PercentageBars.Bars.none)
 					output += RenderPercentage(currentOption.Value.Count, peopleCount);
 				if (Anony == EAnony.personal)
@@ -190,11 +190,11 @@ namespace telegrambotgroupagree {
 			return regex.Match(input);
 		}
 
-		public virtual string RenderOptionTitle(KeyValuePair<string, List<User>> option, bool moderate = false) {
+		public virtual string RenderOptionTitle(KeyValuePair<string, List<User>> option, bool noApproximation, bool moderate = false) {
 			Match match = GetAppendingMatch(option.Key);
 			string[] lines = option.Key.Split('\n');
 			//TODO Display Name
-			string output = "\n" + (match.Success ? (moderate ? RenderUserForModeration(match.Value, displayName:null) : "") : "") + string.Format("<b>{0}</b> [{1}]\n", HtmlSpecialChars.Encode((match.Success ? lines[0].Substring(match.Index + match.Length + 2) : lines[0])).UnmarkupUsernames(), RenderNumberUpdateFriendly(option.Value.Count));
+			string output = "\n" + (match.Success ? (moderate ? RenderUserForModeration(match.Value, displayName:null) : "") : "") + string.Format("<b>{0}</b> [{1}]\n", HtmlSpecialChars.Encode((match.Success ? lines[0].Substring(match.Index + match.Length + 2) : lines[0])).UnmarkupUsernames(), RenderNumberUpdateFriendly(option.Value.Count, noApproximation));
 			for (int i = 1; i < lines.Length; i++)
 				output += (option.Value.Count != 0 ? "┆ " : "") + HtmlSpecialChars.Encode(lines[i]) + "\n";
 			return output;
@@ -218,11 +218,14 @@ namespace telegrambotgroupagree {
 			return output;
 		}
 
-		public virtual string RenderPeopleCount(Strings strings, int peopleCount) {
-			return string.Format(strings.GetString(peopleCount == 0 ? Strings.StringsList.rendererZeroVotedSoFar : (peopleCount == 1 ? Strings.StringsList.rendererSingleVotedSoFar : Strings.StringsList.rendererMultiVotedSoFar)), RenderNumberUpdateFriendly(peopleCount));
+		public virtual string RenderPeopleCount(Strings strings, int peopleCount, bool noApproximation) {
+			return string.Format(strings.GetString(peopleCount == 0 ? Strings.StringsList.rendererZeroVotedSoFar : (peopleCount == 1 ? Strings.StringsList.rendererSingleVotedSoFar : Strings.StringsList.rendererMultiVotedSoFar)), RenderNumberUpdateFriendly(peopleCount, noApproximation));
 		}
 
-		public virtual string RenderNumberUpdateFriendly(int input) {
+		public virtual string RenderNumberUpdateFriendly(int input, bool skipApproximation) {
+			if (skipApproximation) {
+				return input.ToString();
+			}
 			int[] lookupTable = {
 				10, 15, 20, 30, 50, 100, 200, 300, 500, 750, 1000,
 			};
@@ -238,7 +241,7 @@ namespace telegrambotgroupagree {
 			} else {
 				for (int i = 1; i < lookupTable.Length; i++) {
 					if (input - lookupTable[i] <= 0) {
-						output = lookupTable[i - 1].ToString() + "+";
+						output = $"{lookupTable[i - 1].ToString()}-{lookupTable[i].ToString()}";
 						break;
 					}
 				}
@@ -281,14 +284,14 @@ namespace telegrambotgroupagree {
 			return inlineKeyboard;
 		}
 
-		public virtual List<InlineKeyboardButton> RenderInlineButton(string optionTitle, int optionCount, int votersCount) {
+		public virtual List<InlineKeyboardButton> RenderInlineButton(string optionTitle, int optionCount, int votersCount, bool noApproximation) {
 			string oneLineTitle = optionTitle.Split('\n')[0];
 			Match match = GetAppendingMatch(oneLineTitle);
 			if (match.Success) {
 				oneLineTitle = oneLineTitle.Substring(match.Index + match.Length + 2);
 			}
 			var inlineKeyboardRow = new List<InlineKeyboardButton> {
-				InlineKeyboardButton.Create(oneLineTitle.Truncate(30) + " - " + RenderNumberUpdateFriendly(votersCount), callbackData: Cryptography.Encrypt(chatId + ":" + pollId + ":" + optionCount, Globals.GlobalOptions.Apikey))
+				InlineKeyboardButton.Create(oneLineTitle.Truncate(30) + " - " + RenderNumberUpdateFriendly(votersCount, noApproximation), callbackData: Cryptography.Encrypt(chatId + ":" + pollId + ":" + optionCount, Globals.GlobalOptions.Apikey))
 			};
 			return inlineKeyboardRow;
 		}
@@ -366,7 +369,7 @@ namespace telegrambotgroupagree {
 			string output = "";
 			int loopCycles = 0;
 			foreach (KeyValuePair<string, List<User>> currentOption in PollVotes) {
-				output += RenderOptionTitle(currentOption, moderate: true)
+				output += RenderOptionTitle(currentOption, noApproximation:true, moderate: true)
 					+ "/delete_" + HashWorker.Base53Encode(PollId + ":" + loopCycles + ":" + CRC32.HashCRC32(currentOption.Key)) + "\n";
 				loopCycles++;
 			}
@@ -479,12 +482,12 @@ namespace telegrambotgroupagree {
 
 		public void Send(string apikey, Strings strings, long chatId, bool fromChannel = false) {
             FinishCreation();
-			ContentParts content = GetContent(strings, apikey);
+			ContentParts content = GetContent(strings, apikey, noApproximation:true);
 			Api.SendMessage(apikey, chatId, content.Text, replyMarkup: (fromChannel ? content.InlineKeyboard : GenerateUserMarkup(strings,apikey)));
 		}
 
 		public void Send(string apikey, Strings strings, long chatId, int pagOffset) {
-			ContentParts content = GetContent(strings, apikey, offset: pagOffset);
+			ContentParts content = GetContent(strings, apikey, noApproximation:true, offset: pagOffset);
 			Api.SendMessage(apikey, chatId, content.Text, replyMarkup: content.InlineKeyboard);
 		}
 
@@ -493,15 +496,15 @@ namespace telegrambotgroupagree {
             this.archived = true;
         }
 
-		public void Update(string apikey, Strings strings, long chatId, int messageID, int pagOffset) {
-			ContentParts content = GetContent(strings, apikey, offset: pagOffset);
+		public void Update(string apikey, Strings strings, long chatId, int messageID, int pagOffset, bool noApproximation) {
+			ContentParts content = GetContent(strings, apikey, noApproximation, offset: pagOffset);
 			Api.EditMessageText(apikey, content.Text, content.InlineKeyboard, chatId, messageID);
 		}
 
-		public void Update(List<Instance> instances, long currentBotChatID, Strings strings, int? messageId = null, string currentText = null, long? newChatId = null, bool vote = false) {
+		public void Update(List<Instance> instances, long currentBotChatID, Strings strings, bool noApproximation, int? messageId = null, string currentText = null, long? newChatId = null, bool vote = false) {
 			bool getsAVote = messageId == null;
 			string apikey = instances.Find(x => x.chatID == currentBotChatID).apikey;
-			ContentParts content = GetContent(strings, apikey);
+			ContentParts content = GetContent(strings, apikey, noApproximation:noApproximation);
 			ContentParts contentChannel = GetContent(strings, apikey, true);
 			Regex regex = new Regex("<[^>]*>");
 			if (currentText == null || regex.Replace(content.Text, "") != regex.Replace(currentText, "") || vote) {
@@ -529,12 +532,12 @@ namespace telegrambotgroupagree {
 		}
 
 		internal void UpdateWithOptionsPane(string apikey, Strings strings, int messageID, string text) {
-			ContentParts content = GetContent(strings, apikey);
+			ContentParts content = GetContent(strings, apikey, noApproximation:true);
 			Api.EditMessageText(apikey, "<b>" + HtmlSpecialChars.Encode(strings.GetString(Strings.StringsList.optionsForPoll)) + "</b>\n\n" + content.Text, this.GenerateOptionsMarkup(strings), chatId, messageID);
 		}
 
 		internal void UpdateWithModeratePane(string apikey, Strings strings, int messageId, string text) {
-			ContentParts content = GetContent(strings, apikey, moderatePane:true);
+			ContentParts content = GetContent(strings, apikey, noApproximation:true,  moderatePane:true);
 			Api.EditMessageText(apikey, content.Text, content.InlineKeyboard, chatId, messageId);
 		}
 
@@ -545,7 +548,7 @@ namespace telegrambotgroupagree {
 			return InlineQueryResultArticle.Create(chatId + ":" + pollId, content.InlineTitle, InputTextMessageContent.Create(content.Text, disableWebPagePreview: true), content.InlineKeyboard, description: content.InlineDescription, thumbUrl:"https://wjclub.capella.uberspace.de/groupagreebot/res/" + pollType.ToString() + "_" + anony.ToString() + ".png", thumbWidth:256, thumbHeight:256);
 		}
 
-		public virtual MySqlCommand GenerateCommand(MySqlConnection connection, long currentBotChatID, Strings strings, List<Instance> instances, bool change = true) {
+		public virtual MySqlCommand GenerateCommand(MySqlConnection connection, long currentBotChatID, Strings strings, List<Instance> instances, bool noApproximation, bool change = true) {
             MySqlCommand command = new MySqlCommand
             {
                 Connection = connection
@@ -571,7 +574,7 @@ namespace telegrambotgroupagree {
 				command.Parameters.AddWithValue("?pollType", pollType);
 				command.Parameters.AddWithValue("?lang", this.Lang);
 				if (change) {
-					Update(instances, currentBotChatID, strings);
+					Update(instances, currentBotChatID, strings, noApproximation);
 				}
 			}
 			return command;

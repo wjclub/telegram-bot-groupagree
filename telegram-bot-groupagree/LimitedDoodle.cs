@@ -69,7 +69,7 @@ namespace telegrambotgroupagree {
 			return "ℹ️ " + string.Format(strings.GetString(Strings.StringsList.limitedDoodleYouCanChooseSoMany), MaxVotes, pollVotes.Count) + "\n";
 		}
 
-		public override MySqlCommand GenerateCommand(MySqlConnection connection, long currentBotChatID, Strings strings, List<Instance> instances, bool change = true) {
+		public override MySqlCommand GenerateCommand(MySqlConnection connection, long currentBotChatID, Strings strings, List<Instance> instances, bool noApproximation, bool change = true) {
 			MySqlCommand command = new MySqlCommand();
 			command.Connection = connection;
 			if (delete) {
@@ -95,7 +95,7 @@ namespace telegrambotgroupagree {
 				command.Parameters.AddWithValue("?people", JsonConvert.SerializeObject(people));
 				command.Parameters.AddWithValue("?maxVotes", MaxVotes);
 				if (change)
-					Update(instances, currentBotChatID, strings);
+					Update(instances, currentBotChatID, strings, noApproximation: noApproximation);
 			}
 			return command;
 		}

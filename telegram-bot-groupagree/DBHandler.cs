@@ -107,9 +107,9 @@ namespace telegrambotgroupagree {
 						case EPolls.doodle:
 							allPolls.Add(new Doodle(int.Parse(reader["chatid"].ToString()), int.Parse(reader["pollid"].ToString()), reader["pollText"].ToString(), reader["pollDescription"].ToString(), (EAnony)Enum.Parse(typeof(EAnony), reader["anony"].ToString()), (reader["closed"].ToString() == "1" || false), (PercentageBars.Bars)Enum.Parse(typeof(PercentageBars.Bars), reader["percentageBar"].ToString()), (reader["appendable"].ToString() == "1" || false), (reader["sorted"].ToString() == "1" || false), (reader["archived"].ToString() == "1" || false), JsonConvert.DeserializeObject<Dictionary<string, List<User>>>(reader["pollVotes"].ToString()), JsonConvert.DeserializeObject<List<MessageID>>(reader["messageIds"].ToString()), JsonConvert.DeserializeObject<List<User>>(reader["people"].ToString()), this, (Strings.Langs)Enum.Parse(typeof(Strings.Langs), reader["lang"].ToString())));
 							break;
-						case EPolls.board:
+						/*case EPolls.board:
 							allPolls.Add(new Board(int.Parse(reader["chatid"].ToString()), int.Parse(reader["pollid"].ToString()), reader["pollText"].ToString(), reader["pollDescription"].ToString(), (EAnony)Enum.Parse(typeof(EAnony), reader["anony"].ToString()), (reader["closed"].ToString() == "1" || false), (reader["archived"].ToString() == "1" || false), this, JsonConvert.DeserializeObject<Dictionary<int, BoardVote>>(reader["pollVotes"].ToString()), JsonConvert.DeserializeObject<List<MessageID>>(reader["messageIds"].ToString()), (Strings.Langs)Enum.Parse(typeof(Strings.Langs), reader["lang"].ToString())));
-							break;
+							break;*/
 						case EPolls.limitedDoodle:
 							allPolls.Add(new LimitedDoodle(int.Parse(reader["chatid"].ToString()), int.Parse(reader["pollid"].ToString()), reader["pollText"].ToString(), reader["pollDescription"].ToString(), (EAnony)Enum.Parse(typeof(EAnony), reader["anony"].ToString()), (reader["closed"].ToString() == "1" || false), (PercentageBars.Bars)Enum.Parse(typeof(PercentageBars.Bars), reader["percentageBar"].ToString()), (reader["appendable"].ToString() == "1" || false), (reader["sorted"].ToString() == "1" || false), (reader["archived"].ToString() == "1" || false), JsonConvert.DeserializeObject<Dictionary<string, List<User>>>(reader["pollVotes"].ToString()), JsonConvert.DeserializeObject<List<MessageID>>(reader["messageIds"].ToString()), JsonConvert.DeserializeObject<List<User>>(reader["people"].ToString()), int.Parse(reader["maxVotes"].ToString()), this,  (Strings.Langs)Enum.Parse(typeof(Strings.Langs),reader["lang"].ToString())));
 							break;
@@ -123,10 +123,16 @@ namespace telegrambotgroupagree {
 			return allPolls;
 		}
 
-		public void SetOffset(long chatID, int offset) {
+		public void UpdateInstance(long chatID, int offset, long lastUpdate, long updateCount, long lastSendTime, long sendCount) {
 			connection.Open();
-			MySqlCommand command = connection.CreateCommand();
-			command.CommandText = $"UPDATE instances SET offset = {offset} WHERE chat_id = {chatID};";
+			MySqlCommand command = connection.CreateCommand(); //TODO Put stuff to database
+			command.CommandText = $"UPDATE instances SET offset = ?offset, last_update = ?last_update, updates_60 = ?updates_60, last_send = ?last_send, send_60 = ?send_60 WHERE chat_id = ?chat_id;";
+			command.Parameters.AddWithValue("?chat_id", chatID);
+			command.Parameters.AddWithValue("?offset", offset);
+			command.Parameters.AddWithValue("?last_update", lastUpdate);
+			command.Parameters.AddWithValue("?updates_60", updateCount);
+			command.Parameters.AddWithValue("?last_send", lastSendTime);
+			command.Parameters.AddWithValue("?send_60", sendCount);
 			command.ExecuteNonQuery();
 			connection.Close();
 		}
@@ -169,26 +175,6 @@ namespace telegrambotgroupagree {
 				connection.Close();
 			}
 		}
-		
-		//TODO Probably remove this since this has no use at all
-		/*public List<Pointer> GetAllPointers() {
-			connection.Open();
-			List<Pointer> allPointers = new List<Pointer>();
-			MySqlCommand command = connection.CreateCommand();
-			command.CommandText = "SELECT * FROM pointer";
-			try {
-				MySqlDataReader reader;
-				reader = command.ExecuteReader();
-				while (reader.Read()) {
-					allPointers.Add(parsePointer(reader));
-				}
-			} catch (Exception e) {
-				Notifications.log(e.ToString());
-			} finally {
-				connection.Close();
-			}
-			return allPointers;
-		} */
 
 		private Pointer ParsePointer(MySqlDataReader reader) {
 			int? boardChatId = null, boardPollId = null;
@@ -198,8 +184,8 @@ namespace telegrambotgroupagree {
 		}
 
 		public void FlushToDB(Strings strings, List<Instance> instances, long currentBotChatID) {
-			connection.Open(); //TODO Thinking...
-			pollQueue.ForEach(x => x.Poll.GenerateCommand(connection, currentBotChatID, strings, instances, x.Change).ExecuteNonQuery());
+			connection.Open(); //TODO Thinking... implement request handler here probably?
+			pollQueue.ForEach(x => x.Poll.GenerateCommand(connection, currentBotChatID, strings, instances, noApproximation:x.NoApproximation, change:x.Change).ExecuteNonQuery());
 			pollQueue.Clear();
 			try {
 				pointerQueue.ForEach(x => x.GenerateCommand(connection).ExecuteNonQuery());
@@ -214,5 +200,6 @@ namespace telegrambotgroupagree {
 	public class QueueObject {
 		public Poll Poll;
 		public bool Change;
+		public bool NoApproximation;
 	}
 }
