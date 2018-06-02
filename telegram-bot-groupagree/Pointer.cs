@@ -24,7 +24,7 @@ namespace telegrambotgroupagree {
 	public class Pointer {
 		public Pointer(int chatId, string ieftLang) : this(chatId, EPolls.vote, ENeedle.pollText, EAnony.personal, null, null, 0, Strings.GetLangFromIEFT(ieftLang)) { }
 
-		public Pointer(int chatId, EPolls pollType, ENeedle needle, EAnony anony, int? boardChatId, int? boardPollId, int lastPollId, Strings.Langs lang) {
+		public Pointer(int chatId, EPolls pollType, ENeedle needle, EAnony anony, int? boardChatId, int? boardPollId, int lastPollId, Strings.Langs lang, List<DateTime> lastRequests) {
 			this.ChatId = chatId;
 			this.PollType = pollType;
 			this.Needle = needle;
@@ -33,6 +33,7 @@ namespace telegrambotgroupagree {
 			this.BoardPollId = boardPollId;
 			this.LastPollId = lastPollId;
 			this.Lang = lang;
+            this.LastRequests = lastRequests;
 		}
 
 		public int ChatId;
@@ -43,6 +44,7 @@ namespace telegrambotgroupagree {
 		public int? BoardPollId;
 		public int LastPollId;
 		public Strings.Langs Lang;
+        public List<DateTime> LastRequests;
 
 		public MySqlCommand GenerateCommand(MySqlConnection connection) {
 			MySqlCommand command = new MySqlCommand();

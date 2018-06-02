@@ -20,7 +20,6 @@ namespace telegrambotgroupagree {
 		private DBHandler dBHandler;
 		private Strings strings;
 
-
 		public User BotInfo { get; internal set; }
 		public Pointer CurrentPointer { get; internal set; }
 		public Update CurrentUpdate { get; internal set; }

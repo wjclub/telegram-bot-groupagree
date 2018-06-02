@@ -3,5 +3,6 @@
 		public long botChatID;
 		public string inlineMessageId;
 		public bool channel;
+        public List<DateTime> last30Updates; 
 	}
 }
