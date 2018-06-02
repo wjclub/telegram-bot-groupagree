@@ -15,6 +15,7 @@ namespace telegrambotgroupagree {
 		
 		//instance, user, poll
 		private List<Poll> pollsToUpdateWhenBored;
+        private List<Poll> pollsToUpdate; //TODO refine
 
 		public bool getRestricted(Instance currentInstance, Poll currentPoll) {
 			//TODO Make this work
