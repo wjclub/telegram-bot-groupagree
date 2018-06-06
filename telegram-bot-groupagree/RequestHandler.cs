@@ -55,7 +55,7 @@ namespace telegrambotgroupagree {
 
         public UpdateAvailabilityList getInlineMessageAvailableUpdates(string inlineMessageID, Poll poll) {
             return getListFromLastUpdatesList(
-                poll.MessageIds.Find(x => x.inlineMessageId == inlineMessageID),
+                poll.MessageIds.Find(x => x.inlineMessageId == inlineMessageID).last30Updates,
                 20,
                 15, 
                 TimeSpan.FromMinutes(1));
