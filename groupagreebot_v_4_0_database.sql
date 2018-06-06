@@ -1,6 +1,9 @@
-CREATE DATABASE  IF NOT EXISTS /*your bots chat id here*/`bot_chat_id` !40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE /*your bots chat id here*/`bot_chat_id`;
+CREATE DATABASE  IF NOT EXISTS /*your bots chat id there ->*/`bot_chat_id` !40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE /*your bots chat id there ->*/`bot_chat_id`;
 
+/*
+LEAVE THE REST UNCHANGED
+*/
 DROP TABLE IF EXISTS `pointer`;
 
 CREATE TABLE `pointer` (
