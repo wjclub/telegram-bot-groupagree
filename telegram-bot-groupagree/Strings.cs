@@ -163,6 +163,7 @@ namespace telegrambotgroupagree {
 			addInstanceApproved,
 			addInstanceRejected,
 			addInstanceTechnicalIssue,
+			pollDeleted,
 		};
 
 

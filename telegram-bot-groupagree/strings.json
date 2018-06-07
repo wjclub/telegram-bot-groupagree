@@ -32,7 +32,7 @@
 		"pollTypeDescriptionNoMoreBoard":"Please choose from one of the following poll types:\n\n<b>vote</b> - Standard vote, every user can only select one vote option at a time\n\n<b>doodle</b> - Every user can select multiple vote options at a time\n\n<b>limited doodle</b> - Just like doodle, but now you can choose for how many options each user can vote",
 		"callbackVotedFor":"You voted for {0}",
 		"callbackTookBack":"You took you vote for {0} back...",
-		"voteDoesntExist":"This vote doesn't exist anymore... Sorry :O",
+		"voteDoesntExist":"This vote option/poll doesn't exist anymore...",
 		"startMessage":"<b>Hey,</b> good to see you again!\n\nYour settings are:\n \ud83d\udcca Poll type: <b>{0}</b>\n \ud83d\udc41‍\ud83d\udde8 Anonymous: {1}\n\nNow send me the question or set me up using the buttons below: ",
 		"startMessageChangePollTypeButton":"Change poll type",
 		"startMessagePersonalButton":"Personal {0}",
@@ -115,6 +115,7 @@
 		"addInstanceApproved":"Congratulations, your instance {0} (@{1}) has been approved. You can start using it now. Be aware that changing the profile picture/name/about/description of the bot more than twice a day will result in your instance not working for 24 hours.",
 		"addInstanceRejected":"Sorry, your instance has been rejected. It did not meet our guidelines and you can add it again in a week. Please read the instrurctions carefully next time. Reason: {0}",
 		"addInstanceTechnicalIssue":"Please set the parameters for the bot correctly, please make sure your bot has the following parameters set: {0}. Click the button below to re-add your instance to the queue.",
+		"pollDeleted":"<i>🚫 This poll has been deleted...</i>",
 	},
 	"de":{
 		"creatingPoll":"Erstelle die Umfrage <b>{0}</b>\nSende mir jetzt eine Beschreibung...",

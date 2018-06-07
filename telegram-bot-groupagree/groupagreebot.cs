@@ -795,6 +795,7 @@ namespace telegrambotgroupagree {
 				dBHandler.FlushToDB(strings, instances, currentInstance.chatID);
 				currentInstance.update = Api.GetUpdatesAsync(currentInstance.apikey, offset);
 			}
+			Notifications.log("The bot has been shut down properly...");
 		}
 	}
 }

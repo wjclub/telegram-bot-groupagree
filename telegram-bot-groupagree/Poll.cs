@@ -105,7 +105,7 @@ namespace telegrambotgroupagree {
 
 		public virtual void Delete(List<Instance> instances, long currentBotChatID, Strings strings, int messageId) {
 			delete = true;
-			dBHandler.AddToQueue(this, false);
+			dBHandler.AddToQueue(this);
 			Update(instances, currentBotChatID, strings, true, messageId:messageId);
 		}
 
@@ -151,7 +151,7 @@ namespace telegrambotgroupagree {
 			RenderPeopleCount(strings, peopleCount, noApproximation) + "\n" +
 			RenderOptionalInsert(strings) +
 			//RenderExpansion(strings) +
-			RenderClosed(strings);
+			RenderState(strings);
 		}
 
 		public virtual string RenderTitleEmoji(Strings strings) {
@@ -254,8 +254,14 @@ namespace telegrambotgroupagree {
 			return "";
 		}
 
-		public virtual string RenderClosed(Strings strings) {
-			return this.Closed ? "\n" + strings.GetString(Strings.StringsList.pollClosed) : "";
+		public virtual string RenderState(Strings strings) {
+			if (this.Closed)
+				return "\n" + strings.GetString(Strings.StringsList.pollClosed);
+			if (this.delete) {
+				return "\n" + strings.GetString(Strings.StringsList.pollDeleted);
+			} else {
+				return "";
+			}
 		}
 
 		public virtual string RenderExpansion(Strings strings) {
@@ -265,7 +271,7 @@ namespace telegrambotgroupagree {
 
 		#region RenderInlineKeyboard
 		public virtual InlineKeyboardMarkup RenderInlineKeyboard(List<int> pollVotesCount, Strings strings, bool noApproximation, bool channel = false) {
-			if (Closed) {
+			if (Closed || delete) {
 				return new InlineKeyboardMarkup();
 			}
 			InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup

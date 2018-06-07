@@ -22,6 +22,7 @@ namespace telegrambotgroupagree {
 			} catch (Exception e) {
 				Notifications.log(e.ToString() + "\n\n\n-------- Context --------\n\n" + CustomJsonStuff.JsonEnhancer.FormatJson(JsonConvert.SerializeObject(new { groupagreebot.CurrentUpdate , groupagreebot.CurrentPointer}, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter() }})));
 			}
+			Notifications.log("Weird exit...");
 			//Console.WriteLine(" Press any key...");<
 			//Console.ReadKey();
 		}
