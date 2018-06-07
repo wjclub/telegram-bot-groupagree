@@ -34,3 +34,4 @@ Thumbs.db
 *.Resharper
 #dotCover
 *.dotCover
+/.vs/slnx.sqlite
