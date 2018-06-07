@@ -79,7 +79,7 @@ namespace telegrambotgroupagree {
 		public virtual void Close(List<Instance> instances, long currentBotChatID, Strings strings, int messageId) {
 			closed = true;
 			dBHandler.AddToQueue(this);
-			Update(instances, currentBotChatID, strings, messageId);
+			Update(instances, currentBotChatID, strings, true, messageId:messageId);
 		}
 
 		public virtual void SetPercentage(PercentageBars.Bars bar) {
@@ -100,13 +100,13 @@ namespace telegrambotgroupagree {
 		public virtual void Reopen(List<Instance> instances, long currentBotChatID, Strings strings, int messageId) {
 			closed = false;
 			dBHandler.AddToQueue(this);
-			Update(instances, currentBotChatID, strings, messageId);
+			Update(instances, currentBotChatID, strings, true, messageId:messageId);
 		}
 
 		public virtual void Delete(List<Instance> instances, long currentBotChatID, Strings strings, int messageId) {
 			delete = true;
 			dBHandler.AddToQueue(this, false);
-			Update(instances, currentBotChatID, strings, messageId);
+			Update(instances, currentBotChatID, strings, true, messageId:messageId);
 		}
 
 		public virtual void DeleteFromDeleteAll(string apikey, Strings strings) {
@@ -140,7 +140,7 @@ namespace telegrambotgroupagree {
 
 		#region GetPollOutput
 		protected virtual ContentParts GetPollOutput(Strings strings, int peopleCount, List<int> pollVotesCount, bool noApproximation, bool channel = false) {
-			return new ContentParts(RenderText(strings, peopleCount, pollVotesCount, noApproximation), RenderInlineKeyboard(pollVotesCount, strings, noApproximation, channel: channel), RenderInlineQueryTitle(), RenderInlineQueryDescription(strings, peopleCount));
+			return new ContentParts(RenderText(strings, peopleCount, pollVotesCount, noApproximation), RenderInlineKeyboard(pollVotesCount, strings, noApproximation:noApproximation, channel: channel), RenderInlineQueryTitle(), RenderInlineQueryDescription(strings, peopleCount));
 		}
 
 		#region RenderText
@@ -264,7 +264,7 @@ namespace telegrambotgroupagree {
 		#endregion
 
 		#region RenderInlineKeyboard
-		public virtual InlineKeyboardMarkup RenderInlineKeyboard(List<int> pollVotesCount, Strings strings, bool channel = false) {
+		public virtual InlineKeyboardMarkup RenderInlineKeyboard(List<int> pollVotesCount, Strings strings, bool noApproximation, bool channel = false) {
             InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup
             {
                 InlineKeyboard = new List<List<InlineKeyboardButton>>()
@@ -274,7 +274,7 @@ namespace telegrambotgroupagree {
 			} else {
 				int optionCount = 0;
 				foreach (string optionTitle in PollVotes.Keys) {
-					inlineKeyboard.InlineKeyboard.Add(RenderInlineButton(optionTitle, optionCount, pollVotesCount.ElementAt(optionCount)));
+					inlineKeyboard.InlineKeyboard.Add(RenderInlineButton(optionTitle, optionCount, pollVotesCount.ElementAt(optionCount), noApproximation));
 					optionCount++;
 				}
 			}
@@ -428,14 +428,14 @@ namespace telegrambotgroupagree {
 			};
 			if (!closed) {
 				inline.InlineKeyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.publish), switchInlineQuery: pollText) });
-				if (pollType != EPolls.board) {
+				/*if (pollType != EPolls.board) {
 					inline.InlineKeyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.publishWithLink), switchInlineQuery: "$c:" + pollText) });
 					inline.InlineKeyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.buttonVote), callbackData: "comm:iwannavote:" + Cryptography.Encrypt(chatId+ ":" + pollId, apikey)),
 						                                                       InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.commPageRefresh), callbackData:"comm:update:" + chatId + ":" + pollId)});
-				} else {
+				} else {*/
 					inline.InlineKeyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.buttonVote), callbackData: "comm:url" + Cryptography.Encrypt("board:" + chatId + ":" + pollId, apikey)),
 																			InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.commPageRefresh), callbackData:"comm:update:" + chatId + ":" + pollId)});
-				}
+				/*}*/
 			}
 			inline.InlineKeyboard.Add(new List<InlineKeyboardButton>() {
 				InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.commPageOptions), callbackData:"comm:options:" + chatId + ":" + pollId),
@@ -449,7 +449,7 @@ namespace telegrambotgroupagree {
 			InlineKeyboardMarkup inline = new InlineKeyboardMarkup {
 				InlineKeyboard = new List<List<InlineKeyboardButton>>()
 			};
-			if (this.pollType != EPolls.board) {
+			/*if (this.pollType != EPolls.board) {*/
 				inline.InlineKeyboard.Add(new List<InlineKeyboardButton> {
 					InlineKeyboardButton.Create(String.Format(strings.GetString(Strings.StringsList.optionsPercentageNone), (PercentageBar == PercentageBars.Bars.none).ToCheck()), callbackData:"comm:percentage:none:" + chatId + ":" + pollId),
 					InlineKeyboardButton.Create(PercentageBars.GetIconArray(PercentageBars.Bars.dots).Implode() + " " + (PercentageBar == PercentageBars.Bars.dots).ToCheck(), callbackData:"comm:percentage:dots:" + chatId + ":" + pollId),
@@ -461,7 +461,7 @@ namespace telegrambotgroupagree {
 				inline.InlineKeyboard.Add(new List<InlineKeyboardButton> {
 					InlineKeyboardButton.Create(String.Format(strings.GetString(Strings.StringsList.optionsAppendable), Appendable.ToCheck()), callbackData:"comm:appendable:" + chatId + ":" + pollId),
 				});
-			}
+			/*}*/
 			inline.InlineKeyboard.Add(new List<InlineKeyboardButton> {
 				InlineKeyboardButton.Create(RenderModerationEmoji() + " " + strings.GetString(Strings.StringsList.moderate), callbackData:"comm:moderate:" + chatId + ":" + pollId),
 				});

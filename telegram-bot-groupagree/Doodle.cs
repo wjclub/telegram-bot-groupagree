@@ -101,7 +101,7 @@ namespace telegrambotgroupagree {
 			return result;
 		}
 
-		public override MySqlCommand GenerateCommand(MySqlConnection connection, long currentBotChatID, Strings strings, List<Instance> instances, bool change = true) {
+		public override MySqlCommand GenerateCommand(MySqlConnection connection, long currentBotChatID, Strings strings, List<Instance> instances, bool noApproximation, bool change = true) {
 			var command = new MySqlCommand();
 			command.Connection = connection;
 			if (delete) {
@@ -125,8 +125,9 @@ namespace telegrambotgroupagree {
 				command.Parameters.AddWithValue("?archived", archived);
 				command.Parameters.AddWithValue("?lang", lang);
 				command.Parameters.AddWithValue("?people", JsonConvert.SerializeObject(people));
-				if (change)
-					Update(instances, currentBotChatID, strings);
+				if (change) {
+					Update(instances, currentBotChatID, strings, noApproximation:noApproximation);
+				}
 			}
 			return command;
 		}

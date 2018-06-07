@@ -80,7 +80,7 @@ namespace telegrambotgroupagree {
 					foreach (Update update in updates) {
 						CurrentUpdate = update;
 						currentInstance.offset = offset = update.UpdateId + 1;
-						dBHandler.UpdateInstance(currentInstance.chatID, currentInstance.offset);
+						dBHandler.UpdateInstance(currentInstance.chatID, currentInstance.offset, currentInstance.last30Updates);
 						if (update.Message != null) {
 							Pointer pointer = pointerContainer.GetPointer(update.Message.From.Id, update.Message.From.LanguageCode);
 							if (pointer != null)
@@ -252,19 +252,18 @@ namespace telegrambotgroupagree {
 											Api.SendMessage(apikey, update.Message.Chat.Id, string.Format("/{0}", HttpServerUtility.UrlTokenEncode(Encoding.GetEncoding("UTF-8").GetBytes(string.Format("13:5:{0}", "hey there".HashCRC32()).ToCharArray()))));
 											break;
 										case "addinstance":
-											pointer.Needle = ENeedle.addInstanceToken;
-											Api.SendMessage(apikey, update.Message.Chat.Id, strings.GetString(Strings.StringsList.addInstanceSendToken));
-											break;
-										case "testurl":
+											if(update.Message.From.Id == 133909606) {
+												pointer.Needle = ENeedle.addInstanceToken;
+												Api.SendMessage(apikey, update.Message.Chat.Id, strings.GetString(Strings.StringsList.addInstanceSendToken));
+											} break;
+										/*case "testurl":
 											Api.SendMessage(Globals.GlobalOptions.Apikey, update.Message.Chat.Id, "INTERNAL TEST MESSAGE", replyMarkup: InlineMarkupGenerator.GetOneButtonMarkup(InlineKeyboardButton.Create("TEST THIS NOW", callbackData: "comm:url:t.me/" + Globals.GlobalOptions.Botname + "?start=from_inline")));
-											break;
-#if DEBUG
-										case "burstme":
+											break;*/
+										/*case "burstme":
 											for (int i = 0; i < 40; i++) {
 												Api.SendMessage(Globals.GlobalOptions.Apikey, update.Message.Chat.Id, "INTERNAL TEST MESSAGE NO " + i);
 											}
-											break;
-#endif
+											break;*/
 										default:
 											int editPoll;
 											if (int.TryParse(command, out editPoll)) {
@@ -318,25 +317,26 @@ namespace telegrambotgroupagree {
 											pointer.LastPollId++;
 											dBHandler.AddToQueue(pollContainer.Add(pointer, update.Message.From.Id, update.Message.Text), false);
 											//TODO Kinda test this shit
-											if (pointer.PollType == EPolls.board) {
+											//Board removed
+											/*if (pointer.PollType == EPolls.board) {
 												Api.SendMessage(apikey, update.Message.Chat.Id, string.Format(strings.GetString(Strings.StringsList.creatingBoardWannaAddDescription), HtmlSpecialChars.Encode(update.Message.Text).UnmarkupUsernames()), replyMarkup: new InlineKeyboardMarkup { InlineKeyboard = new List<List<InlineKeyboardButton>> { new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.addDescription), callbackData: "comm:add:description") }, new List<InlineKeyboardButton> { InlineKeyboardButton.Create(EmojiStore.Done + " " + strings.GetString(Strings.StringsList.done), callbackData: "comm:boarddone:" + pointer.ChatId + ":" + pointer.LastPollId) } } });
 												pointer.Needle = ENeedle.nothing;
-											} else {
+											} else {*/
 												Api.SendMessage(apikey, update.Message.Chat.Id, string.Format(strings.GetString(Strings.StringsList.creatingPollWannaAddDescription), HtmlSpecialChars.Encode(update.Message.Text).UnmarkupUsernames()), replyMarkup: new InlineKeyboardMarkup { InlineKeyboard = new List<List<InlineKeyboardButton>> { new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.addDescription), callbackData: "comm:add:description") } } });
 												pointer.Needle = ENeedle.firstOption;
-											}
+											/*}*/
 											break;
 										case ENeedle.pollDescription:
-											Api.SendMessage(apikey, update.Message.Chat.Id, String.Format((pointer.PollType != EPolls.board ? strings.GetString(Strings.StringsList.createPoll) : strings.GetString(Strings.StringsList.createBoard)), HtmlSpecialChars.Encode(update.Message.Text).UnmarkupUsernames()));
+											Api.SendMessage(apikey, update.Message.Chat.Id, String.Format(/*(pointer.PollType != EPolls.board ? */strings.GetString(Strings.StringsList.createPoll)/* : strings.GetString(Strings.StringsList.createBoard))*/, HtmlSpecialChars.Encode(update.Message.Text).UnmarkupUsernames()));
 											try {
 												pollContainer.GetLastPoll(pointer).AddDescription(update.Message.Text);
-												if (pointer.PollType == EPolls.board) {
+												/*if (pointer.PollType == EPolls.board) {
 													pollContainer.GetLastPoll(pointer).Send(apikey, strings, update.Message.Chat.Id);
 													pointer.Needle = ENeedle.nothing;
-												} else {
+												} else {*/
 													pointer.Needle = ENeedle.furtherOptions;
 													dBHandler.AddToQueue(pointer);
-												}
+												/*}*/
 											} catch (Exception e) {
 												Notifications.log(e + "\n\n\n" + JsonConvert.SerializeObject(pointer));
 												continue;
@@ -350,6 +350,7 @@ namespace telegrambotgroupagree {
 												Api.SendMessage(apikey, update.Message.Chat.Id, String.Format(strings.GetString(Strings.StringsList.alreadyDefined), HtmlSpecialChars.Encode(update.Message.Text).UnmarkupUsernames()), replyMarkup: InlineMarkupGenerator.GetOneButtonMarkup(InlineKeyboardButton.Create("\ud83d\udcbe " + strings.GetString(Strings.StringsList.done), callbackData: "comm:done")));
 											pointer.Needle = ENeedle.furtherOptions;
 											break;
+										/* not existent anymore...
 										case ENeedle.board: {
 											if (update.Message.Text.Length <= 120) {
 												update.Message.Text = update.Message.Text.Replace("\n", " ");
@@ -366,7 +367,7 @@ namespace telegrambotgroupagree {
 												Api.SendMessage(apikey, update.Message.Chat.Id, String.Format(strings.GetString(Strings.StringsList.tooManyCharacters), update.Message.Text.Length));
 											}
 										}
-										break;
+										break; */
 										case ENeedle.addOption: {
 											if (update.Message.Text.Length <= 120) {
 												update.Message.Text = update.Message.Text.Replace("\n", " ");
@@ -491,10 +492,10 @@ namespace telegrambotgroupagree {
 										pointer.PollType = EPolls.doodle;
 										refresh = true;
 										break;
-									case "board":
+									/*case "board":
 										pointer.PollType = EPolls.board;
 										refresh = true;
-										break;
+										break;*/
 									case "limitedDoodle":
 										pointer.PollType = EPolls.limitedDoodle;
 										refresh = true;
@@ -513,13 +514,13 @@ namespace telegrambotgroupagree {
 											text = strings.GetString(Strings.StringsList.noPollsToFinish);
 										}
 										break;
-									case "boarddone": {
+									/*case "boarddone": {
 										string[] splitBoardDoneData = command.Split(':');
 										Poll poll = pollContainer.GetPoll(int.Parse(splitBoardDoneData[1]), int.Parse(splitBoardDoneData[2]));
 										poll.FinishCreation();
 										poll.Update(instances, currentInstance.chatID, strings, messageId: update.CallbackQuery.Message.MessageId);
 										break;
-									}
+									}*/
 									case "close":
 										string[] splitCloseData = command.Split(':');
 										pollContainer.GetPoll(int.Parse(splitCloseData[1]), int.Parse(splitCloseData[2])).Close(instances, currentInstance.chatID, strings, update.CallbackQuery.Message.MessageId);
@@ -553,8 +554,8 @@ namespace telegrambotgroupagree {
 										break;
 									case "nodelete":
 										string[] splitNoDeleteData = command.Split(':');
-										if (update.CallbackQuery.From.Id == int.Parse(splitNoDeleteData[1]))
-											pollContainer.GetPoll(int.Parse(splitNoDeleteData[1]), int.Parse(splitNoDeleteData[2])).Update(instances, currentInstance.chatID, strings, update.CallbackQuery.Message.MessageId, "", update.CallbackQuery.Message.Chat.Id, false);
+									if (update.CallbackQuery.From.Id == int.Parse(splitNoDeleteData[1]))
+										pollContainer.GetPoll(int.Parse(splitNoDeleteData[1]), int.Parse(splitNoDeleteData[2])).Update(instances, currentInstance.chatID, strings, noApproximation: true, messageId:update.CallbackQuery.Message.MessageId, currentText:"", newChatId:update.CallbackQuery.Message.Chat.Id, vote:false);
 										break;
 									case "deleteallsure":
 										Api.EditMessageText(apikey, strings.GetString(Strings.StringsList.seriouslySureDeleteEverything), new InlineKeyboardMarkup {
@@ -579,7 +580,7 @@ namespace telegrambotgroupagree {
 										break;
 									case "update":
 										string[] splitUpdateData = command.Split(':');
-										pollContainer.GetPoll(int.Parse(splitUpdateData[1]), int.Parse(splitUpdateData[2])).Update(instances, currentInstance.chatID, strings, update.CallbackQuery.Message.MessageId, update.CallbackQuery.Message.Text);
+									pollContainer.GetPoll(int.Parse(splitUpdateData[1]), int.Parse(splitUpdateData[2])).Update(instances, currentInstance.chatID, strings, noApproximation:true, messageId:update.CallbackQuery.Message.MessageId, currentText:update.CallbackQuery.Message.Text);
 										break;
 									case "options": {
 										string[] splitOptionsData = command.Split(':');
@@ -628,7 +629,7 @@ namespace telegrambotgroupagree {
 											pointer.LastPollId++;
 											Poll newPoll = pollContainer.Add(pointer, update.CallbackQuery.From.Id, poll.PollText);
 											newPoll.AddDescription(poll.PollDescription);
-											if (poll.PollType != EPolls.board)
+											/*if (poll.PollType != EPolls.board)*/
 												foreach (string optionTitle in poll.PollVotes.Keys) {
 													newPoll.AddOption(optionTitle);
 												}
@@ -656,15 +657,15 @@ namespace telegrambotgroupagree {
 									case "skip":
 										string stuff = command.Split(':')[1];
 										if (stuff == "description") {
-											pointer.Needle = ENeedle.firstOption;
+											pointer.Needle = ENeedle.firstOption;/*
 											if (pointer.PollType == EPolls.board) {
 												Poll poll = pollContainer.GetLastPoll(pointer);
 												poll.FinishCreation();
 												poll.Update(instances, currentInstance.chatID, strings, messageId: update.CallbackQuery.Message.MessageId);
 												pointer.Needle = ENeedle.nothing;
-											} else {
+											} else {*/
 												Api.EditMessageText(apikey, strings.GetString(Strings.StringsList.rogerSendIt), chatId: update.CallbackQuery.Message.Chat.Id, messageId: update.CallbackQuery.Message.MessageId);
-											}
+											/*}*/
 										}
 										break;
 									case "add": {
@@ -678,10 +679,10 @@ namespace telegrambotgroupagree {
 									case "iwannavote":
 										try {
 											string[] splitVoteData = Cryptography.Decrypt(command.Substring(11), apikey).Split(':');
-											pollContainer.GetPoll(int.Parse(splitVoteData[0]), int.Parse(splitVoteData[1])).Update(instances, currentInstance.chatID, strings, update.CallbackQuery.Message.MessageId, update.CallbackQuery.Message.Text, vote: true);
+											pollContainer.GetPoll(int.Parse(splitVoteData[0]), int.Parse(splitVoteData[1])).Update(instances, currentInstance.chatID, strings, true, update.CallbackQuery.Message.MessageId, update.CallbackQuery.Message.Text, vote: true);
 										} catch (System.FormatException) {
 											string[] splitVoteData = command.Split(':');
-											pollContainer.GetPoll(int.Parse(splitVoteData[1]), int.Parse(splitVoteData[2])).Update(instances, currentInstance.chatID, strings, update.CallbackQuery.Message.MessageId, "", update.CallbackQuery.Message.Chat.Id);
+											pollContainer.GetPoll(int.Parse(splitVoteData[1]), int.Parse(splitVoteData[2])).Update(instances, currentInstance.chatID, strings, true, update.CallbackQuery.Message.MessageId, "", update.CallbackQuery.Message.Chat.Id);
 											text = strings.GetString(Strings.StringsList.updatingPoll);
 											alert = true;
 										}
@@ -689,7 +690,7 @@ namespace telegrambotgroupagree {
 										break;
 									case "pag":
 										string[] splitPagData = command.Split(':');
-										pollContainer.GetPoll(int.Parse(splitPagData[1]), int.Parse(splitPagData[2])).Update(apikey, strings, update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, int.Parse(splitPagData[3]));
+										pollContainer.GetPoll(int.Parse(splitPagData[1]), int.Parse(splitPagData[2])).Update(apikey, strings, update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, int.Parse(splitPagData[3]), true);
 										break;
 									case "lang":
 										string[] langSplit = command.Split(':');
@@ -700,6 +701,9 @@ namespace telegrambotgroupagree {
 										pointer.Needle = ENeedle.pollText;
 										WelcomeMessage.Refresh(apikey, strings, pointer, update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId);
 										break;
+									default:
+										//TODO Add message
+									break;
 								}
 								if (returnUrl == null) {
 									Api.AnswerCallbackQuery(apikey, update.CallbackQuery.Id, text, alert);
@@ -724,7 +728,7 @@ namespace telegrambotgroupagree {
 										new List<InlineKeyboardButton>() { InlineKeyboardButton.Create(String.Format(strings.GetString(Strings.StringsList.inlineButtonDoodle), (pointer.PollType == EPolls.doodle ? "✅" : "☑️")), callbackData: "comm:doodle") },
 
 										new List<InlineKeyboardButton>() { InlineKeyboardButton.Create(String.Format(strings.GetString(Strings.StringsList.inlineButtonLimitedDoodle), (pointer.PollType == EPolls.limitedDoodle ? "✅" : "☑️")), callbackData: "comm:limitedDoodle") },
-										new List<InlineKeyboardButton>() { InlineKeyboardButton.Create(String.Format(strings.GetString(Strings.StringsList.inlineButtonBoard), (pointer.PollType == EPolls.board ? "✅" : "☑️")), callbackData: "comm:board") },
+										//new List<InlineKeyboardButton>() { InlineKeyboardButton.Create(String.Format(strings.GetString(Strings.StringsList.inlineButtonBoard), (pointer.PollType == EPolls.board ? "✅" : "☑️")), callbackData: "comm:board") },
 									}
 										};
 										Api.EditMessageText(apikey, strings.GetString(Strings.StringsList.pollTypeDescription), inlineKeyboard, update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId);
@@ -772,7 +776,7 @@ namespace telegrambotgroupagree {
 										}
 									}
 									if (update.CallbackQuery.InlineMessageId == null)
-										poll.Update(instances, currentInstance.chatID, strings, update.CallbackQuery.Message.MessageId, update.CallbackQuery.Message.Text, update.CallbackQuery.Message.Chat.Id);
+										poll.Update(instances, currentInstance.chatID, strings, false, /*TODO Request Handler here*/update.CallbackQuery.Message.MessageId, update.CallbackQuery.Message.Text, update.CallbackQuery.Message.Chat.Id);
 								} catch (Exception) {
 									Api.AnswerCallbackQuery(apikey, update.CallbackQuery.Id, strings.GetString(Strings.StringsList.voteDoesntExist));
 								}

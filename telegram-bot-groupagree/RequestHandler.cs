@@ -50,26 +50,24 @@ namespace telegrambotgroupagree {
         }
 
         public UpdateAvailabilityList getInstanceAvailableUpdates(Instance instance) {
-            return getListFromLastUpdatesList(instance.lastUpdates, max: 30, recommended: 25, TimeSpan.FromSeconds(1));
+            return getListFromLastUpdatesList(datesList:instance.last30Updates, max: 30, recommended: 25, cooldown:TimeSpan.FromSeconds(1));
         }
 
-        public UpdateAvailabilityList getInlineMessageAvailableUpdates(string inlineMessageID, Poll poll) {
-            return getListFromLastUpdatesList(
-                poll.MessageIds.Find(x => x.inlineMessageId == inlineMessageID).last30Updates,
-                max: 20,
-                recommended: 15, 
-                TimeSpan.FromMinutes(1));
-        }
+		public UpdateAvailabilityList getInlineMessageAvailableUpdates(string inlineMessageID, Poll poll) => getListFromLastUpdatesList(
+				poll.MessageIds.Find(x => x.inlineMessageId == inlineMessageID).last30Updates,
+				max: 20,
+				recommended: 15,
+				cooldown:TimeSpan.FromMinutes(1));
 
-        public UpdateAvailabilityList getListFromLastUpdatesList(List<DateTime> datesList, short max, short recommended, TimeSpan cooldown) {
+		public UpdateAvailabilityList getListFromLastUpdatesList(List<DateTime> datesList, int max, int recommended, TimeSpan cooldown) {
             DateTime startingNow = DateTime.Now;
-            UpdateAvailabilityList result = {
+            UpdateAvailabilityList result = new UpdateAvailabilityList {
                 maxUpdates = 0,
                 recommendedUpdates = 0,
             };
-            for (int i = 0; i < datesList; i++) {
+            for (int i = 0; i < datesList.Count; i++) {
                 if (startingNow - datesList[i] > cooldown) {
-                    result.maxUpdates = max - Math.Min(max, i);
+                    result.maxUpdates = max - (Math.Min(max, i));
                     result.recommendedUpdates = recommended - Math.Min(recommended,i);
                     break;
                 }
@@ -80,6 +78,6 @@ namespace telegrambotgroupagree {
 }
 
 public class UpdateAvailabilityList {
-    short maxUpdates;
-    short recommendedUpdates;
+    public int maxUpdates;
+    public int recommendedUpdates;
 }

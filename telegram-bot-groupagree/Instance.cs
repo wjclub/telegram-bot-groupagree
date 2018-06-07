@@ -1,3 +1,8 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using WJClubBotFrame.Types;
+
 public class Instance {
     public long chatID { get; internal set; }
     public string key { get; internal set; }

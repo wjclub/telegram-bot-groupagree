@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
 
@@ -22,7 +23,7 @@ namespace telegrambotgroupagree {
 	}
 
 	public class Pointer {
-		public Pointer(int chatId, string ieftLang) : this(chatId, EPolls.vote, ENeedle.pollText, EAnony.personal, null, null, 0, Strings.GetLangFromIEFT(ieftLang)) { }
+		public Pointer(int chatId, string ieftLang) : this(chatId, EPolls.vote, ENeedle.pollText, EAnony.personal, null, null, 0, Strings.GetLangFromIEFT(ieftLang), new List<DateTime>()) { }
 
 		public Pointer(int chatId, EPolls pollType, ENeedle needle, EAnony anony, int? boardChatId, int? boardPollId, int lastPollId, Strings.Langs lang, List<DateTime> lastRequests) {
 			this.ChatId = chatId;

@@ -37,13 +37,13 @@ namespace telegrambotgroupagree {
 						poll = new Doodle(chatId, 0, pollText, pointer.Anony, dBHandler, pointer.Lang);
 					}
 					break;
-				case EPolls.board:
+				/*case EPolls.board:
 					try {
 						poll = new Board(chatId, pointer.LastPollId, pollText, pointer.Anony, dBHandler, pointer.Lang);
 					} catch (NullReferenceException) {
 						poll = new Board(chatId, 0, pollText, pointer.Anony, dBHandler, pointer.Lang);
 					}
-					break;
+					break;*/
 				case EPolls.limitedDoodle:
 					try {
 						poll = new LimitedDoodle(chatId, pointer.LastPollId, pollText, pointer.Anony, dBHandler, pointer.Lang);

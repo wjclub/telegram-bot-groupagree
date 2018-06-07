@@ -73,7 +73,7 @@ namespace telegrambotgroupagree {
 			inlineButtonVote,
 			inlineButtonDoodle,
 			inlineButtonBoard,
-			pollTypeDescription,
+			pollTypeDescriptionNoMoreBoard,
 			callbackVotedFor,
 			voteDoesntExist,
 			startMessage,

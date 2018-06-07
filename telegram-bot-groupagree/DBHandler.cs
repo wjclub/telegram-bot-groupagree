@@ -123,16 +123,13 @@ namespace telegrambotgroupagree {
 			return allPolls;
 		}
 
-		public void UpdateInstance(long chatID, int offset, long lastUpdate, long updateCount, long lastSendTime, long sendCount) {
+		public void UpdateInstance(long chatID, int offset, List<DateTime> last30Updates) {
 			connection.Open();
-			MySqlCommand command = connection.CreateCommand(); //TODO Put stuff to database
-			command.CommandText = $"UPDATE instances SET offset = ?offset, last_update = ?last_update, updates_60 = ?updates_60, last_send = ?last_send, send_60 = ?send_60 WHERE chat_id = ?chat_id;";
+			MySqlCommand command = connection.CreateCommand();
+			command.CommandText = $"UPDATE instances SET offset = ?offset, last_30_updates = ?last_30_updates WHERE chat_id = ?chat_id;";
 			command.Parameters.AddWithValue("?chat_id", chatID);
 			command.Parameters.AddWithValue("?offset", offset);
-			command.Parameters.AddWithValue("?last_update", lastUpdate);
-			command.Parameters.AddWithValue("?updates_60", updateCount);
-			command.Parameters.AddWithValue("?last_send", lastSendTime);
-			command.Parameters.AddWithValue("?send_60", sendCount);
+			command.Parameters.AddWithValue("?last_30_updates", last30Updates);
 			command.ExecuteNonQuery();
 			connection.Close();
 		}
@@ -180,7 +177,7 @@ namespace telegrambotgroupagree {
 			int? boardChatId = null, boardPollId = null;
 			boardChatId = int.TryParse(reader["boardChatId"].ToString(), out int temp) ? (int?)temp : null;
 			boardPollId = int.TryParse(reader["boardPollId"].ToString(), out temp) ? (int?)temp : null;
-			return new Pointer(int.Parse(reader["chatId"].ToString()), (EPolls)Enum.Parse(typeof(EPolls), reader["pollType"].ToString()), (ENeedle)Enum.Parse(typeof(ENeedle), reader["needle"].ToString()), (EAnony)Enum.Parse(typeof(EAnony), reader["anony"].ToString()), boardChatId, boardPollId, int.Parse(reader["lastPollId"].ToString()), (Strings.Langs)Enum.Parse(typeof(Strings.Langs), reader["lang"].ToString()));
+			return new Pointer(int.Parse(reader["chatId"].ToString()), (EPolls)Enum.Parse(typeof(EPolls), reader["pollType"].ToString()), (ENeedle)Enum.Parse(typeof(ENeedle), reader["needle"].ToString()), (EAnony)Enum.Parse(typeof(EAnony), reader["anony"].ToString()), boardChatId, boardPollId, int.Parse(reader["lastPollId"].ToString()), (Strings.Langs)Enum.Parse(typeof(Strings.Langs), reader["lang"].ToString()), new List<DateTime>() /*TODO Get LastRequests from DB*/);
 		}
 
 		public void FlushToDB(Strings strings, List<Instance> instances, long currentBotChatID) {

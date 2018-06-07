@@ -29,7 +29,7 @@
 		"inlineButtonDoodle":"Doodle {0}",
 		"inlineButtonBoard":"Board {0}",
 		"inlineButtonLimitedDoodle":"Limited Doodle {0}",
-		"pollTypeDescription":"Please choose from one of the following poll types:\n\n<b>vote</b> - Standard vote, every user can only select one vote option at a time\n\n<b>doodle</b> - Every user can select multiple vote options at a time\n\n<b>limited doodle</b> - Just like doodle, but now you can choose for how many options each user can vote\n\n<b>board</b> - Every user can leave a custom message with up to 120 characters",
+		"pollTypeDescriptionNoMoreBoard":"Please choose from one of the following poll types:\n\n<b>vote</b> - Standard vote, every user can only select one vote option at a time\n\n<b>doodle</b> - Every user can select multiple vote options at a time\n\n<b>limited doodle</b> - Just like doodle, but now you can choose for how many options each user can vote",
 		"callbackVotedFor":"You voted for {0}",
 		"callbackTookBack":"You took you vote for {0} back...",
 		"voteDoesntExist":"This vote doesn't exist anymore... Sorry :O",

@@ -34,24 +34,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.AspNet.WebHooks.Common, Version=1.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebHooks.Common.1.2.1\lib\net45\Microsoft.AspNet.WebHooks.Common.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.AspNet.WebHooks.Custom, Version=1.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebHooks.Custom.1.2.1\lib\net45\Microsoft.AspNet.WebHooks.Custom.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.AspNet.WebHooks.Custom.Api, Version=1.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebHooks.Custom.Api.1.2.1\lib\net45\Microsoft.AspNet.WebHooks.Custom.Api.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.AspNet.WebHooks.Receivers, Version=1.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebHooks.Receivers.1.2.1\lib\net45\Microsoft.AspNet.WebHooks.Receivers.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.AspNet.WebHooks.Receivers.Custom, Version=1.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebHooks.Receivers.Custom.1.2.1\lib\net45\Microsoft.AspNet.WebHooks.Receivers.Custom.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.AspNet.WebHooks.Receivers.Generic, Version=1.2.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebHooks.Receivers.Generic.1.2.1\lib\net45\Microsoft.AspNet.WebHooks.Receivers.Generic.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Formatting, Version=5.2.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
