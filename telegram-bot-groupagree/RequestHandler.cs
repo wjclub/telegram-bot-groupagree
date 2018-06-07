@@ -50,14 +50,14 @@ namespace telegrambotgroupagree {
         }
 
         public UpdateAvailabilityList getInstanceAvailableUpdates(Instance instance) {
-            return getListFromLastUpdatesList(instance.lastUpdates, 30, 25, TimeSpan.FromSeconds(1));
+            return getListFromLastUpdatesList(instance.lastUpdates, max: 30, recommended: 25, TimeSpan.FromSeconds(1));
         }
 
         public UpdateAvailabilityList getInlineMessageAvailableUpdates(string inlineMessageID, Poll poll) {
             return getListFromLastUpdatesList(
                 poll.MessageIds.Find(x => x.inlineMessageId == inlineMessageID).last30Updates,
-                20,
-                15, 
+                max: 20,
+                recommended: 15, 
                 TimeSpan.FromMinutes(1));
         }
 
