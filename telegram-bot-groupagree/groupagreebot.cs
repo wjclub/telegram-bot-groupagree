@@ -731,7 +731,7 @@ namespace telegrambotgroupagree {
 										//new List<InlineKeyboardButton>() { InlineKeyboardButton.Create(String.Format(strings.GetString(Strings.StringsList.inlineButtonBoard), (pointer.PollType == EPolls.board ? "✅" : "☑️")), callbackData: "comm:board") },
 									}
 										};
-										Api.EditMessageText(apikey, strings.GetString(Strings.StringsList.pollTypeDescription), inlineKeyboard, update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId);
+										Api.EditMessageText(apikey, strings.GetString(Strings.StringsList.pollTypeDescriptionNoMoreBoard), inlineKeyboard, update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId);
 										break;
 								}
 							} else {
