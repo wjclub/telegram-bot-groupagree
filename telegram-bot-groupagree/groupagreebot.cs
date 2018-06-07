@@ -755,7 +755,7 @@ namespace telegrambotgroupagree {
 										dBHandler.AddToQueue(poll);
 										Api.AnswerCallbackQuery(apikey, update.CallbackQuery.Id, "Updating...", true);
 									} else if (poll.Closed) {
-										Api.AnswerCallbackQuery(apikey, update.CallbackQuery.Id, strings.GetString(Strings.StringsList.tryVotePollClosed));
+										Api.AnswerCallbackQuery(apikey, update.CallbackQuery.Id, strings.GetString(Strings.StringsList.tryVotePollClosed), showAlert:true);
 									} else {
 										if (poll.GetType() == typeof(LimitedDoodle)) {
 											LimitedDoodle doodle = (LimitedDoodle)poll;

@@ -1,5 +1,5 @@
 #!/bin/bash
 while [ ! -f cancer.wjdummy ]
 do
-	mono telegram-bot-groupagree.exe gabetauser gabetapw groupagreebot_beta
+	mono telegram-bot-groupagree.exe <dbuser> <dbpw> <dbname>
 done

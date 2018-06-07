@@ -265,7 +265,10 @@ namespace telegrambotgroupagree {
 
 		#region RenderInlineKeyboard
 		public virtual InlineKeyboardMarkup RenderInlineKeyboard(List<int> pollVotesCount, Strings strings, bool noApproximation, bool channel = false) {
-            InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup
+			if (Closed) {
+				return new InlineKeyboardMarkup();
+			}
+			InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup
             {
                 InlineKeyboard = new List<List<InlineKeyboardButton>>()
             };
