@@ -43,17 +43,21 @@ namespace telegrambotgroupagree {
 			return false;
 		}
 
+		//If user pressed more than 3 inline buttons in the last minute
         public bool getUserRestricted(Pointer pointer) {
-            if (pointer.LastRequests[2] - pointer.LastRequests[0] > TimeSpan.FromMinutes(1))
-               return true;
-            return false;
+			//TODO Handle empty lastrequests
+            if (pointer.LastRequests[2] - pointer.LastRequests[0] > TimeSpan.FromMinutes(1)) {
+				return true;
+			}
+			return false;
         }
 
         public UpdateAvailabilityList getInstanceAvailableUpdates(Instance instance) {
             return getListFromLastUpdatesList(datesList:instance.last30Updates, max: 30, recommended: 25, cooldown:TimeSpan.FromSeconds(1));
         }
 
-		public UpdateAvailabilityList getInlineMessageAvailableUpdates(string inlineMessageID, Poll poll) => getListFromLastUpdatesList(
+		public UpdateAvailabilityList getInlineMessageAvailableUpdates(string inlineMessageID, Poll poll) 
+			=> getListFromLastUpdatesList(
 				poll.MessageIds.Find(x => x.inlineMessageId == inlineMessageID).last30Updates,
 				max: 20,
 				recommended: 15,

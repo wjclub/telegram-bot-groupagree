@@ -67,7 +67,7 @@ namespace telegrambotgroupagree {
 			return JsonConvert.SerializeObject(BotInfo);
 		}
 
-		public async void Run() {
+		public async Task Run() {
 			while (!System.IO.File.Exists(@"cancer.wjdummy") && instances != null && instances.Count > 0) {
 				Instance currentInstance = instances[Task.WaitAny(instances.Select(x => x.update).ToArray())];
 				Update[] updates = await currentInstance.update;

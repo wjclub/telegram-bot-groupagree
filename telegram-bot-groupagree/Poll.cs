@@ -279,7 +279,7 @@ namespace telegrambotgroupagree {
                 InlineKeyboard = new List<List<InlineKeyboardButton>>()
             };
             if (channel) {
-				inlineKeyboard.InlineKeyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.buttonVote), callbackData:"comm:url:" + Cryptography.Encrypt("vote:" + ChatId + ":" + PollId, Globals.GlobalOptions.Apikey)) });
+				inlineKeyboard.InlineKeyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.buttonVote), url: "https://telegram.me/" + Globals.GlobalOptions.Botname + "?start=" + Cryptography.Encrypt("vote:" + ChatId + ":" + PollId, Globals.GlobalOptions.Apikey)) });
 			} else {
 				int optionCount = 0;
 				foreach (string optionTitle in PollVotes.Keys) {
@@ -437,11 +437,11 @@ namespace telegrambotgroupagree {
 			};
 			if (!closed) {
 				inline.InlineKeyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.publish), switchInlineQuery: pollText) });
-				/*if (pollType != EPolls.board) {
+				/*if (pollType != EPolls.board) {*/
 					inline.InlineKeyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.publishWithLink), switchInlineQuery: "$c:" + pollText) });
 					inline.InlineKeyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.buttonVote), callbackData: "comm:iwannavote:" + Cryptography.Encrypt(chatId+ ":" + pollId, apikey)),
 						                                                       InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.commPageRefresh), callbackData:"comm:update:" + chatId + ":" + pollId)});
-				} else {*/
+				/*} else {
 					inline.InlineKeyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.buttonVote), callbackData: "comm:url" + Cryptography.Encrypt("board:" + chatId + ":" + pollId, apikey)),
 																			InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.commPageRefresh), callbackData:"comm:update:" + chatId + ":" + pollId)});
 				/*}*/
@@ -522,11 +522,14 @@ namespace telegrambotgroupagree {
 			Regex regex = new Regex("<[^>]*>"); 
 			if (currentText == null || regex.Replace(content.Text, "") != regex.Replace(currentText, "") || voteButtonPressed) {
 				if (messageId != null) {
+					//User voted in private chat and is not the poll owner
 					if (newChatId != null && newChatId != this.chatId) {
 						Api.EditMessageText(apikey, strings.GetString(Strings.StringsList.votedSuccessfully), null, newChatId, messageId);
 						getsAVote = true;
+					//User requests to vote on his own poll
 					} else if (voteButtonPressed) {
 						Api.EditMessageText(apikey, content.Text, content.InlineKeyboard, this.chatId, messageId);
+					//Poll owner voted in private chat
 					} else {
 						Api.EditMessageText(apikey, content.Text, GenerateUserMarkup(strings, apikey), this.chatId, messageId);
 						getsAVote = true;
@@ -557,7 +560,7 @@ namespace telegrambotgroupagree {
 		public InlineQueryResultArticle Result(Strings strings, string apikey, bool channel) {
 			if (closed)
 				return null;
-			ContentParts content = GetContent(strings, apikey, channel);
+			ContentParts content = GetContent(strings, apikey, noApproximation:true /*TODO Request handler here*/, channel:channel);
 			return InlineQueryResultArticle.Create(chatId + ":" + pollId, content.InlineTitle, InputTextMessageContent.Create(content.Text, disableWebPagePreview: true), content.InlineKeyboard, description: content.InlineDescription, thumbUrl:"https://wjclub.capella.uberspace.de/groupagreebot/res/" + pollType.ToString() + "_" + anony.ToString() + ".png", thumbWidth:256, thumbHeight:256);
 		}
 

@@ -18,13 +18,11 @@ namespace telegrambotgroupagree {
 			}
 			GroupAgreeBot groupagreebot = new GroupAgreeBot(dbname, dbuser, dbpw);
 			try {
-				groupagreebot.Run();
+				groupagreebot.Run().Wait();
 			} catch (Exception e) {
 				Notifications.log(e.ToString() + "\n\n\n-------- Context --------\n\n" + CustomJsonStuff.JsonEnhancer.FormatJson(JsonConvert.SerializeObject(new { groupagreebot.CurrentUpdate , groupagreebot.CurrentPointer}, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter() }})));
 			}
-			Notifications.log("Weird exit...");
-			//Console.WriteLine(" Press any key...");<
-			//Console.ReadKey();
+			Notifications.log("Last line reached...");
 		}
 	}
 }
