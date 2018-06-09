@@ -511,11 +511,13 @@ namespace telegrambotgroupagree {
 		}
 
 		public void Update(List<Instance> instances, long currentBotChatID, Strings strings, bool noApproximation, int? messageId = null, string currentText = null, long? newChatId = null, bool vote = false) {
-			bool getsAVote = messageId == null;
+			bool getsAVote = messageId == null; //If a user pressed the update button, the messageId is not null (so nobody voted)
 			string apikey = instances.Find(x => x.chatID == currentBotChatID).apikey;
-			ContentParts content = GetContent(strings, apikey, noApproximation:noApproximation);
-			ContentParts contentChannel = GetContent(strings, apikey, true);
-			Regex regex = new Regex("<[^>]*>");
+			ContentParts content = GetContent(strings, apikey, noApproximation:noApproximation); //Fully fledged poll
+			ContentParts contentChannel = GetContent(strings, apikey, noApproximation:noApproximation, channel:true); //Has only link buttons
+			Regex regex = new Regex("<[^>]*>"); //Filters HTML-Tags from the new message to compare with the old message text (to reduce unecessary updates)
+
+
 			if (currentText == null || regex.Replace(content.Text, "") != regex.Replace(currentText, "") || vote) {
 				if (messageId != null) {
 					if (newChatId != null && newChatId != chatId) {

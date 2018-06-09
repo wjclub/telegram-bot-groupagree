@@ -47,7 +47,7 @@ namespace telegrambotgroupagree {
 			} catch (Exception) {
 				return DecryptFromPw(value, password);
 			}
-		}	
+		}
 
 		public static string DecryptFromPw(string value, string password) {
 			return DecryptFromPw<AesManaged>(value, password);
