@@ -510,33 +510,35 @@ namespace telegrambotgroupagree {
 			Api.EditMessageText(apikey, content.Text, content.InlineKeyboard, chatId, messageID);
 		}
 
-		public void Update(List<Instance> instances, long currentBotChatID, Strings strings, bool noApproximation, int? messageId = null, string currentText = null, long? newChatId = null, bool vote = false) {
-			bool getsAVote = messageId == null; //If a user pressed the update button, the messageId is not null (so nobody voted)
+		public void Update(List<Instance> instances, long currentBotChatID, Strings strings, bool noApproximation, int? messageId = null, string currentText = null, long? newChatId = null, bool voteButtonPressed = false) {
+			//If a user pressed the update button, the messageId is not null (so nobody voted)
+			bool getsAVote = messageId == null; 
 			string apikey = instances.Find(x => x.chatID == currentBotChatID).apikey;
-			ContentParts content = GetContent(strings, apikey, noApproximation:noApproximation); //Fully fledged poll
-			ContentParts contentChannel = GetContent(strings, apikey, noApproximation:noApproximation, channel:true); //Has only link buttons
-			Regex regex = new Regex("<[^>]*>"); //Filters HTML-Tags from the new message to compare with the old message text (to reduce unecessary updates)
-
-
-			if (currentText == null || regex.Replace(content.Text, "") != regex.Replace(currentText, "") || vote) {
+			//Fully fledged poll
+			ContentParts content = GetContent(strings, apikey, noApproximation:noApproximation);
+			//Has only link buttons
+			ContentParts contentChannel = GetContent(strings, apikey, noApproximation:noApproximation, channel:true);
+			//Filters HTML-Tags from the new message to compare with the old message text (to reduce unecessary updates)
+			Regex regex = new Regex("<[^>]*>"); 
+			if (currentText == null || regex.Replace(content.Text, "") != regex.Replace(currentText, "") || voteButtonPressed) {
 				if (messageId != null) {
-					if (newChatId != null && newChatId != chatId) {
+					if (newChatId != null && newChatId != this.chatId) {
 						Api.EditMessageText(apikey, strings.GetString(Strings.StringsList.votedSuccessfully), null, newChatId, messageId);
 						getsAVote = true;
-					} else if (vote) {
-						Api.EditMessageText(apikey, content.Text, content.InlineKeyboard, chatId, messageId);
+					} else if (voteButtonPressed) {
+						Api.EditMessageText(apikey, content.Text, content.InlineKeyboard, this.chatId, messageId);
 					} else {
-						Api.EditMessageText(apikey, content.Text, GenerateUserMarkup(strings, apikey), chatId, messageId);
+						Api.EditMessageText(apikey, content.Text, GenerateUserMarkup(strings, apikey), this.chatId, messageId);
 						getsAVote = true;
 					}
 				}
+				//Refreshes all messages shared via inline mode
 				if (getsAVote) {
 					foreach (MessageID messageID in messageIds) {
 						string inlineApiKey = instances.Find(x => x.chatID == messageID.botChatID).apikey;
-						if (messageID.channel)
-							Api.EditMessageText(inlineApiKey, contentChannel.Text, contentChannel.InlineKeyboard, inlineMessageId: messageID.inlineMessageId);
-						else
-							Api.EditMessageText(inlineApiKey, content.Text, content.InlineKeyboard, inlineMessageId: messageID.inlineMessageId);
+						ContentParts contentToSend = messageID.channel ? contentChannel : content;
+						//TODO Catch deleted messages
+						Api.EditMessageText(inlineApiKey, contentToSend.Text, contentToSend.InlineKeyboard, inlineMessageId: messageID.inlineMessageId);
 					}
 				}
 			}

@@ -554,7 +554,7 @@ namespace telegrambotgroupagree {
 									case "nodelete":
 										string[] splitNoDeleteData = command.Split(':');
 									if (update.CallbackQuery.From.Id == int.Parse(splitNoDeleteData[1]))
-										pollContainer.GetPoll(int.Parse(splitNoDeleteData[1]), int.Parse(splitNoDeleteData[2])).Update(instances, currentInstance.chatID, strings, noApproximation: true, messageId:update.CallbackQuery.Message.MessageId, currentText:"", newChatId:update.CallbackQuery.Message.Chat.Id, vote:false);
+										pollContainer.GetPoll(int.Parse(splitNoDeleteData[1]), int.Parse(splitNoDeleteData[2])).Update(instances, currentInstance.chatID, strings, noApproximation: true, messageId:update.CallbackQuery.Message.MessageId, currentText:"", newChatId:update.CallbackQuery.Message.Chat.Id, voteButtonPressed:false);
 										break;
 									case "deleteallsure":
 										Api.EditMessageText(apikey, strings.GetString(Strings.StringsList.seriouslySureDeleteEverything), new InlineKeyboardMarkup {
@@ -678,7 +678,7 @@ namespace telegrambotgroupagree {
 									case "iwannavote":
 										try {
 											string[] splitVoteData = Cryptography.Decrypt(command.Substring(11), apikey).Split(':');
-											pollContainer.GetPoll(int.Parse(splitVoteData[0]), int.Parse(splitVoteData[1])).Update(instances, currentInstance.chatID, strings, true, update.CallbackQuery.Message.MessageId, update.CallbackQuery.Message.Text, vote: true);
+											pollContainer.GetPoll(int.Parse(splitVoteData[0]), int.Parse(splitVoteData[1])).Update(instances, currentInstance.chatID, strings, true, update.CallbackQuery.Message.MessageId, update.CallbackQuery.Message.Text, voteButtonPressed: true);
 										} catch (System.FormatException) {
 											string[] splitVoteData = command.Split(':');
 											pollContainer.GetPoll(int.Parse(splitVoteData[1]), int.Parse(splitVoteData[2])).Update(instances, currentInstance.chatID, strings, true, update.CallbackQuery.Message.MessageId, "", update.CallbackQuery.Message.Chat.Id);
