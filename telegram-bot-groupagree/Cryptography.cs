@@ -11,6 +11,7 @@ namespace telegrambotgroupagree {
 		private static string _hash = "SHA1";
 		private static string _salt = "sdfgh67876asdkjh"; // Random
 		private static string _vector = "tkx72öl8d9098s56"; // Random
+		private static string _stuffing = "lkr3lokjaf98dsflkj";
 		#endregion
 
 		public static string Encrypt(string value, string password) {
@@ -23,7 +24,7 @@ namespace telegrambotgroupagree {
 			byte[] valueBytes = Encoding.UTF8.GetBytes(value);
 			byte[] encrypted;
 			using (T cipher = new T()) {
-				PasswordDeriveBytes _passwordBytes = new PasswordDeriveBytes(password, saltBytes, _hash, _iterations);
+				PasswordDeriveBytes _passwordBytes = new PasswordDeriveBytes(_stuffing, saltBytes, _hash, _iterations);
 				byte[] keyBytes = _passwordBytes.GetBytes(_keySize / 8);
 				cipher.Mode = CipherMode.CBC;
 				using (ICryptoTransform encryptor = cipher.CreateEncryptor(keyBytes, vectorBytes)) {
@@ -39,14 +40,24 @@ namespace telegrambotgroupagree {
 			}
 			return HttpServerUtility.UrlTokenEncode(encrypted);
 		}
+
 		public static string Decrypt(string value, string password) {
-			return Decrypt<AesManaged>(value, password);
+			try {
+				return DecryptFromPw(value, _stuffing);
+			} catch (Exception) {
+				return DecryptFromPw(value, password);
+			}
+		}	
+
+		public static string DecryptFromPw(string value, string password) {
+			return DecryptFromPw<AesManaged>(value, password);
 		}
-		public static string Decrypt<T>(string value, string password) where T : SymmetricAlgorithm, new() {
+
+		public static string DecryptFromPw<T>(string value, string password) where T : SymmetricAlgorithm, new() {
 			byte[] vectorBytes = Encoding.ASCII.GetBytes(_vector);
 			byte[] saltBytes = Encoding.ASCII.GetBytes(_salt);
 			byte[] valueBytes = null;
-			try {
+			try { //TODO Review this
 				valueBytes = Convert.FromBase64String(value);
 			} catch(Exception) {
 				valueBytes = HttpServerUtility.UrlTokenDecode(value);

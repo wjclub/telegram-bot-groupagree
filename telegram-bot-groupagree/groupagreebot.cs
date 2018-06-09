@@ -11,8 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace telegrambotgroupagree {
-	public class GroupAgreeBot
-	{
+	public class GroupAgreeBot {
 		private List<Instance> instances;
 		private List<Task<Update[]>> instanceTasks;
 		private PointerContainer pointerContainer;
@@ -580,7 +579,7 @@ namespace telegrambotgroupagree {
 										break;
 									case "update":
 										string[] splitUpdateData = command.Split(':');
-									pollContainer.GetPoll(int.Parse(splitUpdateData[1]), int.Parse(splitUpdateData[2])).Update(instances, currentInstance.chatID, strings, noApproximation:true, messageId:update.CallbackQuery.Message.MessageId, currentText:update.CallbackQuery.Message.Text);
+										pollContainer.GetPoll(int.Parse(splitUpdateData[1]), int.Parse(splitUpdateData[2])).Update(instances, currentInstance.chatID, strings, noApproximation:true, messageId:update.CallbackQuery.Message.MessageId, currentText:update.CallbackQuery.Message.Text);
 										break;
 									case "options": {
 										string[] splitOptionsData = command.Split(':');
