@@ -27,6 +27,7 @@ namespace telegrambotgroupagree {
 		};
 
 		public static Dictionary<string, Langs> IeftLookupTable = new Dictionary<string, Langs> {
+			{ "C" , Langs.none},
 			{ "en" , Langs.en },
 			{ "de" , Langs.de },
 			{ "it" , Langs.it },
