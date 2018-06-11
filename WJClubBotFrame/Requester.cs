@@ -15,7 +15,7 @@ namespace WJClubBotFrame {
 		/// </summary>
 		/// <param name="apikey">Telegram Bot Key</param>
 		/// <param name="jsonToSend">Request containing a Bot API method and its parameters</param>
-		/// <returns>I return the (prety undocumented)[not my fault] Response Type to that request</returns>
+		/// <returns>I return the (pretty undocumented)[not my fault] Response Type to that request</returns>
 		public static async Task<Response> MakeRequestNonAsync(string apikey, string jsonToSend) { //TODO Rename
 			using (HttpClient client = new HttpClient()) {
 				client.Timeout = TimeSpan.FromMinutes(1);
