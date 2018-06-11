@@ -1,10 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 using System.Net.Http;
-using System.IO;
 using System.Threading.Tasks;
-using CustomJsonStuff;
-using WJClubBotFrame.Types;
 
 namespace WJClubBotFrame {
 	public class Requester {
@@ -20,6 +17,9 @@ namespace WJClubBotFrame {
 				StringContent content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
 				HttpResponseMessage response = await client.PostAsync(url, content);
 				responseString = await response.Content.ReadAsStringAsync();
+				if (!response.IsSuccessStatusCode) {
+					Notifications.log(CustomJsonStuff.JsonEnhancer.FormatJson(responseString));
+				}
 			}
 			if (!JsonConvert.DeserializeObject<WJClubBotFrame.Types.Response>(responseString).Ok) {
 				Notifications.log(responseString);

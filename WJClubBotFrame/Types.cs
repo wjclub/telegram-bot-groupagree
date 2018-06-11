@@ -11,6 +11,15 @@ namespace WJClubBotFrame.Types {
 		public string Description;
 		[JsonProperty(PropertyName = "result",  Required = Required.Always)]
 		public Update[] Result;
+		[JsonProperty(PropertyName = "parameters", Required = Required.Default)]
+		public ResponseParameters Parameters;
+	}
+
+	public class ResponseParameters {
+		[JsonProperty(PropertyName = "migrate_to_chat_id", Required = Required.Default)]
+		public long MigrateToChatID;
+		[JsonProperty(PropertyName = "retry_after", Required = Required.Default)]
+		public int RetryAfter;
 	}
 
 	public class GetMeResponse {

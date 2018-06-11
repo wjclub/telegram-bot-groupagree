@@ -46,7 +46,7 @@ namespace WJClubBotFrame.Methods {
 			}
 		}
 
-		public static Update[] GetUpdates(string apikey, int offset) {
+		/*public static Update[] GetUpdates(string apikey, int offset) {
 #if DEBUG
 			Console.WriteLine("\nGetting updates [" + DateTime.Now + "]...\n");
 #endif
@@ -67,7 +67,7 @@ namespace WJClubBotFrame.Methods {
 			}
 			//Console.WriteLine(JsonEnhancer.FormatJson(json));
 			return JsonConvert.DeserializeObject<Response>(json).Result;
-		}
+		}*/
 
 		public static async Task<Update[]> GetUpdatesAsync(string apikey, int offset) {
 			string json = null;
