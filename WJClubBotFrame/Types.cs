@@ -4,13 +4,16 @@ namespace WJClubBotFrame.Types {
 	using Newtonsoft.Json;
 	using System.ComponentModel;
 
+	/// <summary>
+	/// Contains the response to a request from a Telegram endpoint, Result has to be deserialized individually
+	/// </summary>
 	public class Response {
 		[JsonProperty(PropertyName = "ok",  Required = Required.Always)]
 		public bool Ok;
 		[JsonProperty(PropertyName = "description",  Required = Required.Default)]
 		public string Description;
-		[JsonProperty(PropertyName = "result",  Required = Required.Always)]
-		public Update[] Result;
+		[JsonProperty(PropertyName = "result",  Required = Required.Default)]
+		public string Result;
 		[JsonProperty(PropertyName = "parameters", Required = Required.Default)]
 		public ResponseParameters Parameters;
 	}
@@ -20,24 +23,6 @@ namespace WJClubBotFrame.Types {
 		public long MigrateToChatID;
 		[JsonProperty(PropertyName = "retry_after", Required = Required.Default)]
 		public int RetryAfter;
-	}
-
-	public class GetMeResponse {
-		[JsonProperty(PropertyName = "ok",  Required = Required.Always)]
-		public bool Ok;
-		[JsonProperty(PropertyName = "description",  Required = Required.Default)]
-		public string Description;
-		[JsonProperty(PropertyName = "result",  Required = Required.Always)]
-		public User Result;
-	}
-
-	public class SendMessageResponse {
-		[JsonProperty(PropertyName = "ok",  Required = Required.Always)]
-		public bool Ok;
-		[JsonProperty(PropertyName = "description",  Required = Required.Default)]
-		public string Description;
-		[JsonProperty(PropertyName = "result",  Required = Required.Always)]
-		public Message Result;
 	}
 
 	public class Update {

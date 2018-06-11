@@ -10,32 +10,19 @@ using System.Net.Http;
 
 namespace WJClubBotFrame.Methods {
 	public class Api {
-		public static User GetMe(string apikey) {
-#if DEBUG
-			Console.WriteLine("\nGetting me [" + DateTime.Now + "]...\n");
-#endif
-			string json;
-			{
-				HttpWebRequest client = (HttpWebRequest)WebRequest.Create("https://api.telegram.org/bot" + apikey + "/getMe");
-				try {
-					Stream data = client.GetResponse().GetResponseStream();
-					using (StreamReader reader = new StreamReader(data)) {
-						json = reader.ReadToEnd();
-					}
-				} catch (WebException e) {
-					Notifications.log(e.ToString());
-					return null;
-				}
-			}
-#if DEBUG
-			Console.WriteLine(JsonEnhancer.FormatJson(json));
-#endif
-			GetMeResponse response = JsonConvert.DeserializeObject<GetMeResponse>(json);
-			return response.Result;
+		public static async Task<User> GetMe(string apikey) {
+			string json = JsonConvert.SerializeObject(new {
+				method = "getMe",
+			}, new JsonSerializerSettings {
+				NullValueHandling = NullValueHandling.Ignore,
+				Converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter() }
+			});
+			Response response = await Requester.MakeRequestNonAsync(apikey, json);
+			return JsonConvert.DeserializeObject<User>(response.Result);
 		}
 
 		public static void DeleteWebhook(string apikey) {
-			HttpWebRequest client = (HttpWebRequest)WebRequest.Create("https://api.telegram.org/bot" + apikey + "/setWebhook?url=");
+			HttpWebRequest client = (HttpWebRequest)WebRequest.Create($"https://api.telegram.org/bot{apikey}/deleteWebhook");
 			try {
 				Stream data = client.GetResponse().GetResponseStream();
 				using (StreamReader reader = new StreamReader(data)) {
@@ -46,29 +33,6 @@ namespace WJClubBotFrame.Methods {
 			}
 		}
 
-		/*public static Update[] GetUpdates(string apikey, int offset) {
-#if DEBUG
-			Console.WriteLine("\nGetting updates [" + DateTime.Now + "]...\n");
-#endif
-			string json;
-			{ //TODO Remove this
-				HttpWebRequest client = (HttpWebRequest)WebRequest.Create("https://api.telegram.org/bot" + apikey + "/getUpdates?timeout=0&offset=" + offset);
-				client.Timeout = 60000;
-				try {
-					Stream data = client.GetResponse().GetResponseStream();
-					using (StreamReader reader = new StreamReader(data)) {
-						json = reader.ReadToEnd();
-						reader.Close();
-					}
-				} catch (WebException e) {
-					Notifications.log(e.ToString());
-					return null;
-				}
-			}
-			//Console.WriteLine(JsonEnhancer.FormatJson(json));
-			return JsonConvert.DeserializeObject<Response>(json).Result;
-		}*/
-
 		public static async Task<Update[]> GetUpdatesAsync(string apikey, int offset) {
 			string json = null;
 			int timeoutSeconds = 60;
@@ -77,7 +41,7 @@ namespace WJClubBotFrame.Methods {
 				HttpResponseMessage response = await client.GetAsync(url);
 				json = await response.Content.ReadAsStringAsync();
 			}
-			return JsonConvert.DeserializeObject<Response>(json).Result;
+			return JsonConvert.DeserializeObject<Update[]>(JsonConvert.DeserializeObject<Response>(json).Result);
 		}
 
 		public static void SendMessage(string apikey, long chatId, string text, bool noWeb = true, bool silent = false, int? replyToId = null, ReplyMarkup replyMarkup = null, bool messageId = false) {
