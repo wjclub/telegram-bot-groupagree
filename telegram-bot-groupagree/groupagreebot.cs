@@ -38,7 +38,8 @@ namespace telegrambotgroupagree {
 				User currentBotUser;
 				try {
 					Api.DeleteWebhook(currentLoopInstance.apikey);
-					if ((currentBotUser = Api.GetMe(currentLoopInstance.apikey)) == null) {
+					currentBotUser = Api.GetMe(currentLoopInstance.apikey);
+					if (currentBotUser == null) {
 						continue;
 					}
 					currentUpdate = Api.GetUpdatesAsync(currentLoopInstance.apikey, currentLoopInstance.offset);
@@ -69,7 +70,9 @@ namespace telegrambotgroupagree {
 
 		public async Task Run() {
 			while (!System.IO.File.Exists(@"cancer.wjdummy") && instances != null && instances.Count > 0) {
-				Instance currentInstance = instances[Task.WaitAny(instances.Select(x => x.update).ToArray())];
+				//TODO Check if this worked
+				Task<Update[]> finishedGetUpdatesTask = await Task<Update[]>.WhenAny(instances.Select(x => x.update).ToArray());
+				Instance currentInstance = instances.Find(x => x.update == finishedGetUpdatesTask);
 				Update[] updates = await currentInstance.update;
 				string apikey = currentInstance.apikey;
 				int offset = currentInstance.offset;
@@ -82,10 +85,11 @@ namespace telegrambotgroupagree {
 						dBHandler.UpdateInstance(currentInstance.chatID, currentInstance.offset, currentInstance.last30Updates);
 						if (update.Message != null) {
 							Pointer pointer = pointerContainer.GetPointer(update.Message.From.Id, update.Message.From.LanguageCode);
-							if (pointer != null)
+							if (pointer != null) {
 								strings.SetLanguage(pointer.Lang);
-							else
+							} else {
 								strings.SetLanguage(Strings.Langs.none);
+							}
 							if (update.Message.Text != null) {
 								if (pointer == null && !update.Message.Text.StartsWith("/start", StringComparison.CurrentCulture)) {
 									Api.SendMessage(apikey, update.Message.Chat.Id, strings.GetString(Strings.StringsList.setupPlease));
