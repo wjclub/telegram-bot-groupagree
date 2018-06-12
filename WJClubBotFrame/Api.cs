@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Net;
-using System.IO;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using WJClubBotFrame.Types;
-using CustomJsonStuff;
 using System.Threading.Tasks;
 using System.Net.Http;
 
@@ -36,7 +34,20 @@ namespace WJClubBotFrame.Methods {
 			int timeoutSeconds = 60;
 			using (HttpClient client = new HttpClient { Timeout = TimeSpan.FromSeconds(timeoutSeconds) }) {
 				string url = $"https://api.telegram.org/bot{apikey}/getUpdates?timeout={timeoutSeconds}&offset={offset}";
-				HttpResponseMessage response = await client.GetAsync(url);
+				HttpResponseMessage response;
+				System.Threading.CancellationTokenSource cancellationTokenSource = new System.Threading.CancellationTokenSource();
+				try {
+					response = await client.GetAsync(url, cancellationToken:cancellationTokenSource.Token);
+				} catch (WebException ex) {
+					Notifications.log($"GetUpdatesAsync WebException for URL: {url}");
+					throw;
+				} catch (TaskCanceledException ex) {
+					if (ex.CancellationToken == cancellationTokenSource.Token) {
+						throw;
+					} else {
+						return null;
+					}
+				}
 				string json = await response.Content.ReadAsStringAsync();
 				return JsonConvert.DeserializeObject<Update[]>(JsonConvert.DeserializeObject<Response>(json).Result);
 			}
