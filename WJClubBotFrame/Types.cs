@@ -12,8 +12,10 @@ namespace WJClubBotFrame.Types {
 		public bool Ok;
 		[JsonProperty(PropertyName = "description",  Required = Required.Default)]
 		public string Description;
+		//TODO fix this this is a weird workaround
 		[JsonProperty(PropertyName = "result",  Required = Required.Default)]
-		public string Result;
+		public object ResultObject;
+		public string Result => JsonConvert.SerializeObject(ResultObject);
 		[JsonProperty(PropertyName = "parameters", Required = Required.Default)]
 		public ResponseParameters Parameters;
 	}

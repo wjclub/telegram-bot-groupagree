@@ -10,7 +10,7 @@ using System.Net.Http;
 
 namespace WJClubBotFrame.Methods {
 	public class Api {
-		public static async Task<User> GetMe(string apikey) {
+		public static async Task<User> GetMeAsync(string apikey) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "getMe",
 			}, new JsonSerializerSettings {
@@ -18,73 +18,86 @@ namespace WJClubBotFrame.Methods {
 				Converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter() }
 			});
 			Response response = await Requester.MakeRequestNonAsync(apikey, json);
-			return JsonConvert.DeserializeObject<User>(response.Result);
-		}
-
-		public static void DeleteWebhook(string apikey) {
-			HttpWebRequest client = (HttpWebRequest)WebRequest.Create($"https://api.telegram.org/bot{apikey}/deleteWebhook");
-			try {
-				Stream data = client.GetResponse().GetResponseStream();
-				using (StreamReader reader = new StreamReader(data)) {
-					reader.ReadToEnd();
-				}
-			} catch (WebException e) {
-				Notifications.log(e.ToString());
+			if (response.Ok) {
+				return JsonConvert.DeserializeObject<User>(response.Result);
+			} else {
+				return null; //TODO Rethink this, maybe throw custom exceptions?
 			}
 		}
 
+		public static async Task<bool> DeleteWebhookAsync(string apikey) {
+			//TODO Is this fine?
+			//This is fine
+			//Ay hope
+			return (await Requester.MakeRequestNonAsync(apikey, JsonConvert.SerializeObject(new { method = "deleteWebhook" }))).Ok;
+		}
+
 		public static async Task<Update[]> GetUpdatesAsync(string apikey, int offset) {
-			string json = null;
 			int timeoutSeconds = 60;
 			using (HttpClient client = new HttpClient { Timeout = TimeSpan.FromSeconds(timeoutSeconds) }) {
 				string url = $"https://api.telegram.org/bot{apikey}/getUpdates?timeout={timeoutSeconds}&offset={offset}";
 				HttpResponseMessage response = await client.GetAsync(url);
-				json = await response.Content.ReadAsStringAsync();
+				string json = await response.Content.ReadAsStringAsync();
+				return JsonConvert.DeserializeObject<Update[]>(JsonConvert.DeserializeObject<Response>(json).Result);
 			}
-			return JsonConvert.DeserializeObject<Update[]>(JsonConvert.DeserializeObject<Response>(json).Result);
 		}
 
-		public static void SendMessage(string apikey, long chatId, string text, bool noWeb = true, bool silent = false, int? replyToId = null, ReplyMarkup replyMarkup = null, bool messageId = false) {
+		public static async Task<Message> SendMessageAsync(string apikey, long chatID, string messageText, bool disableWebPagePreview = true, bool disableNotification = false, int? replyToMessageID = null, ReplyMarkup replyMarkup = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "sendMessage",
-				chat_id = chatId,
-				text = text,
+				chat_id = chatID,
+				text = messageText,
 				parse_mode = "HTML",
-				disable_web_page_preview = noWeb,
-				disable_notification = silent,
-				reply_to_message_id = replyToId,
+				disable_web_page_preview = disableWebPagePreview,
+				disable_notification = disableNotification,
+				reply_to_message_id = replyToMessageID,
 				reply_markup = replyMarkup,
 			}, new JsonSerializerSettings {
 				NullValueHandling = NullValueHandling.Ignore, Converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter() }
 			});
-			Requester.MakeRequestAsync(apikey, json, messageId);
+			Response response = await Requester.MakeRequestNonAsync(apikey, json);
+			if (response.Ok) {
+				return JsonConvert.DeserializeObject<Message>(response.Result);
+			} else {
+				return null; //TODO Look above
+			}
 		}
 
-		public static void ForwardMessage(string apikey, long chatId, long fromChatId, int messageId, bool silent = false) {
+		public static async Task<Message> ForwardMessage(string apikey, long chatID, long fromChatID, int messageID, bool disableNotification = false) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "forwardMessage",
-				chat_id = chatId,
-				from_chat_id = fromChatId,
-				message_id = messageId,
-				disable_notification = silent,
+				chat_id = chatID,
+				from_chat_id = fromChatID,
+				message_id = messageID,
+				disable_notification = disableNotification,
 			});
-			Requester.MakeRequestAsync(apikey, json);
+			Response response = await Requester.MakeRequestNonAsync(apikey, json);
+			if (response.Ok) {
+				return JsonConvert.DeserializeObject<Message>(response.Result);
+			} else {
+				return null; //TODO Look above
+			}
 		}
 
-		public static void SendPhoto(string apikey, long chatId, string photo, string caption, bool silent = false, int? replyToId = null, ReplyKeyboardMarkup replyMarkup = null) {
+		public static async Task<Message> SendPhoto(string apikey, long chatID, string photo, string caption, bool disableNotification = false, int? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "sendPhoto",
-				chat_id = chatId,
+				chat_id = chatID,
 				photo = photo,
 				caption = caption,
-				disable_notification = silent,
-				reply_to_message_id = replyToId,
+				disable_notification = disableNotification,
+				reply_to_message_id = replyToMessageID,
 				reply_markup = replyMarkup,
 			}, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter() } });
-			Requester.MakeRequestAsync(apikey, json);
+			Response response = await Requester.MakeRequestNonAsync(apikey, json);
+			if (response.Ok) {
+				return JsonConvert.DeserializeObject<Message>(response.Result);
+			} else {
+				return null; //TODO Look above
+			}
 		}
 
-		public static void SendAudio(string apikey, long chatId, string audio, int? duration = null, string performer = null, string title = null, bool silent = false, int? replyToId = null, ReplyKeyboardMarkup replyMarkup = null) {
+		public static async Task<Message> SendAudio(string apikey, long chatId, string audio, int? duration = null, string performer = null, string title = null, bool silent = false, int? replyToId = null, ReplyKeyboardMarkup replyMarkup = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "sendAudio",
 				chat_id = chatId,
@@ -96,93 +109,128 @@ namespace WJClubBotFrame.Methods {
 				reply_to_message_id = replyToId,
 				reply_markup = replyMarkup,
 			}, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter() } });
-			Requester.MakeRequestAsync(apikey, json);
+			Response response = await Requester.MakeRequestNonAsync(apikey, json);
+			if (response.Ok) {
+				return JsonConvert.DeserializeObject<Message>(response.Result);
+			} else {
+				return null; //TODO Look above
+			}
 		}
 
-		public static void SendDocument(string apikey, long chatId, string document, string caption, bool silent = false, int? replyToId = null, ReplyKeyboardMarkup replyMarkup = null) {
+		public static async Task<Message> SendDocument(string apikey, long chatID, string document, string caption, bool disableNotification = false, int? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "sendDocument",
-				chat_id = chatId,
+				chat_id = chatID,
 				document = document,
 				caption = caption,
-				disable_notification = silent,
-				reply_to_message_id = replyToId,
+				disable_notification = disableNotification,
+				reply_to_message_id = replyToMessageID,
 				reply_markup = replyMarkup,
 			}, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter() } });
-			Requester.MakeRequestAsync(apikey, json);
+			Response response = await Requester.MakeRequestNonAsync(apikey, json);
+			if (response.Ok) {
+				return JsonConvert.DeserializeObject<Message>(response.Result);
+			} else {
+				return null; //TODO Look above
+			}
 		}
 
-		public static void SendSticker(string apikey, long chatId, string sticker, bool silent = false, int? replyToId = null, ReplyKeyboardMarkup replyMarkup = null) {
+		public static async Task<Message> SendSticker(string apikey, long chatID, string sticker, bool disableNotification = false, int? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "sendSticker",
-				chat_id = chatId,
+				chat_id = chatID,
 				sticker = sticker,
-				disable_notification = silent,
-				reply_to_message_id = replyToId,
+				disable_notification = disableNotification,
+				reply_to_message_id = replyToMessageID,
 				reply_markup = replyMarkup,
 			}, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter() } });
-			Requester.MakeRequestAsync(apikey, json);
+			Response response = await Requester.MakeRequestNonAsync(apikey, json);
+			if (response.Ok) {
+				return JsonConvert.DeserializeObject<Message>(response.Result);
+			} else {
+				return null; //TODO Look above
+			}
 		}
 
-		public static void SendVideo(string apikey, long chatId, string video, int? duration = null, int? width = null, int? height = null, string caption = null, bool silent = false, int? replyToId = null, ReplyKeyboardMarkup replyMarkup = null) {
+		public static async Task<Message> SendVideo(string apikey, long chatID, string video, int? duration = null, int? width = null, int? height = null, string caption = null, bool disableNotifications = false, int? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "sendVideo",
-				chat_id = chatId,
+				chat_id = chatID,
 				video = video,
 				duration = duration,
 				width = width,
 				height = height,
 				caption = caption,
-				disable_notification = silent,
-				reply_to_message_id = replyToId,
+				disable_notification = disableNotifications,
+				reply_to_message_id = replyToMessageID,
 				reply_markup = replyMarkup,
 			}, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter() } });
-			Requester.MakeRequestAsync(apikey, json);
+			Response response = await Requester.MakeRequestNonAsync(apikey, json);
+			if (response.Ok) {
+				return JsonConvert.DeserializeObject<Message>(response.Result);
+			} else {
+				return null; //TODO Look above
+			}
 		}
 
-		public static void SendVoice(string apikey, long chatId, string voice, int? duration = null, bool silent = false, int? replyToId = null, ReplyKeyboardMarkup replyMarkup = null) {
+		public static async Task<Message> SendVoice(string apikey, long chatID, string voice, int? duration = null, bool disableNotifications = false, int? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "sendVoice",
-				chat_id = chatId,
+				chat_id = chatID,
 				voice = voice,
 				duration = duration,
-				disable_notification = silent,
-				reply_to_message_id = replyToId,
+				disable_notification = disableNotifications,
+				reply_to_message_id = replyToMessageID,
 				reply_markup = replyMarkup,
 			}, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter() } });
-			Requester.MakeRequestAsync(apikey, json);
+			Response response = await Requester.MakeRequestNonAsync(apikey, json);
+			if (response.Ok) {
+				return JsonConvert.DeserializeObject<Message>(response.Result);
+			} else {
+				return null; //TODO Look above
+			}
 		}
 
-		public static void SendLocation(string apikey, long chatId, int latitude, int longitude, bool silent = false, int? replyToId = null, ReplyKeyboardMarkup replyMarkup = null) {
+		public static async Task<Message> SendLocation(string apikey, long chatID, int latitude, int longitude, bool disableNotifications = false, int? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "sendLocation",
-				chat_id = chatId,
+				chat_id = chatID,
 				latitude = latitude,
 				longitude = longitude,
-				disable_notification = silent,
-				reply_to_message_id = replyToId,
+				disable_notification = disableNotifications,
+				reply_to_message_id = replyToMessageID,
 				reply_markup = replyMarkup,
 			}, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter() } });
-			Requester.MakeRequestAsync(apikey, json);
+			Response response = await Requester.MakeRequestNonAsync(apikey, json);
+			if (response.Ok) {
+				return JsonConvert.DeserializeObject<Message>(response.Result);
+			} else {
+				return null; //TODO Look above
+			}
 		}
 
-		public static void SendVenue(string apikey, long chatId, int latitude, int longitude, string title, string adress, string foursquareId, bool silent = false, int? replyToId = null, ReplyKeyboardMarkup replyMarkup = null) {
+		public static async Task<Message> SendVenue(string apikey, long chatID, int latitude, int longitude, string title, string adress, string foursquareId, bool disableNotifications = false, int? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "sendVenue",
-				chat_id = chatId,
+				chat_id = chatID,
 				latitude = latitude,
 				longitude = longitude,
 				title = title,
 				adress = adress,
 				foursquare_id = foursquareId,
-				disable_notification = silent,
-				reply_to_message_id = replyToId,
+				disable_notification = disableNotifications,
+				reply_to_message_id = replyToMessageID,
 				reply_markup = replyMarkup,
 			}, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter() } });
-			Requester.MakeRequestAsync(apikey, json);
+			Response response = await Requester.MakeRequestNonAsync(apikey, json);
+			if (response.Ok) {
+				return JsonConvert.DeserializeObject<Message>(response.Result);
+			} else {
+				return null; //TODO Look above
+			}
 		}
 
-		public static void AnswerCallbackQuery(string apikey, string callbackQueryId, string text = null, bool showAlert = false, string url = null) {
+		public static async Task<bool> AnswerCallbackQuery(string apikey, string callbackQueryId, string text = null, bool showAlert = false, string url = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "answerCallbackQuery",
 				callback_query_id = callbackQueryId,
@@ -190,10 +238,11 @@ namespace WJClubBotFrame.Methods {
 				show_alert = showAlert,
 				url = url,
 			}, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter() } });
-			Requester.MakeRequestAsync(apikey, json);
+			Response response = await Requester.MakeRequestNonAsync(apikey, json);
+			return response.Ok; //TODO see above
 		}
 
-		public static void AnswerInlineQuery(string apikey, string inlineQueryId, List<InlineQueryResult> results, int? cacheTime = null, bool personal = false, string pmText = null, string pmParameter = null) {
+		public static async Task<bool> AnswerInlineQuery(string apikey, string inlineQueryId, List<InlineQueryResult> results, int? cacheTime = null, bool personal = false, string pmText = null, string pmParameter = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "answerInlineQuery",
 				inline_query_id = inlineQueryId,
@@ -203,31 +252,35 @@ namespace WJClubBotFrame.Methods {
 				switch_pm_text = pmText,
 				switch_pm_parameter = pmParameter,
 			}, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter() } });
-			Requester.MakeRequestAsync(apikey, json);
+			Response response = await Requester.MakeRequestNonAsync(apikey, json);
+			return response.Ok; //TODO see above
 		}
 
-		public static void EditMessageText(string apikey, string text, ReplyMarkup replyMarkup = null, long? chatId = null, int? messageId = null, string inlineMessageId = null, bool noWeb = true) {
+		//TODO Make this return message optionally
+		public static async Task<bool> EditMessageText(string apikey, string text, ReplyMarkup replyMarkup = null, long? chatID = null, int? messageID = null, string inlineMessageID = null, bool disableWebPagePreview = true) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "editMessageText",
-				chat_id = chatId,
-				message_id = messageId,
-				inline_message_id = inlineMessageId,
+				chat_id = chatID,
+				message_id = messageID,
+				inline_message_id = inlineMessageID,
 				text = text,
 				parse_mode = "HTML",
-				disable_web_page_preview = noWeb,
+				disable_web_page_preview = disableWebPagePreview,
 				reply_markup = replyMarkup,
 			}, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter() } });
-			Requester.MakeRequestAsync(apikey, json);
+			Response response = await Requester.MakeRequestNonAsync(apikey, json);
+			return response.Ok;
 		}
 
-		public static void EditMessageReplyMarkup(string apikey, long chatID, int messageID, object replyMarkup) {
+		public static async Task<bool> EditMessageReplyMarkup(string apikey, long chatID, int messageID, object replyMarkup) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "editMessageReplyMarkup",
 				chat_id = chatID,
 				message_id = messageID,
 				reply_markup = replyMarkup,
 			}, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter() } });
-			Requester.MakeRequestAsync(apikey, json);
+			Response response = await Requester.MakeRequestNonAsync(apikey, json);
+			return response.Ok;
 		}
 	}
 }

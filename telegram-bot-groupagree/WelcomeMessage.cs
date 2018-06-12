@@ -23,7 +23,7 @@ namespace telegrambotgroupagree {
 
 		public static void Send(string apikey, Strings strings, Pointer pointer) {
 			ContentParts content = prepare(strings, pointer);
-			Api.SendMessage(apikey,pointer.ChatId, content.Text, replyMarkup:content.InlineKeyboard);
+			Api.SendMessageAsync(apikey,pointer.ChatId, content.Text, replyMarkup:content.InlineKeyboard);
 		}
 	}
 }

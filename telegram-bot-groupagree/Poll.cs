@@ -492,12 +492,12 @@ namespace telegrambotgroupagree {
 		public void Send(string apikey, Strings strings, long chatId, bool fromChannel = false) {
             FinishCreation();
 			ContentParts content = GetContent(strings, apikey, noApproximation:true);
-			Api.SendMessage(apikey, chatId, content.Text, replyMarkup: (fromChannel ? content.InlineKeyboard : GenerateUserMarkup(strings,apikey)));
+			Api.SendMessageAsync(apikey, chatId, content.Text, replyMarkup: (fromChannel ? content.InlineKeyboard : GenerateUserMarkup(strings,apikey)));
 		}
 
 		public void Send(string apikey, Strings strings, long chatId, int pagOffset) {
 			ContentParts content = GetContent(strings, apikey, noApproximation:true, offset: pagOffset);
-			Api.SendMessage(apikey, chatId, content.Text, replyMarkup: content.InlineKeyboard);
+			Api.SendMessageAsync(apikey, chatId, content.Text, replyMarkup: content.InlineKeyboard);
 		}
 
         public void FinishCreation() {
@@ -541,7 +541,7 @@ namespace telegrambotgroupagree {
 						string inlineApiKey = instances.Find(x => x.chatID == messageID.botChatID).apikey;
 						ContentParts contentToSend = messageID.channel ? contentChannel : content;
 						//TODO Catch deleted messages
-						Api.EditMessageText(inlineApiKey, contentToSend.Text, contentToSend.InlineKeyboard, inlineMessageId: messageID.inlineMessageId);
+						Api.EditMessageText(inlineApiKey, contentToSend.Text, contentToSend.InlineKeyboard, inlineMessageID: messageID.inlineMessageId);
 					}
 				}
 			}
