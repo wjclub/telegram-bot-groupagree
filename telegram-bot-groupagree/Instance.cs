@@ -21,4 +21,5 @@ public class Instance {
     public User creator;
     public Task<Update[]> update;
     public List<DateTime> last30Updates;
+	internal DateTime retryAt;
 }

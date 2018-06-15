@@ -268,7 +268,18 @@ namespace WJClubBotFrame.Methods {
 		}
 
 		//TODO Make this return message optionally
-		public static async Task<bool> EditMessageText(string apikey, string text, ReplyMarkup replyMarkup = null, long? chatID = null, int? messageID = null, string inlineMessageID = null, bool disableWebPagePreview = true) {
+		/// <summary>
+		/// Edit a message, works with inline messags as well as normal messages
+		/// </summary>
+		/// <param name="apikey"></param>
+		/// <param name="text"></param>
+		/// <param name="replyMarkup"></param>
+		/// <param name="chatID"></param>
+		/// <param name="messageID"></param>
+		/// <param name="inlineMessageID"></param>
+		/// <param name="disableWebPagePreview"></param>
+		/// <returns>Nothing ;D</returns>
+		public static async Task EditMessageText(string apikey, string text, ReplyMarkup replyMarkup = null, long? chatID = null, int? messageID = null, string inlineMessageID = null, bool disableWebPagePreview = true) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "editMessageText",
 				chat_id = chatID,
@@ -280,7 +291,20 @@ namespace WJClubBotFrame.Methods {
 				reply_markup = replyMarkup,
 			}, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore, Converters = new[] { new Newtonsoft.Json.Converters.StringEnumConverter() } });
 			Response response = await Requester.MakeRequestNonAsync(apikey, json);
-			return response.Ok;
+			if (!response.Ok) {
+				switch (response.ErrorCode) {
+					case 400: {
+						switch (response.Description) {
+							case "Bad Request: MESSAGE_ID_INVALID":
+								throw new Exceptions.MessageIDInvalid();
+							case "Bad Request: MESSAGE_TOO_LONG":
+								throw new Exceptions.MessageTooLong();
+						}
+					} break;
+					case 429:
+						throw new Exceptions.TooManyRequests(response.Parameters.RetryAfter);
+				}
+			}
 		}
 
 		public static async Task<bool> EditMessageReplyMarkup(string apikey, long chatID, int messageID, object replyMarkup) {

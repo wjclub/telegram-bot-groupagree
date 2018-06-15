@@ -6,6 +6,7 @@ namespace telegrambotgroupagree {
 		public long botChatID;
 		public string inlineMessageId;
 		public bool channel;
+		public bool messageIDInvalid;
         public List<DateTime> last30Updates; 
 	}
 }

@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System;
 using System.Linq;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace telegrambotgroupagree {
 	public abstract class Poll {
@@ -78,40 +79,40 @@ namespace telegrambotgroupagree {
 
 		public virtual void Close(List<Instance> instances, long currentBotChatID, Strings strings, int messageId) {
 			closed = true;
-			dBHandler.AddToQueue(this);
+			dBHandler.AddToQueue(this, change: true, forceNoApproximation:true);
 			Update(instances, currentBotChatID, strings, true, messageId:messageId);
 		}
 
 		public virtual void SetPercentage(PercentageBars.Bars bar) {
 			this.PercentageBar = bar;
-			dBHandler.AddToQueue(this);
+			dBHandler.AddToQueue(this, true);
 		}
 
 		public virtual void SetSorted(bool sorted) {
 			this.Sorted = sorted;
-			dBHandler.AddToQueue(this);
+			dBHandler.AddToQueue(this, change:true);
 		}
 
 		public virtual void SetAppendable(bool appendable) {
 			this.Appendable = appendable;
-			dBHandler.AddToQueue(this);
+			dBHandler.AddToQueue(this, change:true);
 		}
 
 		public virtual void Reopen(List<Instance> instances, long currentBotChatID, Strings strings, int messageId) {
 			closed = false;
-			dBHandler.AddToQueue(this);
+			dBHandler.AddToQueue(this, change: true);
 			Update(instances, currentBotChatID, strings, true, messageId:messageId);
 		}
 
 		public virtual void Delete(List<Instance> instances, long currentBotChatID, Strings strings, int messageId) {
 			delete = true;
-			dBHandler.AddToQueue(this);
+			dBHandler.AddToQueue(this, change: true, forceNoApproximation: true);
 			Update(instances, currentBotChatID, strings, true, messageId:messageId);
 		}
 
 		public virtual void DeleteFromDeleteAll(string apikey, Strings strings) {
 			delete = true;
-			dBHandler.AddToQueue(this, false);
+			dBHandler.AddToQueue(this, change: true, forceNoApproximation: true);
 		}
 
 		protected virtual ContentParts GetContent(Strings strings, string apikey, bool noApproximation, bool channel = false, int? offset = null, bool moderatePane = false) {
@@ -510,10 +511,11 @@ namespace telegrambotgroupagree {
 			Api.EditMessageText(apikey, content.Text, content.InlineKeyboard, chatId, messageID);
 		}
 
-		public void Update(List<Instance> instances, long currentBotChatID, Strings strings, bool noApproximation, int? messageId = null, string currentText = null, long? newChatId = null, bool voteButtonPressed = false) {
+		public async Task Update(List<Instance> instances, long currentBotChatID, Strings strings, bool noApproximation, int? messageId = null, string currentText = null, long? newChatId = null, bool voteButtonPressed = false) {
 			//If a user pressed the update button, the messageId is not null (so nobody voted)
-			bool getsAVote = messageId == null; 
-			string apikey = instances.Find(x => x.chatID == currentBotChatID).apikey;
+			bool getsAVote = messageId == null;
+			Instance currentInstance = instances.Find(x => x.chatID == currentBotChatID);
+			string apikey = currentInstance.apikey;
 			//Fully fledged poll
 			ContentParts content = GetContent(strings, apikey, noApproximation:noApproximation);
 			//Has only link buttons
@@ -538,10 +540,35 @@ namespace telegrambotgroupagree {
 				//Refreshes all messages shared via inline mode
 				if (getsAVote) {
 					foreach (MessageID messageID in messageIds) {
-						string inlineApiKey = instances.Find(x => x.chatID == messageID.botChatID).apikey;
+						if (messageID.messageIDInvalid) {
+							continue;
+						}
 						ContentParts contentToSend = messageID.channel ? contentChannel : content;
-						//TODO Catch deleted messages
-						Api.EditMessageText(inlineApiKey, contentToSend.Text, contentToSend.InlineKeyboard, inlineMessageID: messageID.inlineMessageId);
+						Instance currentLoopInstance = currentInstance;
+						bool instanceQuestionable = false;
+						try {
+							currentLoopInstance = instances.Find(x => x.chatID == messageID.botChatID);
+						} catch (NullReferenceException) {
+							instanceQuestionable = true;
+						}
+						try {
+							//TODO Request Handler here
+							await Api.EditMessageText(
+								currentInstance.apikey,
+								contentToSend.Text,
+								contentToSend.InlineKeyboard,
+								inlineMessageID: messageID.inlineMessageId
+								);
+							if (instanceQuestionable) {
+								messageID.botChatID = currentLoopInstance.chatID;
+							}
+						//Thrown when the message was deleted
+						} catch (WJClubBotFrame.Exceptions.MessageIDInvalid) {
+							//TODO Notify user maybe?
+							messageID.messageIDInvalid = true;
+						} catch (WJClubBotFrame.Exceptions.TooManyRequests ex) {
+							currentLoopInstance.retryAt = DateTime.Now + TimeSpan.FromSeconds(ex.RetryAfter);
+						}
 					}
 				}
 			}
@@ -564,7 +591,7 @@ namespace telegrambotgroupagree {
 			return InlineQueryResultArticle.Create(chatId + ":" + pollId, content.InlineTitle, InputTextMessageContent.Create(content.Text, disableWebPagePreview: true), content.InlineKeyboard, description: content.InlineDescription, thumbUrl:"https://wjclub.capella.uberspace.de/groupagreebot/res/" + pollType.ToString() + "_" + anony.ToString() + ".png", thumbWidth:256, thumbHeight:256);
 		}
 
-		public virtual MySqlCommand GenerateCommand(MySqlConnection connection, long currentBotChatID, Strings strings, List<Instance> instances, bool noApproximation, bool change = true) {
+		public virtual MySqlCommand GenerateCommand(MySqlConnection connection, long currentBotChatID, Strings strings, List<Instance> instances, bool forceNoApproximation, bool change = true) {
             MySqlCommand command = new MySqlCommand
             {
                 Connection = connection
@@ -590,7 +617,7 @@ namespace telegrambotgroupagree {
 				command.Parameters.AddWithValue("?pollType", pollType);
 				command.Parameters.AddWithValue("?lang", this.Lang);
 				if (change) {
-					Update(instances, currentBotChatID, strings, noApproximation);
+					Update(instances, currentBotChatID, strings, forceNoApproximation);
 				}
 			}
 			return command;

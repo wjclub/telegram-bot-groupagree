@@ -25,7 +25,7 @@ namespace telegrambotgroupagree {
 		private List<Poll> pollsToUpdateWhenBored;
         private List<Poll> pollsToUpdate; //TODO refine
 
-		public bool getRestricted(Instance currentInstance, Poll currentPoll) {
+		/*public bool getRestricted(Instance currentInstance, Poll currentPoll) {
 			//TODO Make this work
 			return false;
 		}
@@ -41,7 +41,7 @@ namespace telegrambotgroupagree {
 
 		public bool getToThrottle(Instance currentInstance, User currentUser) {
 			return false;
-		}
+		}*/
 
 		//If user pressed more than 3 inline buttons in the last minute
         public bool getUserRestricted(Pointer pointer) {
@@ -52,23 +52,23 @@ namespace telegrambotgroupagree {
 			return false;
         }
 
-        public UpdateAvailabilityList getInstanceAvailableUpdates(Instance instance) {
-            return getListFromLastUpdatesList(datesList:instance.last30Updates, max: 30, recommended: 25, cooldown:TimeSpan.FromSeconds(1));
+        public UpdateAvailabilityList GetInstanceAvailableUpdates(Instance instance) {
+			if (instance.retryAt >= DateTime.Now) {
+				return UpdateAvailabilityList.GetNoUpdatesLeft();
+			}
+            return GetListFromLastUpdatesList(datesList:instance.last30Updates, max: 30, recommended: 25, cooldown:TimeSpan.FromSeconds(1));
         }
 
-		public UpdateAvailabilityList getInlineMessageAvailableUpdates(string inlineMessageID, Poll poll) 
-			=> getListFromLastUpdatesList(
+		public UpdateAvailabilityList GetInlineMessageAvailableUpdates(string inlineMessageID, Poll poll) 
+			=> GetListFromLastUpdatesList(
 				poll.MessageIds.Find(x => x.inlineMessageId == inlineMessageID).last30Updates,
 				max: 20,
 				recommended: 15,
 				cooldown:TimeSpan.FromMinutes(1));
 
-		public UpdateAvailabilityList getListFromLastUpdatesList(List<DateTime> datesList, int max, int recommended, TimeSpan cooldown) {
+		public UpdateAvailabilityList GetListFromLastUpdatesList(List<DateTime> datesList, int max, int recommended, TimeSpan cooldown) {
             DateTime startingNow = DateTime.Now;
-            UpdateAvailabilityList result = new UpdateAvailabilityList {
-                maxUpdates = 0,
-                recommendedUpdates = 0,
-            };
+			UpdateAvailabilityList result = UpdateAvailabilityList.GetNoUpdatesLeft();
             for (int i = 0; i < datesList.Count; i++) {
                 if (startingNow - datesList[i] > cooldown) {
                     result.maxUpdates = max - (Math.Min(max, i));
@@ -84,4 +84,9 @@ namespace telegrambotgroupagree {
 public class UpdateAvailabilityList {
     public int maxUpdates;
     public int recommendedUpdates;
+
+	public static UpdateAvailabilityList GetNoUpdatesLeft() => new UpdateAvailabilityList {
+		maxUpdates = 0,
+		recommendedUpdates = 0,
+	};
 }

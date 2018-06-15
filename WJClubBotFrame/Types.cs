@@ -8,8 +8,10 @@ namespace WJClubBotFrame.Types {
 	/// Contains the response to a request from a Telegram endpoint, Result has to be deserialized individually
 	/// </summary>
 	public class Response {
-		[JsonProperty(PropertyName = "ok",  Required = Required.Always)]
+		[JsonProperty(PropertyName = "ok", Required = Required.Always)]
 		public bool Ok;
+		[JsonProperty(PropertyName = "error_code", Required = Required.Default)]
+		public int ErrorCode;
 		[JsonProperty(PropertyName = "description",  Required = Required.Default)]
 		public string Description;
 		//TODO fix this this is a weird workaround

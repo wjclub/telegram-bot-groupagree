@@ -67,11 +67,12 @@ namespace telegrambotgroupagree {
 			});
 		}
 
-		public void AddToQueue(Poll poll, bool change = true) {
+		public void AddToQueue(Poll poll, bool change = true, bool forceNoApproximation = false) {
 			pollQueue.RemoveAll(x => (x.Poll.ChatId == poll.ChatId && x.Poll.PollId == poll.PollId));
 			pollQueue.Add(new QueueObject {
 				Poll = poll,
 				Change = change,
+				ForceNoApproximation = forceNoApproximation,
 			});
 		}
 
@@ -182,7 +183,7 @@ namespace telegrambotgroupagree {
 
 		public void FlushToDB(Strings strings, List<Instance> instances, long currentBotChatID) {
 			connection.Open(); //TODO Thinking... implement request handler here probably?
-			pollQueue.ForEach(x => x.Poll.GenerateCommand(connection, currentBotChatID, strings, instances, noApproximation:x.NoApproximation, change:x.Change).ExecuteNonQuery());
+			pollQueue.ForEach(x => x.Poll.GenerateCommand(connection, currentBotChatID, strings, instances, forceNoApproximation:x.ForceNoApproximation, change:x.Change).ExecuteNonQuery());
 			pollQueue.Clear();
 			try {
 				pointerQueue.ForEach(x => x.GenerateCommand(connection).ExecuteNonQuery());
@@ -197,6 +198,6 @@ namespace telegrambotgroupagree {
 	public class QueueObject {
 		public Poll Poll;
 		public bool Change;
-		public bool NoApproximation;
+		public bool ForceNoApproximation;
 	}
 }
