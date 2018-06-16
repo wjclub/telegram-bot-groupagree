@@ -87,6 +87,7 @@
     <Compile Include="HtmlSpecialChars.cs" />
     <Compile Include="Doodle.cs" />
     <Compile Include="RequestHandler.cs" />
+    <Compile Include="UpdateAvailabilityList.cs" />
     <Compile Include="WelcomeMessage.cs" />
     <None Include="Board.cs.bak" />
     <None Include="BoardVote.cs.bak" />

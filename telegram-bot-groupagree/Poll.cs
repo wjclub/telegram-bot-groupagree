@@ -552,6 +552,7 @@ namespace telegrambotgroupagree {
 							instanceQuestionable = true;
 						}
 						try {
+
 							//TODO Request Handler here
 							await Api.EditMessageText(
 								currentInstance.apikey,
