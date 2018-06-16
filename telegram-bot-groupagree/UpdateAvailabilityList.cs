@@ -3,7 +3,7 @@
 		public int maxUpdates;
 		public int recommendedUpdates;
 
-		public static UpdateAvailabilityList FactoryNoUpdatesLeft() => new UpdateAvailabilityList {
+		public static UpdateAvailabilityList FactoryZeroUpdatesLeft() => new UpdateAvailabilityList {
 			maxUpdates = 0,
 			recommendedUpdates = 0,
 		};

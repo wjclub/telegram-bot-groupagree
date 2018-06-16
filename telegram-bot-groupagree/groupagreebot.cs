@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace telegrambotgroupagree {
 	public class GroupAgreeBot {
 		private List<Instance> instances;
-		private List<Task<Update[]>> instanceTasks;
+		//private List<Task<Update[]>> instanceTasks;
 		private PointerContainer pointerContainer;
 		private PollContainer pollContainer;
 		private DBHandler dBHandler;
@@ -23,13 +23,14 @@ namespace telegrambotgroupagree {
 		public Pointer CurrentPointer { get; internal set; }
 		public Update CurrentUpdate { get; internal set; }
 
-		public GroupAgreeBot(string dbName, string dbUser, string dbPassword) {
-			instances = new List<Instance>();
-			instanceTasks = new List<Task<Update[]>>();
+		public static async Task<GroupAgreeBot> Factory(string dbName, string dbUser, string dbPassword) {
+			DBHandler dBHandler;
+			List<Instance> instances = new List<Instance>();
+			//instanceTasks = new List<Task<Update[]>>();
 			try {
 				dBHandler = new DBHandler(dbName, dbUser, dbPassword);
-			} catch (Exception e) {
-				Notifications.log("SHIT\n\n" + e.ToString());
+			} catch (Exception ex) {
+				throw new ArgumentException(message: "Error with the database, check the credentials or contact @wjclub on Telegram", innerException:ex);
 			}
 			string instancesLog = "Starting instances:\n\n";
 			List<Instance> constructorInstances = dBHandler.GetInstances();
@@ -37,8 +38,8 @@ namespace telegrambotgroupagree {
 				Task<Update[]> currentUpdate;
 				User currentBotUser;
 				try {
-					Api.DeleteWebhookAsync(currentLoopInstance.apikey);
-					currentBotUser = Api.GetMeAsync(currentLoopInstance.apikey).Result; //TODO This is weird can this be fixed please?
+					await Api.DeleteWebhookAsync(currentLoopInstance.apikey);
+					currentBotUser = await Api.GetMeAsync(currentLoopInstance.apikey);
 					if (currentBotUser == null) {
 						continue;
 					}
@@ -48,25 +49,29 @@ namespace telegrambotgroupagree {
 					Notifications.log("Instances setup fail: \n" + e.ToString());
 					continue;
 				}
-				this.instances.Add(new Instance {
+				instances.Add(new Instance {
 					apikey = currentLoopInstance.apikey,
 					offset = currentLoopInstance.offset,
 					botUser = currentBotUser,
 					creator = currentLoopInstance.creator,
 					update = currentUpdate,
 				});
-				this.instanceTasks.Add(currentUpdate);
+				//instanceTasks.Add(currentUpdate);
 				instancesLog += $"{currentBotUser.FirstName} (@{currentBotUser.Username})\n\n";
 			}
 			Notifications.log(instancesLog);
-			pointerContainer = new PointerContainer(dBHandler);
-			strings = new Strings();
-			pollContainer = new PollContainer(dBHandler, strings);
+			return new GroupAgreeBot(dBHandler:dBHandler, instances:instances);
 		}
 
-		public override string ToString() {
-			return JsonConvert.SerializeObject(BotInfo);
+		private GroupAgreeBot(DBHandler dBHandler, List<Instance> instances) {
+			this.strings = new Strings();
+			this.pointerContainer = new PointerContainer(dBHandler);
+			this.pollContainer = new PollContainer(dBHandler, strings);
+			this.instances = instances;
 		}
+
+		public override string ToString() 
+			=> JsonConvert.SerializeObject(BotInfo);
 
 		public async Task Run() {
 			while (!System.IO.File.Exists(@"cancer.wjdummy") && instances != null && instances.Count > 0) {

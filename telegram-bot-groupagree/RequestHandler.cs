@@ -3,14 +3,23 @@ using System.Collections.Generic;
 
 namespace telegrambotgroupagree {
 	public static class RequestHandler {
-		//Limits for the telegram api, -1 means message won't be accepted because it is too long 
-		public static readonly int[] requestsPerMinute = { 20, 4, -1};
-		public static readonly int[] requestThresholds = { 512, 4096};
-		
-		//If user pressed more than 3 inline buttons in the last minute
-        public static bool getUserRestricted(Pointer pointer) {
-			//TODO Handle empty lastrequests
-            if (pointer.LastRequests[2] - pointer.LastRequests[0] > TimeSpan.FromMinutes(1)) {
+		//Limits for the telegram api
+		public static readonly int messageUnitSize = 512;
+		public static readonly int maxMessageLength = 4096;
+		public static readonly int maxUserRequestsPerMinute = 5;
+		public static readonly int maxChatUpdatesPerMinute = 20;
+		public static readonly int recommendedChatUpdatesPerMinute = 15;
+		public static readonly int maxInstanceUpdatesPerSecond = 30;
+		public static readonly int recommendedInstanceUpdatesPerSecond = 25;
+
+		//If user pressed more than 5 inline buttons in the last minute
+		public static bool getUserRestricted(Pointer pointer) {
+			if (pointer == null) {
+				throw new ArgumentNullException("pointer", "Empty pointer at 239857209843");
+			} else if (pointer.LastRequests == null) {
+				throw new ArgumentNullException("pointer.LastRequests", "Empty pointer.LastRequests at 4435093247934");
+			}
+			if (pointer.LastRequests.Count > maxUserRequestsPerMinute && pointer.LastRequests[maxUserRequestsPerMinute] - pointer.LastRequests[0] > TimeSpan.FromMinutes(1)) {
 				return true;
 			}
 			return false;
@@ -18,21 +27,25 @@ namespace telegrambotgroupagree {
 
         public static UpdateAvailabilityList GetInstanceAvailableUpdates(Instance instance) {
 			if (instance.retryAt >= DateTime.Now) {
-				return UpdateAvailabilityList.FactoryNoUpdatesLeft();
+				return UpdateAvailabilityList.FactoryZeroUpdatesLeft();
 			}
-            return GetListFromLastUpdatesList(datesList:instance.last30Updates, max: 30, recommended: 25, cooldown:TimeSpan.FromSeconds(1));
+            return GetListFromLastUpdatesList(
+				datesList:instance.last30Updates, 
+				max: maxInstanceUpdatesPerSecond, 
+				recommended: recommendedInstanceUpdatesPerSecond, 
+				cooldown:TimeSpan.FromSeconds(1));
         }
 
 		public static UpdateAvailabilityList GetInlineMessageAvailableUpdates(string inlineMessageID, Poll poll) 
 			=> GetListFromLastUpdatesList(
 				poll.MessageIds.Find(x => x.inlineMessageId == inlineMessageID).last30Updates,
-				max: 20,
-				recommended: 15,
+				max: maxChatUpdatesPerMinute,
+				recommended: recommendedChatUpdatesPerMinute,
 				cooldown:TimeSpan.FromMinutes(1));
 
 		public static UpdateAvailabilityList GetListFromLastUpdatesList(List<DateTime> datesList, int max, int recommended, TimeSpan cooldown) {
             DateTime startingNow = DateTime.Now;
-			UpdateAvailabilityList result = UpdateAvailabilityList.FactoryNoUpdatesLeft();
+			UpdateAvailabilityList result = UpdateAvailabilityList.FactoryZeroUpdatesLeft();
             for (int i = 0; i < datesList.Count; i++) {
                 if (startingNow - datesList[i] > cooldown) {
                     result.maxUpdates = max - (Math.Min(max, i));
@@ -43,7 +56,16 @@ namespace telegrambotgroupagree {
             return result;
         }
 
-		public static bool DoUpdate(UpdateAvailabilityList updateAvailabilityList, bool necessary)
-			=> necessary ? updateAvailabilityList.maxUpdates > 0 : updateAvailabilityList.recommendedUpdates > 0;
+		public static bool DoUpdate(UpdateAvailabilityList updateAvailabilityList, int messageTextLength, bool necessary = false) {
+			int updateWeight = IsFatUpdate(messageTextLength: messageTextLength) ? 4 : 1;
+			if (necessary) {
+				return updateAvailabilityList.maxUpdates >= updateWeight;
+			} else {
+				return updateAvailabilityList.recommendedUpdates >= updateWeight;
+			}
+		}
+
+		public static bool IsFatUpdate(int messageTextLength) 
+			=> messageTextLength >= messageUnitSize;
 	}
 }
