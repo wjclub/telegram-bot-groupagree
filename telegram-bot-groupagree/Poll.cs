@@ -506,7 +506,7 @@ namespace telegrambotgroupagree {
             this.archived = true;
         }
 
-		public void Update(string apikey, Strings strings, long chatId, int messageID, int pagOffset, bool noApproximation) {
+		public async Task Update(string apikey, Strings strings, long chatId, int messageID, int pagOffset, bool noApproximation) {
 			ContentParts content = GetContent(strings, apikey, noApproximation, offset: pagOffset);
 			Api.EditMessageText(apikey, content.Text, content.InlineKeyboard, chatId, messageID);
 		}
