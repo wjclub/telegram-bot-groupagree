@@ -21,7 +21,7 @@ namespace telegrambotgroupagree {
 		new private Dictionary<int, BoardVote> pollVotes;
 		new public Dictionary<int, BoardVote> PollVotes { get{ return pollVotes; } }
 
-		protected override ContentParts GetContent(Strings strings, string apikey, bool channel = false, int? offset = null, bool moderatePane = true) {
+		protected override ContentParts GetContent(Strings strings, string apikey, bool noApproximation, bool channel = false, int? offset = null, bool moderatePane = true) {
 			Strings.Langs oldLang = strings.CurrentLang;
 			strings.SetLanguage(lang);
 			string text;
@@ -79,8 +79,9 @@ namespace telegrambotgroupagree {
 		}
 
 		public override string RenderPollConfig(Strings strings) {
-			if (Anony == EAnony.personal)
+			if (Anony == EAnony.personal) {
 				return strings.GetString(Strings.StringsList.inlineDescriptionPersonalBoard);
+			}
 			return strings.GetString(Strings.StringsList.inlineDescriptionAnonymousBoard);
 		}
 
@@ -96,7 +97,7 @@ namespace telegrambotgroupagree {
 			return true;
 		}
 
-		public override MySqlCommand GenerateCommand(MySqlConnection connection, long currentBotChatID, Strings strings, List<Instance> instances, bool change = true) {
+		public override MySqlCommand GenerateCommand(MySqlConnection connection, long currentBotChatID, Strings strings, List<Instance> instances, bool forceNoApproximation, bool change = true) {
 			MySqlCommand command = new MySqlCommand();
 			command.Connection = connection;
 			if (delete) {
@@ -123,4 +124,3 @@ namespace telegrambotgroupagree {
 		}
 	}
 }
-

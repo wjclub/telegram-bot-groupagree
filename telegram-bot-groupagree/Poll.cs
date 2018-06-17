@@ -511,7 +511,7 @@ namespace telegrambotgroupagree {
 			Api.EditMessageText(apikey, content.Text, content.InlineKeyboard, chatId, messageID);
 		}
 
-		public async Task Update(List<Instance> instances, long currentBotChatID, Strings strings, bool noApproximation, int? messageId = null, string currentText = null, long? newChatId = null, bool voteButtonPressed = false) {
+		public async Task Update(List<Instance> instances, long currentBotChatID, Strings strings, bool noApproximation, string currentInlineMessageID = null, int? messageId = null, string currentText = null, long? newChatId = null, bool voteButtonPressed = false) {
 			//If a user pressed the update button, the messageId is not null (so nobody voted)
 			bool getsAVote = messageId == null;
 			Instance currentInstance = instances.Find(x => x.chatID == currentBotChatID);
@@ -539,8 +539,16 @@ namespace telegrambotgroupagree {
 				}
 				//Refreshes all messages shared via inline mode
 				if (getsAVote) {
+					if (currentInlineMessageID != null) {
+						MessageID currentMessageID = messageIds.Find(x => x.inlineMessageId == currentInlineMessageID);
+						if (currentMessageID.messageIDInvalid) {
+							//Throw something
+						} else if (currentMessageID.botChatID == currentBotChatID) {
+
+						}
+					}
 					foreach (MessageID messageID in messageIds) {
-						if (messageID.messageIDInvalid) {
+						if (messageID.messageIDInvalid || messageID.inlineMessageId == currentInlineMessageID) {
 							continue;
 						}
 						ContentParts contentToSend = messageID.channel ? contentChannel : content;

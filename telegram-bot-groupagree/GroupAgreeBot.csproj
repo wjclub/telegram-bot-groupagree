@@ -89,8 +89,8 @@
     <Compile Include="RequestHandler.cs" />
     <Compile Include="UpdateAvailabilityList.cs" />
     <Compile Include="WelcomeMessage.cs" />
-    <None Include="Board.cs.bak" />
-    <None Include="BoardVote.cs.bak" />
+    <Compile Include="Board.cs" />
+    <Compile Include="BoardVote.cs" />
     <Compile Include="IPollVote.cs" />
     <Compile Include="PVote.cs" />
     <Compile Include="InlineMarkupGenerator.cs" />
