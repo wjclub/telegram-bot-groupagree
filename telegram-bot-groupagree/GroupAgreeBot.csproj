@@ -88,6 +88,7 @@
     <Compile Include="Doodle.cs" />
     <Compile Include="RequestHandler.cs" />
     <Compile Include="UpdateAvailabilityList.cs" />
+    <Compile Include="UpdateMessageIDInvalidException.cs" />
     <Compile Include="WelcomeMessage.cs" />
     <Compile Include="Board.cs" />
     <Compile Include="BoardVote.cs" />

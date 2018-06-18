@@ -14,7 +14,7 @@ namespace telegrambotgroupagree {
 		private static string _stuffing = "lkr3lokjaf98dsflkj";
 		#endregion
 
-		public static string Encrypt(string value, string password) {
+		public static string Encrypt(string value, string password = null) {
 			return Encrypt<AesManaged>(value, password);
 		}
 

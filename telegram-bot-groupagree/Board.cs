@@ -11,17 +11,18 @@ using StringEdit = System.Globalization.CultureInfo;
 namespace telegrambotgroupagree {
 	public class Board : Poll {
 		public Board(int chatId, int pollId, string pollText, EAnony anony, DBHandler dBHandler, Strings.Langs lang) : this(chatId, pollId, pollText, null, anony, false, false, dBHandler, new Dictionary<int, BoardVote>(), new List<MessageID>(), lang) {
-			
+			this.pollType = EPolls.board;
 		}
 
 		public Board(int chatId, int pollId, string pollText, string pollDescription, EAnony anony, bool closed, bool archived, DBHandler dBHandler, Dictionary<int, BoardVote> pollVotes, List<MessageID> messageIds, Strings.Langs lang) : base(chatId, pollId, pollText, pollDescription, anony, closed, PercentageBars.Bars.none, false, false, archived, dBHandler, null, messageIds, lang, EPolls.board) {
+			this.pollType = EPolls.board;
 			this.pollVotes = pollVotes;
 		}
 
 		new private Dictionary<int, BoardVote> pollVotes;
 		new public Dictionary<int, BoardVote> PollVotes { get{ return pollVotes; } }
 
-		protected override ContentParts GetContent(Strings strings, string apikey, bool noApproximation, bool channel = false, int? offset = null, bool moderatePane = true) {
+		protected override ContentParts GetPollOutput(Strings strings, int peopleCount, List<int> pollVotesCount, bool noApproximation, bool channel = false) {
 			Strings.Langs oldLang = strings.CurrentLang;
 			strings.SetLanguage(lang);
 			string text;
@@ -30,11 +31,11 @@ namespace telegrambotgroupagree {
 			string inlineDescription;
 			InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup();
 			inlineKeyboard.InlineKeyboard = new List<List<InlineKeyboardButton>>();
-			if (offset == null) {
-				if (!closed)
-					inlineKeyboard.InlineKeyboard.Add(new List<InlineKeyboardButton>() { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.buttonVote), url: "https://telegram.me/" + Globals.GlobalOptions.Botname + "?start=" + Cryptography.Encrypt("board:" + ChatId.ToString() + ":" + PollId.ToString(), apikey)) });
-					//inlineKeyboard.InlineKeyboard.Add(new List<InlineKeyboardButton>() { InlineKeyboardButton.Create(strings.GetString(Strings.stringsList.buttonVote), url: "https://telegram.me/" + Globals.Botname + "?start=" + "board:" + ChatId + ":" + PollId) });
-				inlineDescription = StringEdit.CurrentCulture.TextInfo.ToTitleCase(anony.ToString()) + " " + pollType + ": " + pollText + ": ";
+			//if (offset == null) {
+			if (!closed) {
+				inlineKeyboard.InlineKeyboard.Add(new List<InlineKeyboardButton>() { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.buttonVote), url: $"https://telegram.me/{ Globals.GlobalOptions.Botname }?start={ Cryptography.Encrypt($"board:{ ChatId.ToString() }:{ PollId.ToString() }") }") });
+			}
+			inlineDescription = StringEdit.CurrentCulture.TextInfo.ToTitleCase(anony.ToString()) + " " + pollType + ": " + pollText + ": ";
 				text = "\ud83d\udcdd <b>" + HtmlSpecialChars.Encode(pollText).UnmarkupUsernames() + "</b>" + (!string.IsNullOrEmpty(pollDescription) ? ("\n" + HtmlSpecialChars.Encode(pollDescription) + "\n") : "\n");
 				foreach (KeyValuePair<int, BoardVote> x in pollVotes) {
 					string toAdd = (anony == EAnony.personal ? "\n\u200E<b>" + HtmlSpecialChars.Encode(x.Value.Name.Replace("\u200F", "").Replace("\u202B", "").Replace("\u202E", "").Truncate(25)) + ": </b>" : "\n\ud83d\udc64 ") + HtmlSpecialChars.Encode(x.Value.Text) + "\n";
@@ -42,17 +43,18 @@ namespace telegrambotgroupagree {
 						text += toAdd;
 						inlineDescription += x.Value.Text + ", ";
 					} else {
-						text += "\n▶️ <a href=\"https://telegram.me/" + Globals.GlobalOptions.Botname + "?start=" + Cryptography.Encrypt("pag:" + chatId + ":" + pollId + ":0", apikey) + "\">" + strings.GetString(Strings.StringsList.boardShowMore) + "</a>\n";
+						text += "\n▶️ <a href=\"https://telegram.me/" + Globals.GlobalOptions.Botname + "?start=" + Cryptography.Encrypt("pag:" + chatId + ":" + pollId + ":0") + "\">" + strings.GetString(Strings.StringsList.boardShowMore) + "</a>\n";
 						break;
 					}
 				}
-				if (delete || closed)
+				if (delete || closed) {
 					inlineKeyboard = null;
+				}
 				inlineDescription = inlineDescription.Substring(0, inlineDescription.Length - 2);
 				text += "\n" + string.Format(strings.GetString(pollVotes.Count == 0 ? Strings.StringsList.rendererZeroVotedSoFar : (pollVotes.Count == 1 ? Strings.StringsList.rendererSingleVotedSoFar : Strings.StringsList.rendererMultiVotedSoFar)), pollVotes.Count);
 				if (closed)
 					text += "\n" + strings.GetString(Strings.StringsList.pollClosed);
-			} else {
+			/*} else {
 				inlineDescription = "";
 				if (offset < pollVotes.Count) {
 					int difference = (int)offset - (pollVotes.Count - 1);
@@ -73,11 +75,12 @@ namespace telegrambotgroupagree {
 				} else {
 					text = strings.GetString(Strings.StringsList.boardPagCantFind);
 				}
-			}
+			}*/
 			strings.SetLanguage(oldLang);
 			return new ContentParts(text, inlineKeyboard, inlineTitle, inlineDescription);
 		}
 
+		
 		public override string RenderPollConfig(Strings strings) {
 			if (Anony == EAnony.personal) {
 				return strings.GetString(Strings.StringsList.inlineDescriptionPersonalBoard);
@@ -87,8 +90,9 @@ namespace telegrambotgroupagree {
 
 		public override bool Vote(string apikey, int optionNr, User user, Message message, string inlineMessageId = null) {
 			dBHandler.AddToQueue(this);
-			if (closed)
+			if (closed) {
 				return false;
+			}
 			pollVotes.Remove(user.Id);
 			pollVotes.Add(user.Id, new BoardVote {
 				Name = user.FirstName + (user.LastName != null ? " " + user.LastName : ""),
@@ -118,7 +122,7 @@ namespace telegrambotgroupagree {
 				command.Parameters.AddWithValue("?archived", archived);
 				command.Parameters.AddWithValue("?lang", lang);
 				if (change)
-					Update(instances, currentBotChatID, strings);
+					Update(instances, currentBotChatID, strings, noApproximation:true);
 			}
 			return command;
 		}

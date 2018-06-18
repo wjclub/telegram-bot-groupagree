@@ -30,7 +30,7 @@ namespace telegrambotgroupagree {
 			try {
 				dBHandler = new DBHandler(dbName, dbUser, dbPassword);
 			} catch (Exception ex) {
-				throw new ArgumentException(message: "Error with the database, check the credentials or contact @wjclub on Telegram", innerException:ex);
+				throw new ArgumentException(message: "Error with the database, check the credentials or contact @wjclub", innerException:ex);
 			}
 			string instancesLog = "Starting instances:\n\n";
 			List<Instance> constructorInstances = dBHandler.GetInstances();
@@ -64,6 +64,7 @@ namespace telegrambotgroupagree {
 		}
 
 		private GroupAgreeBot(DBHandler dBHandler, List<Instance> instances) {
+			this.dBHandler = dBHandler;
 			this.strings = new Strings();
 			this.pointerContainer = new PointerContainer(dBHandler);
 			this.pollContainer = new PollContainer(dBHandler, strings);
@@ -264,14 +265,16 @@ namespace telegrambotgroupagree {
 												pointer.Needle = ENeedle.addInstanceToken;
 												Api.SendMessageAsync(apikey, update.Message.Chat.Id, strings.GetString(Strings.StringsList.addInstanceSendToken));
 											} break;
-										/*case "testurl":
-											Api.SendMessage(Globals.GlobalOptions.Apikey, update.Message.Chat.Id, "INTERNAL TEST MESSAGE", replyMarkup: InlineMarkupGenerator.GetOneButtonMarkup(InlineKeyboardButton.Create("TEST THIS NOW", callbackData: "comm:url:t.me/" + Globals.GlobalOptions.Botname + "?start=from_inline")));
-											break;*/
-										/*case "burstme":
+										#if DEBUG
+										case "testurl":
+											Api.SendMessageAsync(Globals.GlobalOptions.Apikey, update.Message.Chat.Id, "INTERNAL TEST MESSAGE", replyMarkup: InlineMarkupGenerator.GetOneButtonMarkup(InlineKeyboardButton.Create("TEST THIS NOW", callbackData: "comm:url:t.me/" + Globals.GlobalOptions.Botname + "?start=from_inline")));
+											break;
+										case "burstme":
 											for (int i = 0; i < 40; i++) {
-												Api.SendMessage(Globals.GlobalOptions.Apikey, update.Message.Chat.Id, "INTERNAL TEST MESSAGE NO " + i);
+												Api.SendMessageAsync(Globals.GlobalOptions.Apikey, update.Message.Chat.Id, "INTERNAL TEST MESSAGE NO " + i);
 											}
-											break;*/
+											break;
+										#endif
 										default:
 											int editPoll;
 											if (int.TryParse(command, out editPoll)) {
@@ -325,26 +328,25 @@ namespace telegrambotgroupagree {
 											pointer.LastPollId++;
 											dBHandler.AddToQueue(pollContainer.Add(pointer, update.Message.From.Id, update.Message.Text), false);
 											//TODO Kinda test this shit
-											//Board removed
-											/*if (pointer.PollType == EPolls.board) {
-												Api.SendMessage(apikey, update.Message.Chat.Id, string.Format(strings.GetString(Strings.StringsList.creatingBoardWannaAddDescription), HtmlSpecialChars.Encode(update.Message.Text).UnmarkupUsernames()), replyMarkup: new InlineKeyboardMarkup { InlineKeyboard = new List<List<InlineKeyboardButton>> { new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.addDescription), callbackData: "comm:add:description") }, new List<InlineKeyboardButton> { InlineKeyboardButton.Create(EmojiStore.Done + " " + strings.GetString(Strings.StringsList.done), callbackData: "comm:boarddone:" + pointer.ChatId + ":" + pointer.LastPollId) } } });
+											if (pointer.PollType == EPolls.board) {
+												Api.SendMessageAsync(apikey, update.Message.Chat.Id, string.Format(strings.GetString(Strings.StringsList.creatingBoardWannaAddDescription), HtmlSpecialChars.Encode(update.Message.Text).UnmarkupUsernames()), replyMarkup: new InlineKeyboardMarkup { InlineKeyboard = new List<List<InlineKeyboardButton>> { new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.addDescription), callbackData: "comm:add:description") }, new List<InlineKeyboardButton> { InlineKeyboardButton.Create(EmojiStore.Done + " " + strings.GetString(Strings.StringsList.done), callbackData: "comm:boarddone:" + pointer.ChatId + ":" + pointer.LastPollId) } } });
 												pointer.Needle = ENeedle.nothing;
-											} else {*/
+											} else {
 												Api.SendMessageAsync(apikey, update.Message.Chat.Id, string.Format(strings.GetString(Strings.StringsList.creatingPollWannaAddDescription), HtmlSpecialChars.Encode(update.Message.Text).UnmarkupUsernames()), replyMarkup: new InlineKeyboardMarkup { InlineKeyboard = new List<List<InlineKeyboardButton>> { new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.addDescription), callbackData: "comm:add:description") } } });
 												pointer.Needle = ENeedle.firstOption;
-											/*}*/
+											}
 											break;
 										case ENeedle.pollDescription:
 											Api.SendMessageAsync(apikey, update.Message.Chat.Id, String.Format(/*(pointer.PollType != EPolls.board ? */strings.GetString(Strings.StringsList.createPoll)/* : strings.GetString(Strings.StringsList.createBoard))*/, HtmlSpecialChars.Encode(update.Message.Text).UnmarkupUsernames()));
 											try {
 												pollContainer.GetLastPoll(pointer).AddDescription(update.Message.Text);
-												/*if (pointer.PollType == EPolls.board) {
+												if (pointer.PollType == EPolls.board) {
 													pollContainer.GetLastPoll(pointer).Send(apikey, strings, update.Message.Chat.Id);
 													pointer.Needle = ENeedle.nothing;
-												} else {*/
+												} else {
 													pointer.Needle = ENeedle.furtherOptions;
 													dBHandler.AddToQueue(pointer);
-												/*}*/
+												}
 											} catch (Exception e) {
 												Notifications.log(e + "\n\n\n" + JsonConvert.SerializeObject(pointer));
 												continue;
@@ -358,24 +360,23 @@ namespace telegrambotgroupagree {
 												Api.SendMessageAsync(apikey, update.Message.Chat.Id, String.Format(strings.GetString(Strings.StringsList.alreadyDefined), HtmlSpecialChars.Encode(update.Message.Text).UnmarkupUsernames()), replyMarkup: InlineMarkupGenerator.GetOneButtonMarkup(InlineKeyboardButton.Create("\ud83d\udcbe " + strings.GetString(Strings.StringsList.done), callbackData: "comm:done")));
 											pointer.Needle = ENeedle.furtherOptions;
 											break;
-										/* not existent anymore...
 										case ENeedle.board: {
 											if (update.Message.Text.Length <= 120) {
 												update.Message.Text = update.Message.Text.Replace("\n", " ");
 												try {
 													Poll poll = pollContainer.GetPoll((int)pointer.BoardChatId, (int)pointer.BoardPollId);
 													poll.Vote(apikey, 0, update.Message.From, update.Message);
-													Api.SendMessage(apikey, update.Message.Chat.Id, String.Format(strings.GetString(Strings.StringsList.boardSuccess), HtmlSpecialChars.Encode(update.Message.Text).UnmarkupUsernames(), HtmlSpecialChars.Encode(poll.PollText.Truncate(25)).UnmarkupUsernames()));
+													Api.SendMessageAsync(apikey, update.Message.Chat.Id, String.Format(strings.GetString(Strings.StringsList.boardSuccess), HtmlSpecialChars.Encode(update.Message.Text).UnmarkupUsernames(), HtmlSpecialChars.Encode(poll.PollText.Truncate(25)).UnmarkupUsernames()));
 												} catch (Exception e) {
-													Api.SendMessage(apikey, update.Message.Chat.Id, "Sorry, an error occured...\nPlease try again...");
+													Api.SendMessageAsync(apikey, update.Message.Chat.Id, "Sorry, an error occured...\nPlease try again...");
 													Notifications.log(e.ToString() + "\n\nThe board db error...\nAgain...");
 												}
 												pointer.Needle = ENeedle.nothing;
 											} else {
-												Api.SendMessage(apikey, update.Message.Chat.Id, String.Format(strings.GetString(Strings.StringsList.tooManyCharacters), update.Message.Text.Length));
+												Api.SendMessageAsync(apikey, update.Message.Chat.Id, String.Format(strings.GetString(Strings.StringsList.tooManyCharacters), update.Message.Text.Length));
 											}
 										}
-										break; */
+										break;
 										case ENeedle.addOption: {
 											if (update.Message.Text.Length <= 120) {
 												update.Message.Text = update.Message.Text.Replace("\n", " ");
@@ -500,10 +501,10 @@ namespace telegrambotgroupagree {
 										pointer.PollType = EPolls.doodle;
 										refresh = true;
 										break;
-									/*case "board":
+									case "board":
 										pointer.PollType = EPolls.board;
 										refresh = true;
-										break;*/
+										break;
 									case "limitedDoodle":
 										pointer.PollType = EPolls.limitedDoodle;
 										refresh = true;
@@ -522,13 +523,13 @@ namespace telegrambotgroupagree {
 											text = strings.GetString(Strings.StringsList.noPollsToFinish);
 										}
 										break;
-									/*case "boarddone": {
+									case "boarddone": {
 										string[] splitBoardDoneData = command.Split(':');
 										Poll poll = pollContainer.GetPoll(int.Parse(splitBoardDoneData[1]), int.Parse(splitBoardDoneData[2]));
 										poll.FinishCreation();
-										poll.Update(instances, currentInstance.chatID, strings, messageId: update.CallbackQuery.Message.MessageId);
+										poll.Update(instances, currentInstance.chatID, strings, noApproximation:true, messageId: update.CallbackQuery.Message.MessageId);
 										break;
-									}*/
+									}
 									case "close":
 										string[] splitCloseData = command.Split(':');
 										pollContainer.GetPoll(int.Parse(splitCloseData[1]), int.Parse(splitCloseData[2])).Close(instances, currentInstance.chatID, strings, update.CallbackQuery.Message.MessageId);
@@ -637,7 +638,7 @@ namespace telegrambotgroupagree {
 											pointer.LastPollId++;
 											Poll newPoll = pollContainer.Add(pointer, update.CallbackQuery.From.Id, poll.PollText);
 											newPoll.AddDescription(poll.PollDescription);
-											/*if (poll.PollType != EPolls.board)*/
+											if (poll.PollType != EPolls.board)
 												foreach (string optionTitle in poll.PollVotes.Keys) {
 													newPoll.AddOption(optionTitle);
 												}
@@ -665,15 +666,15 @@ namespace telegrambotgroupagree {
 									case "skip":
 										string stuff = command.Split(':')[1];
 										if (stuff == "description") {
-											pointer.Needle = ENeedle.firstOption;/*
+											pointer.Needle = ENeedle.firstOption;
 											if (pointer.PollType == EPolls.board) {
 												Poll poll = pollContainer.GetLastPoll(pointer);
 												poll.FinishCreation();
-												poll.Update(instances, currentInstance.chatID, strings, messageId: update.CallbackQuery.Message.MessageId);
+												poll.Update(instances, currentInstance.chatID, strings, noApproximation: true, messageId: update.CallbackQuery.Message.MessageId);
 												pointer.Needle = ENeedle.nothing;
-											} else {*/
+											} else {
 												Api.EditMessageText(apikey, strings.GetString(Strings.StringsList.rogerSendIt), chatID: update.CallbackQuery.Message.Chat.Id, messageID: update.CallbackQuery.Message.MessageId);
-											/*}*/
+											}
 										}
 										break;
 									case "add": {
@@ -687,10 +688,10 @@ namespace telegrambotgroupagree {
 									case "iwannavote":
 										try {
 											string[] splitVoteData = Cryptography.Decrypt(command.Substring(11), apikey).Split(':');
-											pollContainer.GetPoll(int.Parse(splitVoteData[0]), int.Parse(splitVoteData[1])).Update(instances, currentInstance.chatID, strings, true, update.CallbackQuery.Message.MessageId, update.CallbackQuery.Message.Text, voteButtonPressed: true);
+											pollContainer.GetPoll(int.Parse(splitVoteData[0]), int.Parse(splitVoteData[1])).Update(instances, currentInstance.chatID, strings, true, messageId: update.CallbackQuery.Message.MessageId, currentText:update.CallbackQuery.Message.Text, voteButtonPressed: true);
 										} catch (System.FormatException) {
 											string[] splitVoteData = command.Split(':');
-											pollContainer.GetPoll(int.Parse(splitVoteData[1]), int.Parse(splitVoteData[2])).Update(instances, currentInstance.chatID, strings, true, update.CallbackQuery.Message.MessageId, "", update.CallbackQuery.Message.Chat.Id);
+											pollContainer.GetPoll(int.Parse(splitVoteData[1]), int.Parse(splitVoteData[2])).Update(instances, currentInstance.chatID, strings, true, messageId: update.CallbackQuery.Message.MessageId, currentText:"", newChatId: update.CallbackQuery.Message.Chat.Id);
 											text = strings.GetString(Strings.StringsList.updatingPoll);
 											alert = true;
 										}
@@ -736,7 +737,7 @@ namespace telegrambotgroupagree {
 										new List<InlineKeyboardButton>() { InlineKeyboardButton.Create(String.Format(strings.GetString(Strings.StringsList.inlineButtonDoodle), (pointer.PollType == EPolls.doodle ? "✅" : "☑️")), callbackData: "comm:doodle") },
 
 										new List<InlineKeyboardButton>() { InlineKeyboardButton.Create(String.Format(strings.GetString(Strings.StringsList.inlineButtonLimitedDoodle), (pointer.PollType == EPolls.limitedDoodle ? "✅" : "☑️")), callbackData: "comm:limitedDoodle") },
-										//new List<InlineKeyboardButton>() { InlineKeyboardButton.Create(String.Format(strings.GetString(Strings.StringsList.inlineButtonBoard), (pointer.PollType == EPolls.board ? "✅" : "☑️")), callbackData: "comm:board") },
+										new List<InlineKeyboardButton>() { InlineKeyboardButton.Create(String.Format(strings.GetString(Strings.StringsList.inlineButtonBoard), (pointer.PollType == EPolls.board ? "✅" : "☑️")), callbackData: "comm:board") },
 									}
 										};
 										Api.EditMessageText(apikey, strings.GetString(Strings.StringsList.pollTypeDescriptionNoMoreBoard), inlineKeyboard, update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId);
@@ -784,7 +785,7 @@ namespace telegrambotgroupagree {
 										}
 									}
 									if (update.CallbackQuery.InlineMessageId == null)
-										poll.Update(instances, currentInstance.chatID, strings, false, /*TODO Request Handler here*/update.CallbackQuery.Message.MessageId, update.CallbackQuery.Message.Text, update.CallbackQuery.Message.Chat.Id);
+										poll.Update(instances, currentInstance.chatID, strings, false, /*TODO Request Handler here*/messageId: update.CallbackQuery.Message.MessageId, currentText: update.CallbackQuery.Message.Text, newChatId: update.CallbackQuery.Message.Chat.Id);
 								} catch (Exception) {
 									Api.AnswerCallbackQuery(apikey, update.CallbackQuery.Id, strings.GetString(Strings.StringsList.voteDoesntExist));
 								}

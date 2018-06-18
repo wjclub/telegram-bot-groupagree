@@ -9,6 +9,7 @@ using System;
 using System.Linq;
 using System.IO;
 using System.Threading.Tasks;
+using System.Runtime.Serialization;
 
 namespace telegrambotgroupagree {
 	public abstract class Poll {
@@ -132,9 +133,11 @@ namespace telegrambotgroupagree {
 		public virtual List<int> CountVotes(out int peopleCount) {
 			List<int> output = new List<int>();
 			peopleCount = 0;
-			foreach (List<User> voters in PollVotes.Values) {
+			if (PollVotes != null) {
+				foreach (List<User> voters in PollVotes.Values) {
 				output.Add(voters.Count);
 				peopleCount += voters.Count;
+				}
 			}
 			return output;
 		}
@@ -438,14 +441,14 @@ namespace telegrambotgroupagree {
 			};
 			if (!closed) {
 				inline.InlineKeyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.publish), switchInlineQuery: pollText) });
-				/*if (pollType != EPolls.board) {*/
+				if (pollType != EPolls.board) {
 					inline.InlineKeyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.publishWithLink), switchInlineQuery: "$c:" + pollText) });
 					inline.InlineKeyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.buttonVote), callbackData: "comm:iwannavote:" + Cryptography.Encrypt(chatId+ ":" + pollId, apikey)),
 						                                                       InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.commPageRefresh), callbackData:"comm:update:" + chatId + ":" + pollId)});
-				/*} else {
+				} else {
 					inline.InlineKeyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.buttonVote), callbackData: "comm:url" + Cryptography.Encrypt("board:" + chatId + ":" + pollId, apikey)),
 																			InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.commPageRefresh), callbackData:"comm:update:" + chatId + ":" + pollId)});
-				/*}*/
+				}
 			}
 			inline.InlineKeyboard.Add(new List<InlineKeyboardButton>() {
 				InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.commPageOptions), callbackData:"comm:options:" + chatId + ":" + pollId),
@@ -459,7 +462,7 @@ namespace telegrambotgroupagree {
 			InlineKeyboardMarkup inline = new InlineKeyboardMarkup {
 				InlineKeyboard = new List<List<InlineKeyboardButton>>()
 			};
-			/*if (this.pollType != EPolls.board) {*/
+			if (this.pollType != EPolls.board) {
 				inline.InlineKeyboard.Add(new List<InlineKeyboardButton> {
 					InlineKeyboardButton.Create(String.Format(strings.GetString(Strings.StringsList.optionsPercentageNone), (PercentageBar == PercentageBars.Bars.none).ToCheck()), callbackData:"comm:percentage:none:" + chatId + ":" + pollId),
 					InlineKeyboardButton.Create(PercentageBars.GetIconArray(PercentageBars.Bars.dots).Implode() + " " + (PercentageBar == PercentageBars.Bars.dots).ToCheck(), callbackData:"comm:percentage:dots:" + chatId + ":" + pollId),
@@ -471,7 +474,7 @@ namespace telegrambotgroupagree {
 				inline.InlineKeyboard.Add(new List<InlineKeyboardButton> {
 					InlineKeyboardButton.Create(String.Format(strings.GetString(Strings.StringsList.optionsAppendable), Appendable.ToCheck()), callbackData:"comm:appendable:" + chatId + ":" + pollId),
 				});
-			/*}*/
+			}
 			inline.InlineKeyboard.Add(new List<InlineKeyboardButton> {
 				InlineKeyboardButton.Create(RenderModerationEmoji() + " " + strings.GetString(Strings.StringsList.moderate), callbackData:"comm:moderate:" + chatId + ":" + pollId),
 				});
@@ -542,9 +545,11 @@ namespace telegrambotgroupagree {
 					if (currentInlineMessageID != null) {
 						MessageID currentMessageID = messageIds.Find(x => x.inlineMessageId == currentInlineMessageID);
 						if (currentMessageID.messageIDInvalid) {
-							//Throw something
+							throw new UpdateMessageIDInvalidException();
 						} else if (currentMessageID.botChatID == currentBotChatID) {
 
+						} else {
+							throw new UpdateBotsDontMatchException();
 						}
 					}
 					foreach (MessageID messageID in messageIds) {
@@ -632,6 +637,21 @@ namespace telegrambotgroupagree {
 			return command;
 		}
     }
+
+	[Serializable]
+	internal class UpdateBotsDontMatchException:Exception {
+		public UpdateBotsDontMatchException() {
+		}
+
+		public UpdateBotsDontMatchException(string message) : base(message) {
+		}
+
+		public UpdateBotsDontMatchException(string message, Exception innerException) : base(message, innerException) {
+		}
+
+		protected UpdateBotsDontMatchException(SerializationInfo info, StreamingContext context) : base(info, context) {
+		}
+	}
 
 	public class ContentParts {
 		public ContentParts(string text, InlineKeyboardMarkup inlineKeyboard, string inlineTitle, string inlineDescription) {

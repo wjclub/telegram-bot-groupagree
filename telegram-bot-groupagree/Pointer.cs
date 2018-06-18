@@ -18,7 +18,7 @@ namespace telegrambotgroupagree {
 	public enum EPolls {
 		vote = 0,
 		doodle = 1,
-		//Removed board
+		board = 2,
 		limitedDoodle = 3
 	}
 

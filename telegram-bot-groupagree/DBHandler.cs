@@ -21,16 +21,6 @@ namespace telegrambotgroupagree {
 				CharacterSet = "utf8mb4"
 			};
 			connection = new MySqlConnection(connectionStringBuilder.ToString());
-			/*
-			try {
-				Console.WriteLine("Trying to connect to: ..." + conn_string);
-				Console.WriteLine("Connecting to MySQL...");
-				connection.Open();
-			} catch (Exception ex) {
-				Console.WriteLine(ex.ToString());
-				Console.WriteLine ("DB Error");
-			}
-			*/
 		}
 
 		private MySqlConnection connection;
@@ -108,9 +98,9 @@ namespace telegrambotgroupagree {
 						case EPolls.doodle:
 							allPolls.Add(new Doodle(int.Parse(reader["chatid"].ToString()), int.Parse(reader["pollid"].ToString()), reader["pollText"].ToString(), reader["pollDescription"].ToString(), (EAnony)Enum.Parse(typeof(EAnony), reader["anony"].ToString()), (reader["closed"].ToString() == "1" || false), (PercentageBars.Bars)Enum.Parse(typeof(PercentageBars.Bars), reader["percentageBar"].ToString()), (reader["appendable"].ToString() == "1" || false), (reader["sorted"].ToString() == "1" || false), (reader["archived"].ToString() == "1" || false), JsonConvert.DeserializeObject<Dictionary<string, List<User>>>(reader["pollVotes"].ToString()), JsonConvert.DeserializeObject<List<MessageID>>(reader["messageIds"].ToString()), JsonConvert.DeserializeObject<List<User>>(reader["people"].ToString()), this, (Strings.Langs)Enum.Parse(typeof(Strings.Langs), reader["lang"].ToString())));
 							break;
-						/*case EPolls.board:
+						case EPolls.board:
 							allPolls.Add(new Board(int.Parse(reader["chatid"].ToString()), int.Parse(reader["pollid"].ToString()), reader["pollText"].ToString(), reader["pollDescription"].ToString(), (EAnony)Enum.Parse(typeof(EAnony), reader["anony"].ToString()), (reader["closed"].ToString() == "1" || false), (reader["archived"].ToString() == "1" || false), this, JsonConvert.DeserializeObject<Dictionary<int, BoardVote>>(reader["pollVotes"].ToString()), JsonConvert.DeserializeObject<List<MessageID>>(reader["messageIds"].ToString()), (Strings.Langs)Enum.Parse(typeof(Strings.Langs), reader["lang"].ToString())));
-							break;*/
+							break;
 						case EPolls.limitedDoodle:
 							allPolls.Add(new LimitedDoodle(int.Parse(reader["chatid"].ToString()), int.Parse(reader["pollid"].ToString()), reader["pollText"].ToString(), reader["pollDescription"].ToString(), (EAnony)Enum.Parse(typeof(EAnony), reader["anony"].ToString()), (reader["closed"].ToString() == "1" || false), (PercentageBars.Bars)Enum.Parse(typeof(PercentageBars.Bars), reader["percentageBar"].ToString()), (reader["appendable"].ToString() == "1" || false), (reader["sorted"].ToString() == "1" || false), (reader["archived"].ToString() == "1" || false), JsonConvert.DeserializeObject<Dictionary<string, List<User>>>(reader["pollVotes"].ToString()), JsonConvert.DeserializeObject<List<MessageID>>(reader["messageIds"].ToString()), JsonConvert.DeserializeObject<List<User>>(reader["people"].ToString()), int.Parse(reader["maxVotes"].ToString()), this,  (Strings.Langs)Enum.Parse(typeof(Strings.Langs),reader["lang"].ToString())));
 							break;
