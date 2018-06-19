@@ -588,6 +588,10 @@ namespace telegrambotgroupagree {
 			}
 		}
 
+		public async Task Update(List<Instance> instances, long currentBotChatID, Strings strings, UpdateRequest updateRequest) {
+			//TODO Figure this out
+		}
+
 		internal void UpdateWithOptionsPane(string apikey, Strings strings, int messageID, string text) {
 			ContentParts content = GetContent(strings, apikey, noApproximation:true);
 			Api.EditMessageText(apikey, "<b>" + HtmlSpecialChars.Encode(strings.GetString(Strings.StringsList.optionsForPoll)) + "</b>\n\n" + content.Text, this.GenerateOptionsMarkup(strings), chatId, messageID);
