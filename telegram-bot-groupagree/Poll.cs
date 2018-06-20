@@ -569,39 +569,53 @@ namespace telegrambotgroupagree {
 		}
 
 		public async Task Update(List<Instance> instances, long currentBotChatID, Strings strings, UpdateQueueObject updateQueueObject, bool noApproximation = true) {
-			Instance currentInstance = instances.Find(x => x.chatID == currentBotChatID);
-			ContentParts content = GetContent(strings, currentInstance.apikey, noApproximation: noApproximation);
-			ContentParts contentChannel = GetContent(strings, currentInstance.apikey, noApproximation: noApproximation, channel: true);
-			foreach (MessageID messageID in messageIds) {
-				if (messageID.messageIDInvalid) {
-					continue;
-				}
-				ContentParts contentToSend = messageID.channel ? contentChannel : content;
-				Instance currentLoopInstance = currentInstance;
-				bool instanceQuestionable = false;
-				try {
-					currentLoopInstance = instances.Find(x => x.chatID == messageID.botChatID);
-				} catch (NullReferenceException) {
-					instanceQuestionable = true;
-				}
-				try {
-
-					//TODO Request Handler here
-					await Api.EditMessageTextAsync(
-						currentInstance.apikey,
-						contentToSend.Text,
-						contentToSend.InlineKeyboard,
-						inlineMessageID: messageID.inlineMessageId
-						);
-					if (instanceQuestionable) {
-						messageID.botChatID = currentLoopInstance.chatID;
+			bool allDone = true;
+			try {
+				Instance currentInstance = instances.Find(x => x.chatID == currentBotChatID);
+				ContentParts content = GetContent(strings, currentInstance.apikey, noApproximation: noApproximation);
+				ContentParts contentChannel = GetContent(strings, currentInstance.apikey, noApproximation: noApproximation, channel: true);
+				foreach (MessageID messageID in messageIds) {
+					if (messageID.messageIDInvalid) {
+						continue;
 					}
-					//Thrown when the message was deleted
-				} catch (WJClubBotFrame.Exceptions.MessageIDInvalid) {
-					//TODO Notify user maybe?
-					messageID.messageIDInvalid = true;
-				} catch (WJClubBotFrame.Exceptions.TooManyRequests ex) {
-					currentLoopInstance.retryAt = DateTime.Now + TimeSpan.FromSeconds(ex.RetryAfter);
+					ContentParts contentToSend = messageID.channel ? contentChannel : content;
+					Instance currentLoopInstance = currentInstance;
+					bool instanceQuestionable = false;
+					try {
+						currentLoopInstance = instances.Find(x => x.chatID == messageID.botChatID);
+					} catch (NullReferenceException) {
+						instanceQuestionable = true;
+					}
+					try {
+						if (RequestHandler.GetInstanceAvailableUpdates(currentLoopInstance).recommendedUpdates > RequestHandler.recommendedInstanceUpdatesPerSecond) {
+							if (RequestHandler.GetMessageIDAvailableUpdates(messageID: messageID).recommendedUpdates > RequestHandler.recommendedChatUpdatesPerMinute) {
+								//TODO Request Handler here
+								await Api.EditMessageTextAsync(
+									currentInstance.apikey,
+									contentToSend.Text,
+									contentToSend.InlineKeyboard,
+									inlineMessageID: messageID.inlineMessageId
+									);
+								updateQueueObject.doneUpdates.Add(messageID.inlineMessageId);
+								if (instanceQuestionable) {
+									messageID.botChatID = currentLoopInstance.chatID;
+								}
+							} else {
+								allDone = false;
+								continue;
+							}
+						}
+						//Thrown when the message was deleted
+					} catch (WJClubBotFrame.Exceptions.MessageIDInvalid) {
+						//TODO Notify user maybe?
+						messageID.messageIDInvalid = true;
+					} catch (WJClubBotFrame.Exceptions.TooManyRequests ex) {
+						currentLoopInstance.retryAt = DateTime.Now + TimeSpan.FromSeconds(ex.RetryAfter);
+					}
+				}
+			} finally {
+				if (allDone) {
+					dBHandler.UpdateQueue.Remove(updateQueueObject);
 				}
 			}
 		}

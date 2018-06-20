@@ -36,9 +36,9 @@ namespace telegrambotgroupagree {
 				cooldown:TimeSpan.FromSeconds(1));
         }
 
-		public static UpdateAvailabilityList GetInlineMessageAvailableUpdates(string inlineMessageID, Poll poll) 
+		public static UpdateAvailabilityList GetMessageIDAvailableUpdates(MessageID messageID) 
 			=> GetListFromLastUpdatesList(
-				poll.MessageIds.Find(x => x.inlineMessageId == inlineMessageID).last30Updates,
+				messageID.last30Updates,
 				max: maxChatUpdatesPerMinute,
 				recommended: recommendedChatUpdatesPerMinute,
 				cooldown:TimeSpan.FromMinutes(1));
