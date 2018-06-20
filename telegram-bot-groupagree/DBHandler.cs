@@ -33,7 +33,7 @@ namespace telegrambotgroupagree {
 
 		public List<Pointer> PointerQueue { get { return this.pointerQueue; } }
 
-		public List<UpdateRequest> delayedRequests  {get; internal set; }
+		public List<UpdateQueueObject> UpdateQueue  { get; internal set; }
 
 		public List<Instance> GetInstances() {
 			connection.Open();

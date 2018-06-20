@@ -511,7 +511,7 @@ namespace telegrambotgroupagree {
 
 		public async Task Update(string apikey, Strings strings, long chatId, int messageID, int pagOffset, bool noApproximation) {
 			ContentParts content = GetContent(strings, apikey, noApproximation, offset: pagOffset);
-			Api.EditMessageText(apikey, content.Text, content.InlineKeyboard, chatId, messageID);
+			Api.EditMessageTextAsync(apikey, content.Text, content.InlineKeyboard, chatId, messageID);
 		}
 
 		public async Task Update(List<Instance> instances, long currentBotChatID, Strings strings, bool noApproximation, string currentInlineMessageID = null, int? messageId = null, string currentText = null, long? newChatId = null, bool voteButtonPressed = false) {
@@ -529,14 +529,14 @@ namespace telegrambotgroupagree {
 				if (messageId != null) {
 					//User voted in private chat and is not the poll owner
 					if (newChatId != null && newChatId != this.chatId) {
-						Api.EditMessageText(apikey, strings.GetString(Strings.StringsList.votedSuccessfully), null, newChatId, messageId);
+						Api.EditMessageTextAsync(apikey, strings.GetString(Strings.StringsList.votedSuccessfully), null, newChatId, messageId);
 						getsAVote = true;
 					//User requests to vote on his own poll
 					} else if (voteButtonPressed) {
-						Api.EditMessageText(apikey, content.Text, content.InlineKeyboard, this.chatId, messageId);
+						Api.EditMessageTextAsync(apikey, content.Text, content.InlineKeyboard, this.chatId, messageId);
 					//Poll owner voted in private chat
 					} else {
-						Api.EditMessageText(apikey, content.Text, GenerateUserMarkup(strings, apikey), this.chatId, messageId);
+						Api.EditMessageTextAsync(apikey, content.Text, GenerateUserMarkup(strings, apikey), this.chatId, messageId);
 						getsAVote = true;
 					}
 				}
@@ -547,59 +547,73 @@ namespace telegrambotgroupagree {
 						if (currentMessageID.messageIDInvalid) {
 							throw new UpdateMessageIDInvalidException();
 						} else if (currentMessageID.botChatID == currentBotChatID) {
-
+							ContentParts contentToSend = currentMessageID.channel ? contentChannel : content;
+							
+							await Api.EditMessageTextAsync(
+								currentInstance.apikey,
+								contentToSend.Text,
+								contentToSend.InlineKeyboard,
+								inlineMessageID: currentMessageID.inlineMessageId
+								);
 						} else {
 							throw new UpdateBotsDontMatchException();
 						}
 					}
-					foreach (MessageID messageID in messageIds) {
-						if (messageID.messageIDInvalid || messageID.inlineMessageId == currentInlineMessageID) {
-							continue;
-						}
-						ContentParts contentToSend = messageID.channel ? contentChannel : content;
-						Instance currentLoopInstance = currentInstance;
-						bool instanceQuestionable = false;
-						try {
-							currentLoopInstance = instances.Find(x => x.chatID == messageID.botChatID);
-						} catch (NullReferenceException) {
-							instanceQuestionable = true;
-						}
-						try {
-
-							//TODO Request Handler here
-							await Api.EditMessageText(
-								currentInstance.apikey,
-								contentToSend.Text,
-								contentToSend.InlineKeyboard,
-								inlineMessageID: messageID.inlineMessageId
-								);
-							if (instanceQuestionable) {
-								messageID.botChatID = currentLoopInstance.chatID;
-							}
-						//Thrown when the message was deleted
-						} catch (WJClubBotFrame.Exceptions.MessageIDInvalid) {
-							//TODO Notify user maybe?
-							messageID.messageIDInvalid = true;
-						} catch (WJClubBotFrame.Exceptions.TooManyRequests ex) {
-							currentLoopInstance.retryAt = DateTime.Now + TimeSpan.FromSeconds(ex.RetryAfter);
-						}
-					}
+					dBHandler.UpdateQueue.Add(new UpdateQueueObject {
+						poll = this,
+						priorityUpdates = new List<string> { currentInlineMessageID },
+						important = false,
+					});
 				}
 			}
 		}
 
-		public async Task Update(List<Instance> instances, long currentBotChatID, Strings strings, UpdateRequest updateRequest) {
-			//TODO Figure this out
+		public async Task Update(List<Instance> instances, long currentBotChatID, Strings strings, UpdateQueueObject updateQueueObject, bool noApproximation = true) {
+			Instance currentInstance = instances.Find(x => x.chatID == currentBotChatID);
+			ContentParts content = GetContent(strings, currentInstance.apikey, noApproximation: noApproximation);
+			ContentParts contentChannel = GetContent(strings, currentInstance.apikey, noApproximation: noApproximation, channel: true);
+			foreach (MessageID messageID in messageIds) {
+				if (messageID.messageIDInvalid) {
+					continue;
+				}
+				ContentParts contentToSend = messageID.channel ? contentChannel : content;
+				Instance currentLoopInstance = currentInstance;
+				bool instanceQuestionable = false;
+				try {
+					currentLoopInstance = instances.Find(x => x.chatID == messageID.botChatID);
+				} catch (NullReferenceException) {
+					instanceQuestionable = true;
+				}
+				try {
+
+					//TODO Request Handler here
+					await Api.EditMessageTextAsync(
+						currentInstance.apikey,
+						contentToSend.Text,
+						contentToSend.InlineKeyboard,
+						inlineMessageID: messageID.inlineMessageId
+						);
+					if (instanceQuestionable) {
+						messageID.botChatID = currentLoopInstance.chatID;
+					}
+					//Thrown when the message was deleted
+				} catch (WJClubBotFrame.Exceptions.MessageIDInvalid) {
+					//TODO Notify user maybe?
+					messageID.messageIDInvalid = true;
+				} catch (WJClubBotFrame.Exceptions.TooManyRequests ex) {
+					currentLoopInstance.retryAt = DateTime.Now + TimeSpan.FromSeconds(ex.RetryAfter);
+				}
+			}
 		}
 
 		internal void UpdateWithOptionsPane(string apikey, Strings strings, int messageID, string text) {
 			ContentParts content = GetContent(strings, apikey, noApproximation:true);
-			Api.EditMessageText(apikey, "<b>" + HtmlSpecialChars.Encode(strings.GetString(Strings.StringsList.optionsForPoll)) + "</b>\n\n" + content.Text, this.GenerateOptionsMarkup(strings), chatId, messageID);
+			Api.EditMessageTextAsync(apikey, "<b>" + HtmlSpecialChars.Encode(strings.GetString(Strings.StringsList.optionsForPoll)) + "</b>\n\n" + content.Text, this.GenerateOptionsMarkup(strings), chatId, messageID);
 		}
 
 		internal void UpdateWithModeratePane(string apikey, Strings strings, int messageId, string text) {
 			ContentParts content = GetContent(strings, apikey, noApproximation:true,  moderatePane:true);
-			Api.EditMessageText(apikey, content.Text, content.InlineKeyboard, chatId, messageId);
+			Api.EditMessageTextAsync(apikey, content.Text, content.InlineKeyboard, chatId, messageId);
 		}
 
 		public InlineQueryResultArticle Result(Strings strings, string apikey, bool channel) {

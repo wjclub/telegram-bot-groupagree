@@ -75,8 +75,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="UpdateRequest.cs" />
-    <Compile Include="EKindOfUpdate.cs" />
+    <Compile Include="UpdateQueueObject.cs" />
     <Compile Include="Instance.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="MainBotFrame.cs" />

@@ -279,7 +279,7 @@ namespace WJClubBotFrame.Methods {
 		/// <param name="inlineMessageID"></param>
 		/// <param name="disableWebPagePreview"></param>
 		/// <returns>Nothing ;D</returns>
-		public static async Task EditMessageText(string apikey, string text, ReplyMarkup replyMarkup = null, long? chatID = null, int? messageID = null, string inlineMessageID = null, bool disableWebPagePreview = true) {
+		public static async Task EditMessageTextAsync(string apikey, string text, ReplyMarkup replyMarkup = null, long? chatID = null, int? messageID = null, string inlineMessageID = null, bool disableWebPagePreview = true) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "editMessageText",
 				chat_id = chatID,
