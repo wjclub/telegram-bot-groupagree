@@ -65,6 +65,16 @@ namespace telegrambotgroupagree {
 			}
 		}
 
+		public static bool DoUpdate(MessageID messageID, int messageTextLength, bool necessary = false) 
+			=> DoUpdate(updateAvailabilityList: GetMessageIDAvailableUpdates(messageID), messageTextLength: messageTextLength, necessary: necessary);
+
+		public static bool DoUpdate(Instance instance, int messageTextLength, bool necessary = false)
+			=> DoUpdate(updateAvailabilityList: GetInstanceAvailableUpdates(instance), messageTextLength: messageTextLength, necessary: necessary);
+
+		public static bool DoUpdate(Instance instance, MessageID messageID, int messageTextLength, bool necessary = false) 
+			=> DoUpdate(instance: instance, messageTextLength: messageTextLength, necessary: necessary) 
+				&& DoUpdate(messageID: messageID, messageTextLength: messageTextLength, necessary: necessary);
+
 		public static bool IsFatUpdate(int messageTextLength) 
 			=> messageTextLength >= messageUnitSize;
 	}

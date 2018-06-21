@@ -546,18 +546,21 @@ namespace telegrambotgroupagree {
 							throw new UpdateMessageIDInvalidException();
 						} else if (currentMessageID.botChatID == currentBotChatID) {
 							ContentParts contentToSend = currentMessageID.channel ? contentChannel : content;
+							if (RequestHandler.DoUpdate(instance: currentInstance, messageID: currentMessageID, messageTextLength: content.Text.Length, necessary: true)) { 
+									try {
+										await Api.EditMessageTextAsync(
+										currentInstance.apikey,
+										contentToSend.Text,
+										contentToSend.InlineKeyboard,
+										inlineMessageID: currentMessageID.inlineMessageId
+										);
+									} catch (WJClubBotFrame.Exceptions.MessageIDInvalid) {
+										currentMessageID.messageIDInvalid = true;
+									} catch (WJClubBotFrame.Exceptions.TooManyRequests ex) {
+										currentInstance.retryAt = DateTime.Now + TimeSpan.FromSeconds(ex.RetryAfter);
+									}
+								}
 
-							try {
-
-							} catch () {
-
-							}
-							await Api.EditMessageTextAsync(
-								currentInstance.apikey,
-								contentToSend.Text,
-								contentToSend.InlineKeyboard,
-								inlineMessageID: currentMessageID.inlineMessageId
-								);
 						} else {
 							throw new UpdateBotsDontMatchException();
 						}
@@ -565,6 +568,7 @@ namespace telegrambotgroupagree {
 					dBHandler.UpdateQueue.Add(new UpdateQueueObject {
 						poll = this,
 						priorityUpdates = new List<string> { currentInlineMessageID },
+						doneUpdates = new List<string>(),
 						important = false,
 					});
 				}
@@ -589,30 +593,28 @@ namespace telegrambotgroupagree {
 					} catch (NullReferenceException) {
 						instanceQuestionable = true;
 					}
-					if (RequestHandler.GetInstanceAvailableUpdates(currentLoopInstance).recommendedUpdates > RequestHandler.recommendedInstanceUpdatesPerSecond) {
-						if (RequestHandler.GetMessageIDAvailableUpdates(messageID: messageID).recommendedUpdates > RequestHandler.recommendedChatUpdatesPerMinute) {
-							try {
-								await Api.EditMessageTextAsync(
-									currentInstance.apikey,
-									contentToSend.Text,
-									contentToSend.InlineKeyboard,
-									inlineMessageID: messageID.inlineMessageId
-									);
-								messageID.last30Updates.Add(DateTime.Now);
-								updateQueueObject.doneUpdates.Add(messageID.inlineMessageId);
-								if (instanceQuestionable) {
-									messageID.botChatID = currentLoopInstance.chatID;
-								}
-								//Thrown when the message was deleted
-							} catch (WJClubBotFrame.Exceptions.MessageIDInvalid) {
-								messageID.messageIDInvalid = true;
-							} catch (WJClubBotFrame.Exceptions.TooManyRequests ex) {
-								currentLoopInstance.retryAt = DateTime.Now + TimeSpan.FromSeconds(ex.RetryAfter);
+					if (RequestHandler.DoUpdate(instance: currentLoopInstance, messageID: messageID, messageTextLength: content.Text.Length, necessary: true)) {
+						try {
+							await Api.EditMessageTextAsync(
+								currentInstance.apikey,
+								contentToSend.Text,
+								contentToSend.InlineKeyboard,
+								inlineMessageID: messageID.inlineMessageId
+								);
+							messageID.last30Updates.Add(DateTime.Now);
+							updateQueueObject.doneUpdates.Add(messageID.inlineMessageId);
+							if (instanceQuestionable) {
+								messageID.botChatID = currentLoopInstance.chatID;
 							}
-						} else {
-							allDone = false;
-							continue;
+							//Thrown when the message was deleted
+						} catch (WJClubBotFrame.Exceptions.MessageIDInvalid) {
+							messageID.messageIDInvalid = true;
+						} catch (WJClubBotFrame.Exceptions.TooManyRequests ex) {
+							currentLoopInstance.retryAt = DateTime.Now + TimeSpan.FromSeconds(ex.RetryAfter);
 						}
+					} else {
+						allDone = false;
+						continue;
 					}
 				}
 			} finally {
