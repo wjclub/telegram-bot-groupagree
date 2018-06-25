@@ -6,5 +6,6 @@ namespace telegrambotgroupagree {
 		public List<string> priorityUpdates;
 		public List<string> doneUpdates;
 		public bool important;
+		public long fromBotID;
 	}
 }

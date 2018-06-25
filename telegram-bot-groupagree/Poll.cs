@@ -81,7 +81,8 @@ namespace telegrambotgroupagree {
 		public virtual void Close(List<Instance> instances, long currentBotChatID, Strings strings, int messageId) {
 			closed = true;
 			dBHandler.AddToQueue(this, change: true, forceNoApproximation: true);
-			Update(instances, currentBotChatID, strings, true, messageId: messageId);
+			//TODO catch stuff
+			Update(instances, currentBotChatID, strings, true, messageId: messageId).Wait();
 		}
 
 		public virtual void SetPercentage(PercentageBars.Bars bar) {
@@ -102,13 +103,15 @@ namespace telegrambotgroupagree {
 		public virtual void Reopen(List<Instance> instances, long currentBotChatID, Strings strings, int messageId) {
 			closed = false;
 			dBHandler.AddToQueue(this, change: true);
-			Update(instances, currentBotChatID, strings, true, messageId: messageId);
+			//TODO catch stuff
+			Update(instances, currentBotChatID, strings, true, messageId: messageId).Wait();
 		}
 
 		public virtual void Delete(List<Instance> instances, long currentBotChatID, Strings strings, int messageId) {
 			delete = true;
 			dBHandler.AddToQueue(this, change: true, forceNoApproximation: true);
-			Update(instances, currentBotChatID, strings, true, messageId: messageId);
+			//TODO catch stuff
+			Update(instances, currentBotChatID, strings, true, messageId: messageId).Wait();
 		}
 
 		public virtual void DeleteFromDeleteAll(string apikey, Strings strings) {
@@ -326,10 +329,11 @@ namespace telegrambotgroupagree {
 					descTooLong = true;
 				}
 			}
-			if (descTooLong)
+			if (descTooLong) {
 				output += " ...";
-			else
+			} else {
 				output = output.Substring(0, output.Length - 3);
+			}
 			return output;
 		}
 
@@ -338,14 +342,15 @@ namespace telegrambotgroupagree {
 		}
 
 		public virtual bool DeleteOption(int optionID, string crc32Hash) {
-			if (PollVotes.Count <= 1)
+			if (PollVotes.Count <= 1) {
 				return false;
+			}
 			string currentKey = PollVotes.ElementAt(optionID).Key;
 			if (currentKey.HashCRC32() == crc32Hash) {
 				PollVotes.Remove(currentKey);
 				dBHandler.AddToQueue(this, true);
 			} else {
-				throw new FormatException();
+				throw new FormatException("Hashes for poll vote do not match");
 			}
 			return true;
 		}
@@ -570,15 +575,16 @@ namespace telegrambotgroupagree {
 						priorityUpdates = new List<string> { currentInlineMessageID },
 						doneUpdates = new List<string>(),
 						important = false,
+						fromBotID = currentBotChatID,
 					});
 				}
 			}
 		}
 
-		public async Task Update(List<Instance> instances, long currentBotChatID, Strings strings, UpdateQueueObject updateQueueObject, bool noApproximation = true) {
-			bool allDone = true;
+		public async Task Update(List<Instance> instances, Strings strings, UpdateQueueObject updateQueueObject, bool noApproximation = true) {
+			bool allDone = false;
 			try {
-				Instance currentInstance = instances.Find(x => x.chatID == currentBotChatID);
+				Instance currentInstance = instances.Find(x => x.chatID == updateQueueObject.fromBotID);
 				ContentParts content = GetContent(strings, currentInstance.apikey, noApproximation: noApproximation);
 				ContentParts contentChannel = GetContent(strings, currentInstance.apikey, noApproximation: noApproximation, channel: true);
 				foreach (MessageID messageID in messageIds) {
@@ -593,10 +599,10 @@ namespace telegrambotgroupagree {
 					} catch (NullReferenceException) {
 						instanceQuestionable = true;
 					}
-					if (RequestHandler.DoUpdate(instance: currentLoopInstance, messageID: messageID, messageTextLength: content.Text.Length, necessary: true)) {
+					if (RequestHandler.DoUpdate(instance: currentLoopInstance, messageID: messageID, messageTextLength: content.Text.Length, necessary: updateQueueObject.important)) {
 						try {
 							await Api.EditMessageTextAsync(
-								currentInstance.apikey,
+								currentLoopInstance.apikey,
 								contentToSend.Text,
 								contentToSend.InlineKeyboard,
 								inlineMessageID: messageID.inlineMessageId
@@ -667,7 +673,8 @@ namespace telegrambotgroupagree {
 				command.Parameters.AddWithValue("?pollType", pollType);
 				command.Parameters.AddWithValue("?lang", this.Lang);
 				if (change) {
-					Update(instances, currentBotChatID, strings, forceNoApproximation);
+					//TODO catch stuff
+					Update(instances, currentBotChatID, strings, forceNoApproximation).Wait();
 				}
 			}
 			return command;

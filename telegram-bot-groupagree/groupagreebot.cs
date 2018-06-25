@@ -88,7 +88,7 @@ namespace telegrambotgroupagree {
 					foreach (Update update in updates) {
 						CurrentUpdate = update;
 						currentInstance.offset = offset = update.UpdateId + 1;
-						dBHandler.UpdateInstance(currentInstance.chatID, currentInstance.offset, currentInstance.last30Updates);
+						dBHandler.UpdateInstance(currentInstance.chatID, currentInstance.offset, currentInstance.last30Updates, currentInstance.retryAt);
 						if (update.Message != null) {
 							Pointer pointer = pointerContainer.GetPointer(update.Message.From.Id, update.Message.From.LanguageCode);
 							if (pointer != null) {
@@ -291,18 +291,29 @@ namespace telegrambotgroupagree {
 													if (int.TryParse(commandSplit[0], out int pollID)) {
 														Poll poll = pollContainer.GetPoll(update.Message.From.Id, pollID);
 														if (int.TryParse(commandSplit[1], out int optionID)) {
+														try {
+															string optionText = poll.GetOptionText(optionID);
 															try {
-																string optionText = poll.GetOptionText(optionID);
-																try {
-																	if (poll.DeleteOption(optionID, commandSplit[2])) {
-																		Api.SendMessageAsync(Globals.GlobalOptions.Apikey, update.Message.Chat.Id, string.Format(strings.GetString(Strings.StringsList.optionDeleteSuccess), poll.PollText, optionText), replyMarkup: InlineMarkupGenerator.GetTheModerationKeyboard(strings, update.Message.From.Id, pollID));
-																	} else {
-																		Api.SendMessageAsync(Globals.GlobalOptions.Apikey, update.Message.Chat.Id, strings.GetString(Strings.StringsList.aPollHasToHaveAtLeastOneOption));
-																	}
-																} catch (FormatException) {
-																	Api.SendMessageAsync(Globals.GlobalOptions.Apikey, update.Message.Chat.Id, String.Format(strings.GetString(Strings.StringsList.pollOptionDeleteErrorButPollStillFound), optionText));
+																if (poll.DeleteOption(optionID, commandSplit[2])) {
+																	Api.SendMessageAsync(Globals.GlobalOptions.Apikey, update.Message.Chat.Id, string.Format(strings.GetString(Strings.StringsList.optionDeleteSuccess), poll.PollText, optionText), replyMarkup: InlineMarkupGenerator.GetTheModerationKeyboard(strings, update.Message.From.Id, pollID));
+																} else {
+																	Api.SendMessageAsync(Globals.GlobalOptions.Apikey, update.Message.Chat.Id, strings.GetString(Strings.StringsList.aPollHasToHaveAtLeastOneOption));
 																}
-															} catch (ArgumentOutOfRangeException) {
+															} catch (FormatException) {
+																Api.SendMessageAsync(Globals.GlobalOptions.Apikey, update.Message.Chat.Id, String.Format(strings.GetString(Strings.StringsList.pollOptionDeleteErrorButPollStillFound), optionText));
+															} catch (BoardTextDoesntMatch) {
+																await Api.SendMessageAsync(Globals.GlobalOptions.Apikey, update.Message.Chat.Id, String.Format(strings.GetString(Strings.StringsList.pollOptionDeleteBoardHasChanged), optionText),
+																	replyMarkup: new InlineKeyboardMarkup {
+																		InlineKeyboard = new List<List<InlineKeyboardButton>>{
+																			new List<InlineKeyboardButton>{
+																				InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.sure), callbackData:$"comm:boardoptiondetete:{optionID}"),
+																				InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.no), callbackData:"comm:moderate"),
+																			}
+																		}
+																	}
+																);
+															}
+														} catch (ArgumentOutOfRangeException) {
 																Api.SendMessageAsync(apikey, update.Message.Chat.Id, strings.GetString(Strings.StringsList.optionNotFound), replyMarkup: InlineMarkupGenerator.GetTheModerationKeyboard(strings, update.Message.From.Id, pollID));
 															}
 														}
@@ -527,7 +538,8 @@ namespace telegrambotgroupagree {
 										string[] splitBoardDoneData = command.Split(':');
 										Poll poll = pollContainer.GetPoll(int.Parse(splitBoardDoneData[1]), int.Parse(splitBoardDoneData[2]));
 										poll.FinishCreation();
-										poll.Update(instances, currentInstance.chatID, strings, noApproximation:true, messageId: update.CallbackQuery.Message.MessageId);
+										//TODO catch stuff
+										await poll.Update(instances, currentInstance.chatID, strings, noApproximation:true, messageId: update.CallbackQuery.Message.MessageId);
 										break;
 									}
 									case "close":
@@ -563,8 +575,10 @@ namespace telegrambotgroupagree {
 										break;
 									case "nodelete":
 										string[] splitNoDeleteData = command.Split(':');
-									if (update.CallbackQuery.From.Id == int.Parse(splitNoDeleteData[1]))
-										pollContainer.GetPoll(int.Parse(splitNoDeleteData[1]), int.Parse(splitNoDeleteData[2])).Update(instances, currentInstance.chatID, strings, noApproximation: true, messageId:update.CallbackQuery.Message.MessageId, currentText:"", newChatId:update.CallbackQuery.Message.Chat.Id, voteButtonPressed:false);
+										if (update.CallbackQuery.From.Id == int.Parse(splitNoDeleteData[1])) {
+											//TODO catch stuff
+											await pollContainer.GetPoll(int.Parse(splitNoDeleteData[1]), int.Parse(splitNoDeleteData[2])).Update(instances, currentInstance.chatID, strings, noApproximation: true, messageId:update.CallbackQuery.Message.MessageId, currentText:"", newChatId:update.CallbackQuery.Message.Chat.Id, voteButtonPressed:false);
+										}
 										break;
 									case "deleteallsure":
 										Api.EditMessageTextAsync(apikey, strings.GetString(Strings.StringsList.seriouslySureDeleteEverything), new InlineKeyboardMarkup {
@@ -589,7 +603,8 @@ namespace telegrambotgroupagree {
 										break;
 									case "update":
 										string[] splitUpdateData = command.Split(':');
-										pollContainer.GetPoll(int.Parse(splitUpdateData[1]), int.Parse(splitUpdateData[2])).Update(instances, currentInstance.chatID, strings, noApproximation:true, messageId:update.CallbackQuery.Message.MessageId, currentText:update.CallbackQuery.Message.Text);
+										//TODO catch stuff
+										await pollContainer.GetPoll(int.Parse(splitUpdateData[1]), int.Parse(splitUpdateData[2])).Update(instances, currentInstance.chatID, strings, noApproximation:true, messageId:update.CallbackQuery.Message.MessageId, currentText:update.CallbackQuery.Message.Text);
 										break;
 									case "options": {
 										string[] splitOptionsData = command.Split(':');
@@ -631,8 +646,8 @@ namespace telegrambotgroupagree {
 										if (splitCloneData[1] == update.CallbackQuery.From.Id.ToString()) {
 											Poll poll = pollContainer.GetPoll(update.CallbackQuery.From.Id, int.Parse(splitCloneData[2]));
 											//Poll newPoll = poll.CloneAndClean(pointer);
-											var oldPollType = pointer.PollType;
-											var oldAnony = pointer.Anony;
+											EPolls oldPollType = pointer.PollType;
+											EAnony oldAnony = pointer.Anony;
 											pointer.PollType = poll.PollType;
 											pointer.Anony = poll.Anony;
 											pointer.LastPollId++;
@@ -670,7 +685,8 @@ namespace telegrambotgroupagree {
 											if (pointer.PollType == EPolls.board) {
 												Poll poll = pollContainer.GetLastPoll(pointer);
 												poll.FinishCreation();
-												poll.Update(instances, currentInstance.chatID, strings, noApproximation: true, messageId: update.CallbackQuery.Message.MessageId);
+												//TODO catch stuff
+												await poll.Update(instances, currentInstance.chatID, strings, noApproximation: true, messageId: update.CallbackQuery.Message.MessageId);
 												pointer.Needle = ENeedle.nothing;
 											} else {
 												Api.EditMessageTextAsync(apikey, strings.GetString(Strings.StringsList.rogerSendIt), chatID: update.CallbackQuery.Message.Chat.Id, messageID: update.CallbackQuery.Message.MessageId);
@@ -688,10 +704,12 @@ namespace telegrambotgroupagree {
 									case "iwannavote":
 										try {
 											string[] splitVoteData = Cryptography.Decrypt(command.Substring(11), apikey).Split(':');
-											pollContainer.GetPoll(int.Parse(splitVoteData[0]), int.Parse(splitVoteData[1])).Update(instances, currentInstance.chatID, strings, true, messageId: update.CallbackQuery.Message.MessageId, currentText:update.CallbackQuery.Message.Text, voteButtonPressed: true);
+											//TODO catch stuff
+											await pollContainer.GetPoll(int.Parse(splitVoteData[0]), int.Parse(splitVoteData[1])).Update(instances, currentInstance.chatID, strings, true, messageId: update.CallbackQuery.Message.MessageId, currentText:update.CallbackQuery.Message.Text, voteButtonPressed: true);
 										} catch (System.FormatException) {
 											string[] splitVoteData = command.Split(':');
-											pollContainer.GetPoll(int.Parse(splitVoteData[1]), int.Parse(splitVoteData[2])).Update(instances, currentInstance.chatID, strings, true, messageId: update.CallbackQuery.Message.MessageId, currentText:"", newChatId: update.CallbackQuery.Message.Chat.Id);
+											//TODO catch stuff
+											await pollContainer.GetPoll(int.Parse(splitVoteData[1]), int.Parse(splitVoteData[2])).Update(instances, currentInstance.chatID, strings, true, messageId: update.CallbackQuery.Message.MessageId, currentText:"", newChatId: update.CallbackQuery.Message.Chat.Id);
 											text = strings.GetString(Strings.StringsList.updatingPoll);
 											alert = true;
 										}
@@ -699,7 +717,8 @@ namespace telegrambotgroupagree {
 										break;
 									case "pag":
 										string[] splitPagData = command.Split(':');
-										pollContainer.GetPoll(int.Parse(splitPagData[1]), int.Parse(splitPagData[2])).Update(apikey, strings, update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, int.Parse(splitPagData[3]), true);
+										//TODO catch stuff
+										await pollContainer.GetPoll(int.Parse(splitPagData[1]), int.Parse(splitPagData[2])).Update(apikey, strings, update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId, int.Parse(splitPagData[3]), true);
 										break;
 									case "lang":
 										string[] langSplit = command.Split(':');
@@ -709,6 +728,15 @@ namespace telegrambotgroupagree {
 									case "showWelcome":
 										pointer.Needle = ENeedle.pollText;
 										WelcomeMessage.Refresh(apikey, strings, pointer, update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId);
+										break;
+									case "boardoptiondetete":
+										string[] boardOptionDelete = command.Split(':');
+										int chatID = int.Parse(boardOptionDelete[1]);
+										if (chatID == update.CallbackQuery.From.Id) {
+											int optionID = int.Parse(boardOptionDelete[3]);
+										} else {
+											//TODO Alert for error
+										}
 										break;
 									default:
 										//TODO Add message
@@ -785,7 +813,8 @@ namespace telegrambotgroupagree {
 										}
 									}
 									if (update.CallbackQuery.InlineMessageId == null)
-										poll.Update(instances, currentInstance.chatID, strings, false, /*TODO Request Handler here*/messageId: update.CallbackQuery.Message.MessageId, currentText: update.CallbackQuery.Message.Text, newChatId: update.CallbackQuery.Message.Chat.Id);
+										//TODO catch stuff
+										await poll.Update(instances, currentInstance.chatID, strings, false, /*TODO Request Handler here*/messageId: update.CallbackQuery.Message.MessageId, currentText: update.CallbackQuery.Message.Text, newChatId: update.CallbackQuery.Message.Chat.Id);
 								} catch (Exception) {
 									Api.AnswerCallbackQuery(apikey, update.CallbackQuery.Id, strings.GetString(Strings.StringsList.voteDoesntExist));
 								}
@@ -796,12 +825,15 @@ namespace telegrambotgroupagree {
 								botChatID = currentInstance.chatID,
 								inlineMessageId = update.ChosenInlineResult.InlineMessageId,
 								channel = update.ChosenInlineResult.Query.StartsWith("$c:", StringComparison.CurrentCulture),
+								last30Updates = new List<DateTime>(),
+								messageIDInvalid = false,
 							});
 						}
 					}
 					//TODO: API HERE
 				}
 				dBHandler.FlushToDB(strings, instances, currentInstance.chatID);
+				await dBHandler.UpdatePollsFromQueue(strings, instances);
 				currentInstance.update = Api.GetUpdatesAsync(currentInstance.apikey, offset);
 			}
 			Notifications.log("The bot has been shut down properly...");

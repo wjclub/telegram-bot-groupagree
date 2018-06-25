@@ -46,14 +46,22 @@ namespace telegrambotgroupagree {
 		public static UpdateAvailabilityList GetListFromLastUpdatesList(List<DateTime> datesList, int max, int recommended, TimeSpan cooldown) {
             DateTime startingNow = DateTime.Now;
 			UpdateAvailabilityList result = UpdateAvailabilityList.FactoryZeroUpdatesLeft();
-            for (int i = 0; i < datesList.Count; i++) {
-                if (startingNow - datesList[i] > cooldown) {
-                    result.maxUpdates = max - (Math.Min(max, i));
-                    result.recommendedUpdates = recommended - Math.Min(recommended,i);
-                    break;
-                }
-            }
-            return result;
+			if (datesList == null) {
+				datesList = new List<DateTime>();
+				result = new UpdateAvailabilityList {
+					maxUpdates = max,
+					recommendedUpdates = recommended,
+				};
+			} else { 
+				for (int i = 0; i < datesList.Count; i++) {
+					if (startingNow - datesList[i] > cooldown) {
+						result.maxUpdates = max - (Math.Min(max, i));
+						result.recommendedUpdates = recommended - Math.Min(recommended,i);
+						break;
+					}
+				}
+			}
+			return result;
         }
 
 		public static bool DoUpdate(UpdateAvailabilityList updateAvailabilityList, int messageTextLength, bool necessary = false) {

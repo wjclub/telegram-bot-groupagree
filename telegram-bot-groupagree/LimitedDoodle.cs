@@ -95,7 +95,8 @@ namespace telegrambotgroupagree {
 				command.Parameters.AddWithValue("?people", JsonConvert.SerializeObject(people));
 				command.Parameters.AddWithValue("?maxVotes", MaxVotes);
 				if (change)
-					Update(instances, currentBotChatID, strings, noApproximation: noApproximation);
+					//TODO catch stuff
+					Update(instances, currentBotChatID, strings, noApproximation: noApproximation).Wait();
 			}
 			return command;
 		}

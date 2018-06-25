@@ -126,7 +126,7 @@ namespace telegrambotgroupagree {
 				command.Parameters.AddWithValue("?lang", lang);
 				command.Parameters.AddWithValue("?people", JsonConvert.SerializeObject(people));
 				if (change) {
-					Update(instances, currentBotChatID, strings, noApproximation:noApproximation);
+					Update(instances, currentBotChatID, strings, noApproximation:noApproximation).Wait();
 				}
 			}
 			return command;

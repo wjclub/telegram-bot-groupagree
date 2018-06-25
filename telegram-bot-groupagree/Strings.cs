@@ -165,6 +165,9 @@ namespace telegrambotgroupagree {
 			addInstanceRejected,
 			addInstanceTechnicalIssue,
 			pollDeleted,
+			pollOptionDeleteBoardHasChanged,
+			pollOptionDeleteBoardVoteYesDelete,
+			pollOptionDeleteBoardVoteNoKeep,
 		};
 
 

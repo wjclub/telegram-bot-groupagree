@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Threading.Tasks;
 using MySql.Data;
 using MySql.Data.MySqlClient;
+using MySql.Data.Types;
 using Newtonsoft.Json;
 using WJClubBotFrame;
 using WJClubBotFrame.Types;
@@ -12,6 +14,7 @@ namespace telegrambotgroupagree {
 		public DBHandler(string dbName, string dbUser, string dbPassword) {
 			pollQueue = new List<QueueObject>();
 			pointerQueue = new List<Pointer>();
+			UpdateQueue = new List<UpdateQueueObject>();
 			MySqlConnectionStringBuilder connectionStringBuilder = new MySqlConnectionStringBuilder {
 				Server = "127.0.0.1", //for compatability reasons... this forces TCP for MariaDB
 				UserID = dbUser,
@@ -47,6 +50,8 @@ namespace telegrambotgroupagree {
 					offset = int.Parse(reader["offset"].ToString()),
 					creator = JsonConvert.DeserializeObject<User>(reader["owner"].ToString()),
 					botUser = null,
+					last30Updates = JsonConvert.DeserializeObject<List<DateTime>>(reader["last_30_updates"].ToString()),
+					retryAt = reader["retry_at"] != null ? new MySqlDateTime(reader["retry_at"].ToString()).GetDateTime() : (DateTime?) null,
 				});
 			}
 			connection.Close();
@@ -116,13 +121,14 @@ namespace telegrambotgroupagree {
 			return allPolls;
 		}
 
-		public void UpdateInstance(long chatID, int offset, List<DateTime> last30Updates) {
+		public void UpdateInstance(long chatID, int offset, List<DateTime> last30Updates, DateTime? retryAt) {
 			connection.Open();
 			MySqlCommand command = connection.CreateCommand();
-			command.CommandText = $"UPDATE instances SET offset = ?offset, last_30_updates = ?last_30_updates WHERE chat_id = ?chat_id;";
+			command.CommandText = $"UPDATE instances SET offset = ?offset, last_30_updates = ?last_30_updates, retry_at = ?retry_at WHERE chat_id = ?chat_id;";
 			command.Parameters.AddWithValue("?chat_id", chatID);
 			command.Parameters.AddWithValue("?offset", offset);
 			command.Parameters.AddWithValue("?last_30_updates", last30Updates);
+			command.Parameters.AddWithValue("?retry_at", retryAt);
 			command.ExecuteNonQuery();
 			connection.Close();
 		}
@@ -184,6 +190,22 @@ namespace telegrambotgroupagree {
 				Notifications.log(e.ToString());
 			}
 			connection.Close();
+		}
+
+		public async Task UpdatePollsFromQueue(Strings strings, List<Instance> instances) {
+			if (UpdateQueue != null && UpdateQueue.Count > 0) {
+				//Update important stuff first
+				foreach (UpdateQueueObject obj in UpdateQueue) {
+					if (obj.important) {
+						await obj.poll.Update(instances, strings, obj);
+					}
+				}
+				foreach (UpdateQueueObject obj in UpdateQueue) {
+					if (!obj.important) {
+						await obj.poll.Update(instances, strings, obj);
+					}
+				}
+			}
 		}
 	}
 
