@@ -9,6 +9,7 @@ using WJClubBotFrame;
 using System.Web;
 using System.Text;
 using System.Threading.Tasks;
+using WJClubBotFrame.Exceptions;
 
 namespace telegrambotgroupagree {
 	public class GroupAgreeBot {
@@ -88,7 +89,7 @@ namespace telegrambotgroupagree {
 					foreach (Update update in updates) {
 						CurrentUpdate = update;
 						currentInstance.offset = offset = update.UpdateId + 1;
-						dBHandler.UpdateInstance(currentInstance.chatID, currentInstance.offset, currentInstance.last30Updates, currentInstance.retryAt);
+						dBHandler.UpdateInstance(currentInstance.chatID, currentInstance.offset, currentInstance.Last30Updates, currentInstance.retryAt);
 						if (update.Message != null) {
 							Pointer pointer = pointerContainer.GetPointer(update.Message.From.Id, update.Message.From.LanguageCode);
 							if (pointer != null) {
@@ -756,7 +757,7 @@ namespace telegrambotgroupagree {
 								else
 									strings.SetLanguage(Strings.Langs.none);
 								string page = update.CallbackQuery.Data.Substring(5);
-								Api.AnswerCallbackQuery(apikey, update.CallbackQuery.Id);
+								string callbackResponseText = null;
 								switch (page) {
 									case "chpoll":
 										InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup {
@@ -768,9 +769,16 @@ namespace telegrambotgroupagree {
 										new List<InlineKeyboardButton>() { InlineKeyboardButton.Create(String.Format(strings.GetString(Strings.StringsList.inlineButtonBoard), (pointer.PollType == EPolls.board ? "✅" : "☑️")), callbackData: "comm:board") },
 									}
 										};
-										Api.EditMessageTextAsync(apikey, strings.GetString(Strings.StringsList.pollTypeDescriptionNoMoreBoard), inlineKeyboard, update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId);
+										try {
+											await Api.EditMessageTextAsync(apikey, strings.GetString(Strings.StringsList.pollTypeDescription), inlineKeyboard, update.CallbackQuery.Message.Chat.Id, update.CallbackQuery.Message.MessageId);
+										} catch (MessageIDInvalid) {
+											callbackResponseText = strings.GetString(Strings.StringsList.messageIDInvalidWelcomeMessage);
+										} catch (TooManyRequests) {
+											callbackResponseText = strings.GetString(Strings.StringsList.tooManyRequestsForMessage);
+										}
 										break;
 								}
+								await Api.AnswerCallbackQuery(apikey, update.CallbackQuery.Id, callbackResponseText, callbackResponseText != null);
 							} else {
 								Pointer pointer = pointerContainer.GetPointer(update.CallbackQuery.From.Id, update.CallbackQuery.From.LanguageCode);
 								if (pointer != null)
@@ -825,7 +833,7 @@ namespace telegrambotgroupagree {
 								botChatID = currentInstance.chatID,
 								inlineMessageId = update.ChosenInlineResult.InlineMessageId,
 								channel = update.ChosenInlineResult.Query.StartsWith("$c:", StringComparison.CurrentCulture),
-								last30Updates = new List<DateTime>(),
+								Last30Updates = new List<DateTime>(),
 								messageIDInvalid = false,
 							});
 						}

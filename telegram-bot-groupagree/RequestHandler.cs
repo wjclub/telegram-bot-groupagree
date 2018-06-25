@@ -30,7 +30,7 @@ namespace telegrambotgroupagree {
 				return UpdateAvailabilityList.FactoryZeroUpdatesLeft();
 			}
             return GetListFromLastUpdatesList(
-				datesList:instance.last30Updates, 
+				datesList:instance.Last30Updates, 
 				max: maxInstanceUpdatesPerSecond, 
 				recommended: recommendedInstanceUpdatesPerSecond, 
 				cooldown:TimeSpan.FromSeconds(1));
@@ -38,7 +38,7 @@ namespace telegrambotgroupagree {
 
 		public static UpdateAvailabilityList GetMessageIDAvailableUpdates(MessageID messageID) 
 			=> GetListFromLastUpdatesList(
-				messageID.last30Updates,
+				messageID.Last30Updates,
 				max: maxChatUpdatesPerMinute,
 				recommended: recommendedChatUpdatesPerMinute,
 				cooldown:TimeSpan.FromMinutes(1));

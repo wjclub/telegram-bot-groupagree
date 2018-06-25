@@ -50,8 +50,9 @@ namespace telegrambotgroupagree {
 					offset = int.Parse(reader["offset"].ToString()),
 					creator = JsonConvert.DeserializeObject<User>(reader["owner"].ToString()),
 					botUser = null,
-					last30Updates = JsonConvert.DeserializeObject<List<DateTime>>(reader["last_30_updates"].ToString()),
-					retryAt = reader["retry_at"] != null ? new MySqlDateTime(reader["retry_at"].ToString()).GetDateTime() : (DateTime?) null,
+					Last30Updates = JsonConvert.DeserializeObject<List<DateTime>>(reader["last_30_updates"].ToString()),
+					retryAt = null,
+					//retryAt = reader["retry_at"] != null ? new MySqlDateTime(reader["retry_at"].ToString()).GetDateTime() : (DateTime?) null,
 				});
 			}
 			connection.Close();
@@ -127,7 +128,7 @@ namespace telegrambotgroupagree {
 			command.CommandText = $"UPDATE instances SET offset = ?offset, last_30_updates = ?last_30_updates, retry_at = ?retry_at WHERE chat_id = ?chat_id;";
 			command.Parameters.AddWithValue("?chat_id", chatID);
 			command.Parameters.AddWithValue("?offset", offset);
-			command.Parameters.AddWithValue("?last_30_updates", last30Updates);
+			command.Parameters.AddWithValue("?last_30_updates", JsonConvert.SerializeObject(last30Updates));
 			command.Parameters.AddWithValue("?retry_at", retryAt);
 			command.ExecuteNonQuery();
 			connection.Close();

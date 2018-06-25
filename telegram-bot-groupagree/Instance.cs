@@ -20,6 +20,15 @@ public class Instance {
     public User botUser;
     public User creator;
     public Task<Update[]> update;
-    public List<DateTime> last30Updates;
+	private List<DateTime> last30Updates;
+	public List<DateTime> Last30Updates {
+		get {
+			if (last30Updates == null) {
+				last30Updates = new List<DateTime>();
+			}
+			return last30Updates;
+		}
+		set => last30Updates = value;
+	}
 	public DateTime? retryAt;
 }

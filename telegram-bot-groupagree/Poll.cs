@@ -607,7 +607,7 @@ namespace telegrambotgroupagree {
 								contentToSend.InlineKeyboard,
 								inlineMessageID: messageID.inlineMessageId
 								);
-							messageID.last30Updates.Add(DateTime.Now);
+							messageID.Last30Updates.Add(DateTime.Now);
 							updateQueueObject.doneUpdates.Add(messageID.inlineMessageId);
 							if (instanceQuestionable) {
 								messageID.botChatID = currentLoopInstance.chatID;

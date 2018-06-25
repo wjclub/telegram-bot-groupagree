@@ -74,7 +74,6 @@ namespace telegrambotgroupagree {
 			inlineButtonVote,
 			inlineButtonDoodle,
 			inlineButtonBoard,
-			pollTypeDescriptionNoMoreBoard,
 			callbackVotedFor,
 			voteDoesntExist,
 			startMessage,
@@ -168,6 +167,11 @@ namespace telegrambotgroupagree {
 			pollOptionDeleteBoardHasChanged,
 			pollOptionDeleteBoardVoteYesDelete,
 			pollOptionDeleteBoardVoteNoKeep,
+			pollTypeDescription,
+			tooManyRequestsByUser,
+			tooManyRequestsForPoll,
+			messageIDInvalidWelcomeMessage,
+			tooManyRequestsForMessage,
 		};
 
 
