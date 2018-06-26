@@ -44,14 +44,13 @@ namespace telegrambotgroupagree {
 				cooldown:TimeSpan.FromMinutes(1));
 
 		public static UpdateAvailabilityList GetListFromLastUpdatesList(List<DateTime> datesList, int max, int recommended, TimeSpan cooldown) {
-            DateTime startingNow = DateTime.Now;
-			UpdateAvailabilityList result = UpdateAvailabilityList.FactoryZeroUpdatesLeft();
-			if (datesList == null) {
+			UpdateAvailabilityList result = new UpdateAvailabilityList {
+				maxUpdates = max,
+				recommendedUpdates = recommended,
+			};
+			DateTime startingNow = DateTime.Now;
+			if (datesList == null || datesList.Count == 0) {
 				datesList = new List<DateTime>();
-				result = new UpdateAvailabilityList {
-					maxUpdates = max,
-					recommendedUpdates = recommended,
-				};
 			} else { 
 				for (int i = 0; i < datesList.Count; i++) {
 					if (startingNow - datesList[i] > cooldown) {

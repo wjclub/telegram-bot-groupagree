@@ -449,7 +449,7 @@ namespace telegrambotgroupagree {
 					inline.InlineKeyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.buttonVote), callbackData: "comm:iwannavote:" + Cryptography.Encrypt(chatId+ ":" + pollId, apikey)),
 																			   InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.commPageRefresh), callbackData:"comm:update:" + chatId + ":" + pollId)});
 				} else {
-					inline.InlineKeyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.buttonVote), callbackData: "comm:url" + Cryptography.Encrypt("board:" + chatId + ":" + pollId, apikey)),
+					inline.InlineKeyboard.Add(new List<InlineKeyboardButton> { InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.buttonVote), url: "https://t.me/" + Globals.GlobalOptions.Botname + "/?start=" + Cryptography.Encrypt("board:" + chatId + ":" + pollId, apikey)),
 																			InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.commPageRefresh), callbackData:"comm:update:" + chatId + ":" + pollId)});
 				}
 			}
@@ -545,39 +545,57 @@ namespace telegrambotgroupagree {
 				}
 				//Refreshes all messages shared via inline mode
 				if (getsAVote) {
-					if (currentInlineMessageID != null) {
-						MessageID currentMessageID = messageIds.Find(x => x.inlineMessageId == currentInlineMessageID);
-						if (currentMessageID.messageIDInvalid) {
-							throw new UpdateMessageIDInvalidException();
-						} else if (currentMessageID.botChatID == currentBotChatID) {
-							ContentParts contentToSend = currentMessageID.channel ? contentChannel : content;
-							if (RequestHandler.DoUpdate(instance: currentInstance, messageID: currentMessageID, messageTextLength: content.Text.Length, necessary: true)) { 
-									try {
-										await Api.EditMessageTextAsync(
-										currentInstance.apikey,
-										contentToSend.Text,
-										contentToSend.InlineKeyboard,
-										inlineMessageID: currentMessageID.inlineMessageId
-										);
-									} catch (WJClubBotFrame.Exceptions.MessageIDInvalid) {
-										currentMessageID.messageIDInvalid = true;
-									} catch (WJClubBotFrame.Exceptions.TooManyRequests ex) {
-										currentInstance.retryAt = DateTime.Now + TimeSpan.FromSeconds(ex.RetryAfter);
-									}
-								}
-
-						} else {
-							throw new UpdateBotsDontMatchException();
-						}
-					}
-					dBHandler.UpdateQueue.Add(new UpdateQueueObject {
-						poll = this,
-						priorityUpdates = new List<string> { currentInlineMessageID },
-						doneUpdates = new List<string>(),
-						important = false,
-						fromBotID = currentBotChatID,
-					});
+					await RefreshInlineMessage(instances, currentBotChatID, content, contentChannel, currentInlineMessageID);
 				}
+			}
+		}
+
+		public async Task RefreshInlineMessage(List<Instance> instances, long currentBotChatID, ContentParts content, ContentParts contentChannel, string currentInlineMessageID = null) {
+			Instance currentInstance = instances.Find(x => x.chatID == currentBotChatID);
+			bool inlineMessageEditSuccess = false;
+			try {
+				if (currentInlineMessageID != null) {
+					MessageID currentMessageID = messageIds.Find(x => x.inlineMessageId == currentInlineMessageID);
+					if (currentMessageID.messageIDInvalid) {
+						throw new UpdateMessageIDInvalidException();
+					} else if (currentMessageID.botChatID == currentBotChatID) {
+						ContentParts contentToSend = currentMessageID.channel ? contentChannel : content;
+						if (RequestHandler.DoUpdate(instance: currentInstance, messageID: currentMessageID, messageTextLength: content.Text.Length, necessary: true)) {
+							try {
+								await Api.EditMessageTextAsync(
+								currentInstance.apikey,
+								contentToSend.Text,
+								contentToSend.InlineKeyboard,
+								inlineMessageID: currentMessageID.inlineMessageId
+								);
+								inlineMessageEditSuccess = true;
+							} catch (WJClubBotFrame.Exceptions.MessageIDInvalid) {
+								currentMessageID.messageIDInvalid = true;
+							} catch (WJClubBotFrame.Exceptions.TooManyRequests ex) {
+								currentInstance.retryAt = DateTime.Now + TimeSpan.FromSeconds(ex.RetryAfter);
+							}
+						} else {
+							if (RequestHandler.DoUpdate(instance: currentInstance, messageTextLength: content.Text.Length)) {
+								throw new InstanceAtFullCapacity();
+							} else if (RequestHandler.DoUpdate(messageID: currentMessageID, messageTextLength: content.Text.Length)) {
+								throw new MessageIDAtFullCapacity();
+							} else {
+								//TODO This can only happen if the last request was on point one unit away and the clock has moved a tiny bit, maybe solve this differently
+								throw new UnknownFullCapacity();
+							}
+						}
+					} else {
+						throw new UpdateBotsDontMatchException();
+					}
+				}
+			} finally {
+				dBHandler.UpdateQueue.Add(new UpdateQueueObject {
+					poll = this,
+					priorityUpdates = inlineMessageEditSuccess ? new List<string> { currentInlineMessageID } : new List<string>(),
+					doneUpdates = new List<string>(),
+					important = false,
+					fromBotID = currentBotChatID,
+				});
 			}
 		}
 
@@ -672,14 +690,44 @@ namespace telegrambotgroupagree {
 				command.Parameters.AddWithValue("?archived", archived);
 				command.Parameters.AddWithValue("?pollType", pollType);
 				command.Parameters.AddWithValue("?lang", this.Lang);
-				if (change) {
+				/*if (change) {
 					//TODO catch stuff
 					Update(instances, currentBotChatID, strings, forceNoApproximation).Wait();
-				}
+				}*/
 			}
 			return command;
 		}
     }
+
+	[Serializable]
+	internal class UnknownFullCapacity:Exception {
+		public UnknownFullCapacity() {
+		}
+
+		public UnknownFullCapacity(string message) : base(message) {
+		}
+
+		public UnknownFullCapacity(string message, Exception innerException) : base(message, innerException) {
+		}
+
+		protected UnknownFullCapacity(SerializationInfo info, StreamingContext context) : base(info, context) {
+		}
+	}
+
+	[Serializable]
+	internal class InstanceAtFullCapacity:Exception {
+		public InstanceAtFullCapacity() {
+		}
+
+		public InstanceAtFullCapacity(string message) : base(message) {
+		}
+
+		public InstanceAtFullCapacity(string message, Exception innerException) : base(message, innerException) {
+		}
+
+		protected InstanceAtFullCapacity(SerializationInfo info, StreamingContext context) : base(info, context) {
+		}
+	}
 
 	[Serializable]
 	internal class UpdateBotsDontMatchException:Exception {

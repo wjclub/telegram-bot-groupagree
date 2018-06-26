@@ -196,9 +196,9 @@ namespace telegrambotgroupagree {
 				command.Parameters.AddWithValue("?pollType", pollType);
 				command.Parameters.AddWithValue("?archived", archived);
 				command.Parameters.AddWithValue("?lang", lang);
-				if (change)
+				/*if (change)
 					//TODO catch stuff
-					Update(instances, currentBotChatID, strings, noApproximation:true).Wait();
+					Update(instances, currentBotChatID, strings, noApproximation:true).Wait();*/
 			}
 			return command;
 		}
