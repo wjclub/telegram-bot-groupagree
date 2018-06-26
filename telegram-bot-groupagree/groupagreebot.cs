@@ -734,7 +734,16 @@ namespace telegrambotgroupagree {
 										string[] boardOptionDelete = command.Split(':');
 										int chatID = int.Parse(boardOptionDelete[1]);
 										if (chatID == update.CallbackQuery.From.Id) {
+											int pollID = int.Parse(boardOptionDelete[2]);
 											int optionID = int.Parse(boardOptionDelete[3]);
+											Board boardOnWhichToDeteleVote = (Board)pollContainer.GetPoll(chatID, pollID);
+											if (boardOnWhichToDeteleVote.PollVotes.TryGetValue(optionID, out BoardVote boardVoteToDelete)) {
+												boardOnWhichToDeteleVote.DeleteOption(optionID, null);
+												pointer.Needle = ENeedle.nothing;
+												await Api.EditMessageTextAsync(currentInstance.apikey, string.Format(strings.GetString(Strings.StringsList.optionDeleteSuccess), boardOnWhichToDeteleVote.PollText.Truncate(25), boardVoteToDelete.Name.Truncate(25)), chatID:update.CallbackQuery.Message.Chat.Id, messageID:update.CallbackQuery.Message.MessageId);
+											} else {
+												await Api.EditMessageTextAsync(currentInstance.apikey, strings.GetString(Strings.StringsList.optionNotFound), chatID: update.CallbackQuery.Message.Chat.Id, messageID: update.CallbackQuery.Message.MessageId);
+											}
 										} else {
 											//TODO Alert for error
 										}

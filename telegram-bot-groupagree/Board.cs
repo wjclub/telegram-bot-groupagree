@@ -96,7 +96,7 @@ namespace telegrambotgroupagree {
 				return false;
 			}
 			string currentVoteText = PollVotes.ElementAt(optionID).Value.Text;
-			if (currentVoteText.HashCRC32() == crc32Hash) {
+			if (crc32Hash == null || currentVoteText.HashCRC32() == crc32Hash) {
 				PollVotes.Remove(optionID);
 				dBHandler.AddToQueue(this, true);
 			} else {
