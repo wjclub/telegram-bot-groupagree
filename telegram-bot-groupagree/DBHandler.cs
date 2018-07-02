@@ -14,7 +14,6 @@ namespace telegrambotgroupagree {
 		public DBHandler(string dbName, string dbUser, string dbPassword) {
 			pollQueue = new List<QueueObject>();
 			pointerQueue = new List<Pointer>();
-			UpdateQueue = new List<UpdateQueueObject>();
 			MySqlConnectionStringBuilder connectionStringBuilder = new MySqlConnectionStringBuilder {
 				Server = "127.0.0.1", //for compatability reasons... this forces TCP for MariaDB
 				UserID = dbUser,
@@ -35,8 +34,6 @@ namespace telegrambotgroupagree {
 		private List<Pointer> pointerQueue;
 
 		public List<Pointer> PointerQueue { get { return this.pointerQueue; } }
-
-		public List<UpdateQueueObject> UpdateQueue  { get; internal set; }
 
 		public List<Instance> GetInstances() {
 			connection.Open();
@@ -69,7 +66,7 @@ namespace telegrambotgroupagree {
 			pollQueue.RemoveAll(x => (x.Poll.ChatId == poll.ChatId && x.Poll.PollId == poll.PollId));
 			pollQueue.Add(new QueueObject {
 				Poll = poll,
-				Change = change,
+				UpdateMessages = change,
 				ForceNoApproximation = forceNoApproximation,
 			});
 		}
@@ -182,7 +179,7 @@ namespace telegrambotgroupagree {
 
 		public void FlushToDB(Strings strings, List<Instance> instances, long currentBotChatID) {
 			connection.Open(); //TODO Thinking... implement request handler here probably?
-			pollQueue.ForEach(x => x.Poll.GenerateCommand(connection, currentBotChatID, strings, instances, forceNoApproximation:x.ForceNoApproximation, change:x.Change).ExecuteNonQuery());
+			pollQueue.ForEach(x => x.Poll.GenerateCommand(connection, currentBotChatID, strings, instances, forceNoApproximation:x.ForceNoApproximation, change:x.UpdateMessages).ExecuteNonQuery());
 			pollQueue.Clear();
 			try {
 				pointerQueue.ForEach(x => x.GenerateCommand(connection).ExecuteNonQuery());
@@ -194,16 +191,17 @@ namespace telegrambotgroupagree {
 		}
 
 		public async Task UpdatePollsFromQueue(Strings strings, List<Instance> instances) {
-			if (UpdateQueue != null && UpdateQueue.Count > 0) {
+			List<QueueObject> updateQueue = pollQueue.FindAll(x => x.UpdateMessages);
+			if (updateQueue != null && updateQueue.Count > 0) {
 				//Update important stuff first
-				foreach (UpdateQueueObject obj in UpdateQueue) {
-					if (obj.important) {
-						await obj.poll.Update(instances, strings, obj);
+				foreach (QueueObject obj in updateQueue) {
+					if (obj.PriorityUpdates != null && obj.PriorityUpdates.Count > 0) {
+						await obj.Poll.Update(instances, strings, obj);
 					}
 				}
-				foreach (UpdateQueueObject obj in UpdateQueue) {
-					if (!obj.important) {
-						await obj.poll.Update(instances, strings, obj);
+				foreach (QueueObject obj in updateQueue) {
+					if (obj.PriorityUpdates == null || obj.PriorityUpdates.Count == 0) {
+						await obj.Poll.Update(instances, strings, obj);
 					}
 				}
 			}
@@ -212,7 +210,10 @@ namespace telegrambotgroupagree {
 
 	public class QueueObject {
 		public Poll Poll;
-		public bool Change;
+		public bool UpdateMessages;
 		public bool ForceNoApproximation;
+		public List<string> PriorityUpdates;
+		public List<string> DoneUpdates;
+		public long FromBotID;
 	}
 }

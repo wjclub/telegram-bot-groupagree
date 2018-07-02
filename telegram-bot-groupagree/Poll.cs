@@ -119,7 +119,7 @@ namespace telegrambotgroupagree {
 			dBHandler.AddToQueue(this, change: true, forceNoApproximation: true);
 		}
 
-		protected virtual ContentParts GetContent(Strings strings, string apikey, bool noApproximation, bool channel = false, int? offset = null, bool moderatePane = false) {
+		protected virtual ContentParts GetContent(Strings strings, string apikey, bool noApproximation = true, bool channel = false, int? offset = null, bool moderatePane = false) {
 			List<int> pollVotesCount = CountVotes(out int peopleCount);
 			ContentParts output;
 			if (moderatePane) {
@@ -550,7 +550,7 @@ namespace telegrambotgroupagree {
 			}
 		}
 
-		public async Task RefreshInlineMessage(List<Instance> instances, long currentBotChatID, ContentParts content, ContentParts contentChannel, string currentInlineMessageID = null) {
+		public async Task<bool> RefreshInlineMessage(List<Instance> instances, long currentBotChatID, ContentParts content, ContentParts contentChannel, string currentInlineMessageID = null) {
 			Instance currentInstance = instances.Find(x => x.chatID == currentBotChatID);
 			bool inlineMessageEditSuccess = false;
 			try {
@@ -589,22 +589,25 @@ namespace telegrambotgroupagree {
 					}
 				}
 			} finally {
+				//Todo figure this out
+				/*
 				dBHandler.UpdateQueue.Add(new UpdateQueueObject {
 					poll = this,
 					priorityUpdates = inlineMessageEditSuccess ? new List<string> { currentInlineMessageID } : new List<string>(),
 					doneUpdates = new List<string>(),
 					important = false,
 					fromBotID = currentBotChatID,
-				});
+				});*/
 			}
+			return inlineMessageEditSuccess;
 		}
 
-		public async Task Update(List<Instance> instances, Strings strings, UpdateQueueObject updateQueueObject, bool noApproximation = true) {
+		public async Task<bool> Update(List<Instance> instances, Strings strings, QueueObject queueObject) {
 			bool allDone = false;
 			try {
-				Instance currentInstance = instances.Find(x => x.chatID == updateQueueObject.fromBotID);
-				ContentParts content = GetContent(strings, currentInstance.apikey, noApproximation: noApproximation);
-				ContentParts contentChannel = GetContent(strings, currentInstance.apikey, noApproximation: noApproximation, channel: true);
+				Instance currentInstance = instances.Find(x => x.chatID == queueObject.FromBotID);
+				ContentParts content = GetContent(strings, currentInstance.apikey);
+				ContentParts contentChannel = GetContent(strings, currentInstance.apikey, channel: true);
 				foreach (MessageID messageID in messageIds) {
 					if (messageID.messageIDInvalid) {
 						continue;
@@ -617,7 +620,7 @@ namespace telegrambotgroupagree {
 					} catch (NullReferenceException) {
 						instanceQuestionable = true;
 					}
-					if (RequestHandler.DoUpdate(instance: currentLoopInstance, messageID: messageID, messageTextLength: content.Text.Length, necessary: updateQueueObject.important)) {
+					if (RequestHandler.DoUpdate(instance: currentLoopInstance, messageID: messageID, messageTextLength: content.Text.Length, necessary: queueObject.important)) {
 						try {
 							await Api.EditMessageTextAsync(
 								currentLoopInstance.apikey,
@@ -626,7 +629,7 @@ namespace telegrambotgroupagree {
 								inlineMessageID: messageID.inlineMessageId
 								);
 							messageID.Last30Updates.Add(DateTime.Now);
-							updateQueueObject.doneUpdates.Add(messageID.inlineMessageId);
+							queueObject.DoneUpdates.Add(messageID.inlineMessageId);
 							if (instanceQuestionable) {
 								messageID.botChatID = currentLoopInstance.chatID;
 							}
@@ -643,8 +646,9 @@ namespace telegrambotgroupagree {
 				}
 			} finally {
 				if (allDone) {
-					dBHandler.UpdateQueue.Remove(updateQueueObject);
+					return true;
 				}
+				return false;
 			}
 		}
 

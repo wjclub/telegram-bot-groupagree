@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿/*using System.Collections.Generic;
 
 namespace telegrambotgroupagree {
 	public class UpdateQueueObject {
@@ -8,4 +8,4 @@ namespace telegrambotgroupagree {
 		public bool important;
 		public long fromBotID;
 	}
-}
+}*/
