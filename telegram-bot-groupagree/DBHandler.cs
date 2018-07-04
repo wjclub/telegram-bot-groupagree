@@ -178,16 +178,29 @@ namespace telegrambotgroupagree {
 		}
 
 		public void FlushToDB(Strings strings, List<Instance> instances, long currentBotChatID) {
-			connection.Open(); //TODO Thinking... implement request handler here probably?
-			pollQueue.ForEach(x => x.Poll.GenerateCommand(connection, currentBotChatID, strings, instances, forceNoApproximation:x.ForceNoApproximation, change:x.UpdateMessages).ExecuteNonQuery());
-			pollQueue.Clear();
+			connection.Open();
 			try {
-				pointerQueue.ForEach(x => x.GenerateCommand(connection).ExecuteNonQuery());
+				pollQueue.ForEach(x => {
+					x.DBDone =
+						x.Poll.GenerateCommand(
+							connection,
+							currentBotChatID,
+							strings,
+							instances,
+							forceNoApproximation: x.ForceNoApproximation,
+							change: x.UpdateMessages
+						).ExecuteNonQuery()
+					//One line affected
+					== 1;
+				});
+				CleanupPollQueue();
+				pointerQueue.ForEach(x => {
+					x.GenerateCommand(connection).ExecuteNonQuery();
+				});
 				pointerQueue.Clear();
-			} catch (Exception e) {
-				Notifications.log(e.ToString());
+			} finally {
+				connection.Close();
 			}
-			connection.Close();
 		}
 
 		public async Task UpdatePollsFromQueue(Strings strings, List<Instance> instances) {
@@ -205,6 +218,15 @@ namespace telegrambotgroupagree {
 					}
 				}
 			}
+			CleanupPollQueue();
+		}
+
+		public void CleanupPollQueue() {
+			foreach (QueueObject obj in pollQueue) {
+				if (obj.DBDone && obj.MessagesUpdated) {
+					pollQueue.Remove(obj);
+				}
+			}
 		}
 	}
 
@@ -215,5 +237,23 @@ namespace telegrambotgroupagree {
 		public List<string> PriorityUpdates;
 		public List<string> DoneUpdates;
 		public long FromBotID;
+		public bool DBDone;
+		public bool MessagesUpdated {
+			//TODO rethink this
+			get {
+				if (this.Poll != null) {
+					if (this.DoneUpdates != null) {
+						if (this.Poll.MessageIds == null) {
+							return true;
+						}
+						return (this.Poll.MessageIds.Count == this.DoneUpdates.Count);
+					} else {
+						return false;
+					}
+				} else {
+					return true;
+				}
+			}
+		}
 	}
 }

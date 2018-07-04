@@ -4,7 +4,7 @@
 		"nothingToCancel":"Nothing to cancel",
 		"canceledThat":"I've canceled that",
 		"hasCanceled":"Your poll has been canceled",
-		"donation":"<b>Hi</b>\nIt seems like you are enjoying our bot\nTo make this project happen we invested a lot of time and money to build, host and maintain this bot\nIf you want to contribute to this project you could make a donation via bitcoin (more coming soon)\n\nOur wallet adress:\n<code>{0}</code>",
+		"donation2":"<b>Hi</b>\nIt seems like you are enjoying our bot\nTo make this project happen we invested a lot of time and money to build, host and maintain this bot\nIf you want to contribute to this project you could become our patron over at https://patreon.com/browny99. We also have cool perks prepared for you.\n\nThank you for supporting us!",
 		"setupPlease":"Please set up the bot first with /start",
 		"boardAnswer":"Now send me your answer to the question <b>{0}</b> (max. 120 characters)...",
 		"pollDoesntExist":"This poll doesn't exist...\nYou might want to try /list...",

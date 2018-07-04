@@ -50,7 +50,7 @@ namespace telegrambotgroupagree {
 			canceledThat,
 			hasCanceled,
 			creatingPoll,
-			donation,
+			donation2,
 			setupPlease,
 			boardAnswer,
 			pollDoesntExist,

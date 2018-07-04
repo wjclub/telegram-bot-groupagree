@@ -230,52 +230,63 @@ namespace telegrambotgroupagree {
 											Api.SendMessageAsync(apikey, update.Message.Chat.Id, pollContainer.GetPollPretty(update.Message.From.Id));
 											break;
 										case "deleteall":
-											Api.SendMessageAsync(apikey, update.Message.Chat.Id, strings.GetString(Strings.StringsList.seriouslyDeleteEverything), replyMarkup: new InlineKeyboardMarkup {
+											await Api.SendMessageAsync(apikey, update.Message.Chat.Id, strings.GetString(Strings.StringsList.seriouslyDeleteEverything), replyMarkup: new InlineKeyboardMarkup {
 												InlineKeyboard = new List<List<InlineKeyboardButton>>{
-											new List<InlineKeyboardButton>{
-												InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.sure), callbackData:"comm:deleteallsure"),
-												InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.no), callbackData:"comm:deleteallno"),
-											}
-										}
+													new List<InlineKeyboardButton>{
+														InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.sure), callbackData:"comm:deleteallsure"),
+														InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.no), callbackData:"comm:deleteallno"),
+													}
+												}
 											});
 											break;
 										case "donate":
-											Api.SendMessageAsync(apikey, update.Message.Chat.Id, String.Format(strings.GetString(Strings.StringsList.donation), "1EPxtfGVCGp8NP3oF8kFqJG74D9AsWiqQ"));
+											await Api.SendMessageAsync(apikey, update.Message.Chat.Id, strings.GetString(Strings.StringsList.donation2));
 											break;
 										case "lang":
 											LangMessage.Send(apikey, strings, pointer);
 											break;
 										case "debug_missing_strings":
-											var missingStrings = strings.GetMissingStrings();
-											for (int i = 0; i < missingStrings.Count; i++) {
-												if (missingStrings.ElementAt(i).Value.Count > 0)
-													Notifications.log(missingStrings.Keys.ElementAt(i).ToString() + " " + CustomJsonStuff.JsonEnhancer.FormatJson(JsonConvert.SerializeObject(missingStrings.ElementAt(i).Value)));
+											if (update.Message.From.Id == 133909606) {
+												var missingStrings = strings.GetMissingStrings();
+												for (int i = 0; i < missingStrings.Count; i++) {
+													if (missingStrings.ElementAt(i).Value.Count > 0)
+														Notifications.log(missingStrings.Keys.ElementAt(i).ToString() + " " + CustomJsonStuff.JsonEnhancer.FormatJson(JsonConvert.SerializeObject(missingStrings.ElementAt(i).Value)));
+												}
 											}
 											break;
 										case "debug_strings_en":
-											Notifications.log(CustomJsonStuff.JsonEnhancer.FormatJson(JsonConvert.SerializeObject(strings.StringsEn)));
-											break;
-										case "crc32":
-											Api.SendMessageAsync(apikey, update.Message.Chat.Id, "/" + ((update.Message.From.FirstName + update.Message.From.LastName).HashCRC32()));
-											break;
-										case "base53":
-											Api.SendMessageAsync(apikey, update.Message.Chat.Id, string.Format("/{0}", HttpServerUtility.UrlTokenEncode(Encoding.GetEncoding("UTF-8").GetBytes(string.Format("13:5:{0}", "hey there".HashCRC32()).ToCharArray()))));
-											break;
-										case "addinstance":
-											if(update.Message.From.Id == 133909606) {
-												pointer.Needle = ENeedle.addInstanceToken;
-												Api.SendMessageAsync(apikey, update.Message.Chat.Id, strings.GetString(Strings.StringsList.addInstanceSendToken));
-											} break;
-										#if DEBUG
-										case "testurl":
-											Api.SendMessageAsync(Globals.GlobalOptions.Apikey, update.Message.Chat.Id, "INTERNAL TEST MESSAGE", replyMarkup: InlineMarkupGenerator.GetOneButtonMarkup(InlineKeyboardButton.Create("TEST THIS NOW", callbackData: "comm:url:t.me/" + Globals.GlobalOptions.Botname + "?start=from_inline")));
-											break;
-										case "burstme":
-											for (int i = 0; i < 40; i++) {
-												Api.SendMessageAsync(Globals.GlobalOptions.Apikey, update.Message.Chat.Id, "INTERNAL TEST MESSAGE NO " + i);
+											if (update.Message.From.Id == 133909606) {
+												Notifications.log(CustomJsonStuff.JsonEnhancer.FormatJson(JsonConvert.SerializeObject(strings.StringsEn)));
 											}
 											break;
-										#endif
+										case "crc32":
+											if (update.Message.From.Id == 133909606) {
+												await Api.SendMessageAsync(apikey, update.Message.Chat.Id, "/" + ((update.Message.From.FirstName + update.Message.From.LastName).HashCRC32()));
+											}
+											break;
+										case "base53":
+											if (update.Message.From.Id == 133909606) {
+												await Api.SendMessageAsync(apikey, update.Message.Chat.Id, string.Format("/{0}", HttpServerUtility.UrlTokenEncode(Encoding.GetEncoding("UTF-8").GetBytes(string.Format("13:5:{0}", "hey there".HashCRC32()).ToCharArray()))));
+											}
+											break;
+										case "addinstance":
+											if (update.Message.From.Id == 133909606) {
+												pointer.Needle = ENeedle.addInstanceToken;
+												await Api.SendMessageAsync(apikey, update.Message.Chat.Id, strings.GetString(Strings.StringsList.addInstanceSendToken));
+											}
+											break;
+										case "testurl":
+											if (update.Message.From.Id == 133909606) {
+												await Api.SendMessageAsync(Globals.GlobalOptions.Apikey, update.Message.Chat.Id, "INTERNAL TEST MESSAGE", replyMarkup: InlineMarkupGenerator.GetOneButtonMarkup(InlineKeyboardButton.Create("TEST THIS NOW", callbackData: "comm:url:t.me/" + Globals.GlobalOptions.Botname + "?start=from_inline")));
+											}
+											break;
+										case "burstme":
+											if (update.Message.From.Id == 133909606) {
+												for (int i = 0; i < 40; i++) {
+													await Api.SendMessageAsync(Globals.GlobalOptions.Apikey, update.Message.Chat.Id, "INTERNAL TEST MESSAGE NO " + i);
+												}
+											}
+											break;
 										default:
 											int editPoll;
 											if (int.TryParse(command, out editPoll)) {
