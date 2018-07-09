@@ -77,7 +77,7 @@ namespace telegrambotgroupagree {
 
 		public async Task Run() {
 			while (!System.IO.File.Exists(@"cancer.wjdummy") && instances != null && instances.Count > 0) {
-				//TODO Check if this worked
+				//TODO Check if this worked, apparently it does
 				Task<Update[]> finishedGetUpdatesTask = await Task<Update[]>.WhenAny(instances.Select(x => x.update).ToArray());
 				Instance currentInstance = instances.Find(x => x.update == finishedGetUpdatesTask);
 				Update[] updates = await currentInstance.update;
@@ -758,7 +758,8 @@ namespace telegrambotgroupagree {
 												await Api.EditMessageTextAsync(currentInstance.apikey, strings.GetString(Strings.StringsList.optionNotFound), chatID: update.CallbackQuery.Message.Chat.Id, messageID: update.CallbackQuery.Message.MessageId);
 											}
 										} else {
-											//TODO Alert for error
+											text = strings.GetString(Strings.StringsList.caughtScrewingWithCallbacks);
+											alert = true;
 										}
 										break;
 									default:

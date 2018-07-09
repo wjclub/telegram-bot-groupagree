@@ -172,6 +172,7 @@ namespace telegrambotgroupagree {
 			tooManyRequestsForPoll,
 			messageIDInvalidWelcomeMessage,
 			tooManyRequestsForMessage,
+			caughtScrewingWithCallbacks,
 		};
 
 
@@ -189,9 +190,14 @@ namespace telegrambotgroupagree {
 					stringsFile += reader.ReadToEnd();
 				}
 			} catch (FileNotFoundException) {
-				
+				//TODO Do something
 			}
-			langStrings = JsonConvert.DeserializeObject<Dictionary<Langs,Dictionary<StringsList, string>>>(stringsFile);
+			try {
+				langStrings = JsonConvert.DeserializeObject<Dictionary<Langs, Dictionary<StringsList, string>>>(stringsFile);
+			} catch (Newtonsoft.Json.JsonSerializationException ex) {
+				Notifications.log("You fucked up the language files...");
+				throw;
+			}
 			string langNamesFile = "";
 			try {
 				using (StreamReader reader = new StreamReader(@"langnames.json")) {

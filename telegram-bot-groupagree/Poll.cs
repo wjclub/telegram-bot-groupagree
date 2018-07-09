@@ -119,7 +119,7 @@ namespace telegrambotgroupagree {
 			dBHandler.AddToQueue(this, change: true, forceNoApproximation: true);
 		}
 
-		protected virtual ContentParts GetContent(Strings strings, string apikey, bool noApproximation = true, bool channel = false, int? offset = null, bool moderatePane = false) {
+		protected virtual ContentParts GetContent(Strings strings, string apikey = null, bool noApproximation = true, bool channel = false, int? offset = null, bool moderatePane = false) {
 			List<int> pollVotesCount = CountVotes(out int peopleCount);
 			ContentParts output;
 			if (moderatePane) {
@@ -230,31 +230,21 @@ namespace telegrambotgroupagree {
 		}
 
 		public virtual string RenderNumberUpdateFriendly(int input, bool skipApproximation) {
+			double inputDouble = input;
 			if (skipApproximation) {
 				return input.ToString();
 			}
-			int[] lookupTable = {
-				10, 15, 20, 30, 50, 100, 200, 300, 500, 750, 1000,
-			};
 			int power = 0;
 			while (input > 1000) {
-				input /= 1000;
+				inputDouble /= 1000;
 				power += 1;
 			}
 			string[] powerLookup = { "", "K", "M", "B" };
-			string output = "";
-			if (input <= lookupTable[0]) {
-				output = input.ToString();
+			if (power > 0) {
+				return Math.Round(inputDouble, 1) + powerLookup[power];
 			} else {
-				for (int i = 1; i < lookupTable.Length; i++) {
-					if (input - lookupTable[i] <= 0) {
-						output = $"{lookupTable[i - 1].ToString()}-{lookupTable[i].ToString()}";
-						break;
-					}
-				}
+				return input.ToString();
 			}
-			output += powerLookup[power];
-			return output;
 		}
 
 		public virtual string RenderOptionalInsert(Strings strings) {
@@ -413,8 +403,10 @@ namespace telegrambotgroupagree {
 		//	return "\n<b>" + optionText.Substring(cutFront) + "</b>\n";
 		//}
 
-		protected virtual string RenderUserForModeration(string userChatID, string displayName = null)
-			=> "<a href='tg://user?id=" + (displayName ?? userChatID) + "'>" + userChatID + "</a>: ";
+
+		//iamverysmart ;D
+		protected virtual string RenderUserForModeration(object userChatID, object displayName = null)
+			=> $"<a href='tg://user?id={userChatID.ToString()}'>{displayName.ToString() ?? userChatID.ToString()}</a>: ";
 
 		public virtual InlineKeyboardMarkup RenderModerationInlineKeyboard(Strings strings) {
 			InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup {
@@ -604,52 +596,50 @@ namespace telegrambotgroupagree {
 
 		public async Task<bool> Update(List<Instance> instances, Strings strings, QueueObject queueObject) {
 			bool allDone = false;
-			try {
-				Instance currentInstance = instances.Find(x => x.chatID == queueObject.FromBotID);
-				ContentParts content = GetContent(strings, currentInstance.apikey);
-				ContentParts contentChannel = GetContent(strings, currentInstance.apikey, channel: true);
-				foreach (MessageID messageID in messageIds) {
-					if (messageID.messageIDInvalid) {
-						continue;
-					}
-					ContentParts contentToSend = messageID.channel ? contentChannel : content;
-					Instance currentLoopInstance = currentInstance;
-					bool instanceQuestionable = false;
+			Instance currentInstance = instances.Find(x => x.chatID == queueObject.FromBotID) /*?? instances.Find()*/;
+			ContentParts content = GetContent(strings);
+			ContentParts contentChannel = GetContent(strings, channel: true);
+			foreach (MessageID messageID in messageIds) {
+				if (messageID.messageIDInvalid) {
+					continue;
+				}
+				ContentParts contentToSend = messageID.channel ? contentChannel : content;
+				Instance currentLoopInstance = currentInstance;
+				bool instanceQuestionable = false;
+				try {
+					currentLoopInstance = instances.Find(x => x.chatID == messageID.botChatID);
+				} catch (NullReferenceException) {
+					instanceQuestionable = true;
+				}
+				if (currentLoopInstance == null) {
+					instanceQuestionable = true;
+					continue;
+				}
+				if (RequestHandler.DoUpdate(instance: currentLoopInstance, messageID: messageID, messageTextLength: content.Text.Length, necessary: queueObject.Important)) {
 					try {
-						currentLoopInstance = instances.Find(x => x.chatID == messageID.botChatID);
-					} catch (NullReferenceException) {
-						instanceQuestionable = true;
-					}
-					if (RequestHandler.DoUpdate(instance: currentLoopInstance, messageID: messageID, messageTextLength: content.Text.Length, necessary: queueObject.important)) {
-						try {
-							await Api.EditMessageTextAsync(
-								currentLoopInstance.apikey,
-								contentToSend.Text,
-								contentToSend.InlineKeyboard,
-								inlineMessageID: messageID.inlineMessageId
-								);
-							messageID.Last30Updates.Add(DateTime.Now);
-							queueObject.DoneUpdates.Add(messageID.inlineMessageId);
-							if (instanceQuestionable) {
-								messageID.botChatID = currentLoopInstance.chatID;
-							}
-							//Thrown when the message was deleted
-						} catch (WJClubBotFrame.Exceptions.MessageIDInvalid) {
-							messageID.messageIDInvalid = true;
-						} catch (WJClubBotFrame.Exceptions.TooManyRequests ex) {
-							currentLoopInstance.retryAt = DateTime.Now + TimeSpan.FromSeconds(ex.RetryAfter);
+						await Api.EditMessageTextAsync(
+							currentLoopInstance.apikey,
+							contentToSend.Text,
+							contentToSend.InlineKeyboard,
+							inlineMessageID: messageID.inlineMessageId
+							);
+						messageID.Last30Updates.Add(DateTime.Now);
+						queueObject.DoneUpdates.Add(messageID.inlineMessageId);
+						if (instanceQuestionable) {
+							messageID.botChatID = currentLoopInstance.chatID;
 						}
-					} else {
-						allDone = false;
-						continue;
+						//Thrown when the message was deleted
+					} catch (WJClubBotFrame.Exceptions.MessageIDInvalid) {
+						messageID.messageIDInvalid = true;
+					} catch (WJClubBotFrame.Exceptions.TooManyRequests ex) {
+						currentLoopInstance.retryAt = DateTime.Now + TimeSpan.FromSeconds(ex.RetryAfter);
 					}
+				} else {
+					allDone = false;
+					continue;
 				}
-			} finally {
-				if (allDone) {
-					return true;
-				}
-				return false;
 			}
+			return allDone;
 		}
 
 		internal void UpdateWithOptionsPane(string apikey, Strings strings, int messageID, string text) {
@@ -669,7 +659,7 @@ namespace telegrambotgroupagree {
 			return InlineQueryResultArticle.Create(chatId + ":" + pollId, content.InlineTitle, InputTextMessageContent.Create(content.Text, disableWebPagePreview: true), content.InlineKeyboard, description: content.InlineDescription, thumbUrl:"https://wjclub.capella.uberspace.de/groupagreebot/res/" + pollType.ToString() + "_" + anony.ToString() + ".png", thumbWidth:256, thumbHeight:256);
 		}
 
-		public virtual MySqlCommand GenerateCommand(MySqlConnection connection, long currentBotChatID, Strings strings, List<Instance> instances, bool forceNoApproximation, bool change = true) {
+		public virtual MySqlCommand GenerateCommand(MySqlConnection connection, long currentBotChatID, Strings strings, List<Instance> instances, bool? forceNoApproximation = null, bool change = true) {
             MySqlCommand command = new MySqlCommand
             {
                 Connection = connection

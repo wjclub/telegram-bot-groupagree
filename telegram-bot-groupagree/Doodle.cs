@@ -101,7 +101,7 @@ namespace telegrambotgroupagree {
 			return result;
 		}
 
-		public override MySqlCommand GenerateCommand(MySqlConnection connection, long currentBotChatID, Strings strings, List<Instance> instances, bool noApproximation, bool change = true) {
+		public override MySqlCommand GenerateCommand(MySqlConnection connection, long currentBotChatID, Strings strings, List<Instance> instances, bool? noApproximation = null, bool change = true) {
 			var command = new MySqlCommand();
 			command.Connection = connection;
 			if (delete) {

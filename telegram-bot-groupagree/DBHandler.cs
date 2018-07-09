@@ -180,19 +180,15 @@ namespace telegrambotgroupagree {
 		public void FlushToDB(Strings strings, List<Instance> instances, long currentBotChatID) {
 			connection.Open();
 			try {
-				pollQueue.ForEach(x => {
-					x.DBDone =
-						x.Poll.GenerateCommand(
+				foreach (QueueObject obj in pollQueue) {
+					obj.Poll.GenerateCommand(
 							connection,
 							currentBotChatID,
 							strings,
-							instances,
-							forceNoApproximation: x.ForceNoApproximation,
-							change: x.UpdateMessages
-						).ExecuteNonQuery()
-					//One line affected
-					== 1;
-				});
+							instances
+						).ExecuteNonQuery();
+					obj.DBDone = true;
+				}
 				CleanupPollQueue();
 				pointerQueue.ForEach(x => {
 					x.GenerateCommand(connection).ExecuteNonQuery();
@@ -222,10 +218,19 @@ namespace telegrambotgroupagree {
 		}
 
 		public void CleanupPollQueue() {
-			foreach (QueueObject obj in pollQueue) {
-				if (obj.DBDone && obj.MessagesUpdated) {
+			lock (pollQueue) {
+				if (pollQueue.Count == 0)
+					return;
+				List<QueueObject> toRemove = new List<QueueObject>();
+				foreach (QueueObject obj in pollQueue) {
+					if (obj.DBDone && obj.MessagesUpdated) {
+						toRemove.Add(obj);
+					}
+				}
+				foreach (QueueObject obj in toRemove) {
 					pollQueue.Remove(obj);
 				}
+				Notifications.log($"Queuecount: {pollQueue.Count}");
 			}
 		}
 	}
@@ -234,26 +239,37 @@ namespace telegrambotgroupagree {
 		public Poll Poll;
 		public bool UpdateMessages;
 		public bool ForceNoApproximation;
-		public List<string> PriorityUpdates;
-		public List<string> DoneUpdates;
+		private List<string> priorityUpdates;
+		public List<string> PriorityUpdates {
+			get {
+				if (priorityUpdates == null) {
+					priorityUpdates = new List<string>();
+				}
+				return priorityUpdates;
+			}
+			set => priorityUpdates = value;
+		}
+		private List<string> doneUpdates;
+		public List<string> DoneUpdates {
+			get {
+				if (doneUpdates == null) {
+					doneUpdates = new List<string>();
+				}
+				return doneUpdates;
+			}
+			set => doneUpdates = value;
+		}
 		public long FromBotID;
 		public bool DBDone;
 		public bool MessagesUpdated {
 			//TODO rethink this
 			get {
-				if (this.Poll != null) {
-					if (this.DoneUpdates != null) {
-						if (this.Poll.MessageIds == null) {
-							return true;
-						}
-						return (this.Poll.MessageIds.Count == this.DoneUpdates.Count);
-					} else {
-						return false;
-					}
-				} else {
+				if (this.Poll == null || this.Poll.MessageIds == null || this.Poll.MessageIds.Count == 0) {
 					return true;
 				}
+				return (this.Poll.MessageIds.Count == this.DoneUpdates.Count);
 			}
 		}
+		public bool Important => PriorityUpdates != null && PriorityUpdates.Count > 0;
 	}
 }

@@ -88,21 +88,30 @@ namespace telegrambotgroupagree {
 			return output;
 		}
 
-		public override string GetOptionText(int optionID) 
-			=> PollVotes.ElementAt(optionID).Value.Text;
+		public override string GetOptionText(int chatID) 
+			=> PollVotes[chatID].Text;
 
-		public override bool DeleteOption(int optionID, string crc32Hash) {
+		public override bool DeleteOption(int chatID, string crc32Hash) {
 			if (PollVotes.Count == 0) {
 				return false;
 			}
-			string currentVoteText = PollVotes.ElementAt(optionID).Value.Text;
+			string currentVoteText = PollVotes[chatID].Text;
 			if (crc32Hash == null || currentVoteText.HashCRC32() == crc32Hash) {
-				PollVotes.Remove(optionID);
+				PollVotes.Remove(chatID);
 				dBHandler.AddToQueue(this, true);
 			} else {
 				throw new BoardTextDoesntMatch("Hashes for poll vote do not match");
 			}
 			return true;
+		}
+
+		protected override string RenderModerationVotes() {
+			string output = "";
+			foreach (KeyValuePair<int, BoardVote> currentOption in PollVotes) {
+				output += RenderUserForModeration(currentOption.Key, currentOption.Value.Name) + currentOption.Value.Text
+					+ "\n/delete_" + HashWorker.Base53Encode(PollId + ":" + currentOption.Key + ":" + CRC32.HashCRC32(currentOption.Value.Text)) + "\n";
+			}
+			return output;
 		}
 
 		protected ContentParts GetPollOutputOld(Strings strings, int peopleCount, List<int> pollVotesCount, bool noApproximation, bool channel = false) {
@@ -176,7 +185,7 @@ namespace telegrambotgroupagree {
 			return true;
 		}
 
-		public override MySqlCommand GenerateCommand(MySqlConnection connection, long currentBotChatID, Strings strings, List<Instance> instances, bool forceNoApproximation, bool change = true) {
+		public override MySqlCommand GenerateCommand(MySqlConnection connection, long currentBotChatID, Strings strings, List<Instance> instances, bool? forceNoApproximation = null, bool change = true) {
 			MySqlCommand command = new MySqlCommand();
 			command.Connection = connection;
 			if (delete) {
