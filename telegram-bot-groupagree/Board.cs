@@ -108,8 +108,8 @@ namespace telegrambotgroupagree {
 		protected override string RenderModerationVotes() {
 			string output = "";
 			foreach (KeyValuePair<int, BoardVote> currentOption in PollVotes) {
-				output += RenderUserForModeration(currentOption.Key, currentOption.Value.Name) + currentOption.Value.Text
-					+ "\n/delete_" + HashWorker.Base53Encode(PollId + ":" + currentOption.Key + ":" + CRC32.HashCRC32(currentOption.Value.Text)) + "\n";
+				output += "\n" + RenderUserForModeration(currentOption.Key, currentOption.Value.Name) + currentOption.Value.Text
+					+ "\n  /delete_" + HashWorker.Base53Encode(PollId + ":" + currentOption.Key + ":" + CRC32.HashCRC32(currentOption.Value.Text)) + "\n";
 			}
 			return output;
 		}

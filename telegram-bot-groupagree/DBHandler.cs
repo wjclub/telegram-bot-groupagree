@@ -49,7 +49,7 @@ namespace telegrambotgroupagree {
 					botUser = null,
 					Last30Updates = JsonConvert.DeserializeObject<List<DateTime>>(reader["last_30_updates"].ToString()),
 					retryAt = null,
-					//retryAt = reader["retry_at"] != null ? new MySqlDateTime(reader["retry_at"].ToString()).GetDateTime() : (DateTime?) null,
+					//TODO NOW //retryAt = reader["retry_at"] != null ? new MySqlDateTime(reader["retry_at"].ToString()).GetDateTime() : (DateTime?) null,
 				});
 			}
 			connection.Close();
@@ -221,16 +221,20 @@ namespace telegrambotgroupagree {
 			lock (pollQueue) {
 				if (pollQueue.Count == 0)
 					return;
-				List<QueueObject> toRemove = new List<QueueObject>();
-				foreach (QueueObject obj in pollQueue) {
-					if (obj.DBDone && obj.MessagesUpdated) {
-						toRemove.Add(obj);
-					}
-				}
-				foreach (QueueObject obj in toRemove) {
-					pollQueue.Remove(obj);
-				}
-				Notifications.log($"Queuecount: {pollQueue.Count}");
+				//List<QueueObject> toRemove = new List<QueueObject>();
+                //foreach (QueueObject obj in pollQueue) {
+                //	if (obj.DBDone && obj.MessagesUpdated) {
+                //		toRemove.Add(obj);
+                //	}
+                //}
+                //foreach (QueueObject obj in toRemove) {
+                //                pollQueue.RemoveAll(x => {
+                //                    x.Poll.ChatId == obj.Poll.ChatId
+                //                    && x.Poll.PollId == obj.Poll.ChatId
+                //                });
+                //}
+                pollQueue.RemoveAll(x => x.DBDone && x.MessagesUpdated);
+				//Notifications.log($"Queuecount: {pollQueue.Count}");
 			}
 		}
 	}
@@ -264,7 +268,7 @@ namespace telegrambotgroupagree {
 		public bool MessagesUpdated {
 			//TODO rethink this
 			get {
-				if (this.Poll == null || this.Poll.MessageIds == null || this.Poll.MessageIds.Count == 0) {
+                if (this.Poll == null || this.Poll.MessageIds == null || this.Poll.MessageIds.Count == 0 || UpdateMessages == false) {
 					return true;
 				}
 				return (this.Poll.MessageIds.Count == this.DoneUpdates.Count);

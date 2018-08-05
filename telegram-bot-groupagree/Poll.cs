@@ -354,8 +354,9 @@ namespace telegrambotgroupagree {
 		}
 
 		protected virtual string RenderModerationText(Strings strings) {
-			string output = RenderModerationEmoji() + " " + RenderModerationTitle(strings) + "\n";
-			output += RenderModerationDescription();
+			string output = RenderModerationEmoji() + " " + RenderModerationTitle(strings);
+            string moderationDescription = RenderModerationDescription();
+            output += string.IsNullOrEmpty(moderationDescription) ? "" : moderationDescription;
 			output += RenderModerationVotes();
 			return output;
 		}
@@ -492,7 +493,7 @@ namespace telegrambotgroupagree {
 			FinishCreation();
 			ContentParts content = GetContent(strings, apikey, noApproximation: true);
 			Api.SendMessageAsync(apikey, chatId, content.Text, replyMarkup: (fromChannel ? content.InlineKeyboard : GenerateUserMarkup(strings, apikey)));
-		}
+        }
 
 		public void Send(string apikey, Strings strings, long chatId, int pagOffset) {
 			ContentParts content = GetContent(strings, apikey, noApproximation: true, offset: pagOffset);

@@ -836,6 +836,7 @@ namespace telegrambotgroupagree {
 													Api.AnswerCallbackQuery(apikey, update.CallbackQuery.Id, String.Format(strings.GetString(Strings.StringsList.callbackTookBack), poll.PollVotes.ElementAt(int.Parse(splitData[2])).Key));
 											}
 										} else {
+                                            //TODO add response here
 											if (poll.Vote(apikey, int.Parse(splitData[2]), update.CallbackQuery.From, update.CallbackQuery.Message, update.CallbackQuery.InlineMessageId)) {
 												Api.AnswerCallbackQuery(apikey, update.CallbackQuery.Id, String.Format(strings.GetString(Strings.StringsList.callbackVotedFor), poll.PollVotes.ElementAt(int.Parse(splitData[2])).Key.RemoveAppendingText()));
 											} else {
