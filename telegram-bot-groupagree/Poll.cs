@@ -212,7 +212,7 @@ namespace telegrambotgroupagree {
 		}
 
 		public virtual string RenderPollConfig(Strings strings) {
-			throw new KeyNotFoundException("You need to put this method in your poll class");
+			throw new NotImplementedException("You need to put this method in your poll class");
 		}
 
 		public virtual string RenderVotingUsers(List<User> users, int peopleCount) {
