@@ -194,7 +194,7 @@ namespace telegrambotgroupagree {
 			}
 			try {
 				langStrings = JsonConvert.DeserializeObject<Dictionary<Langs, Dictionary<StringsList, string>>>(stringsFile);
-			} catch (Newtonsoft.Json.JsonSerializationException ex) {
+			} catch (Newtonsoft.Json.JsonSerializationException) {
 				Notifications.log("You fucked up the language files...");
 				throw;
 			}

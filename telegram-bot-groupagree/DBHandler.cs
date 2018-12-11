@@ -217,11 +217,13 @@ namespace telegrambotgroupagree {
 			CleanupPollQueue();
 		}
 
-		public void CleanupPollQueue() {
-			lock (pollQueue) {
-				if (pollQueue.Count == 0)
-					return;
-				//List<QueueObject> toRemove = new List<QueueObject>();
+        public void CleanupPollQueue()
+        {
+            lock (pollQueue)
+            {
+                if (pollQueue.Count == 0)
+                    return;
+                //List<QueueObject> toRemove = new List<QueueObject>();
                 //foreach (QueueObject obj in pollQueue) {
                 //	if (obj.DBDone && obj.MessagesUpdated) {
                 //		toRemove.Add(obj);
@@ -234,10 +236,10 @@ namespace telegrambotgroupagree {
                 //                });
                 //}
                 pollQueue.RemoveAll(x => x.DBDone && x.MessagesUpdated);
-				//Notifications.log($"Queuecount: {pollQueue.Count}");
-			}
-		}
-	}
+                //Notifications.log($"Queuecount: {pollQueue.Count}");
+            }
+        }
+    }
 
 	public class QueueObject {
 		public Poll Poll;

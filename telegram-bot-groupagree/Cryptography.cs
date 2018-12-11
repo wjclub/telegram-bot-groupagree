@@ -28,13 +28,12 @@ namespace telegrambotgroupagree {
 				byte[] keyBytes = _passwordBytes.GetBytes(_keySize / 8);
 				cipher.Mode = CipherMode.CBC;
 				using (ICryptoTransform encryptor = cipher.CreateEncryptor(keyBytes, vectorBytes)) {
-					using (MemoryStream to = new MemoryStream()) {
+                    MemoryStream to = new MemoryStream();
 						using (CryptoStream writer = new CryptoStream(to, encryptor, CryptoStreamMode.Write)) {
 							writer.Write(valueBytes, 0, valueBytes.Length);
 							writer.FlushFinalBlock();
 							encrypted = to.ToArray();
 						}
-					}
 				}
 				cipher.Clear();
 			}
@@ -70,23 +69,22 @@ namespace telegrambotgroupagree {
 				cipher.Mode = CipherMode.CBC;
 				try {
 					using (ICryptoTransform decryptor = cipher.CreateDecryptor(keyBytes, vectorBytes)) {
-						using (MemoryStream from = new MemoryStream(valueBytes)) {
+                        MemoryStream from = new MemoryStream(valueBytes);
 							using (CryptoStream reader = new CryptoStream(from, decryptor, CryptoStreamMode.Read)) {
 								decrypted = new byte[valueBytes.Length];
 								decryptedByteCount = reader.Read(decrypted, 0, decrypted.Length);
 							}
-						}
 					}
 				} catch (Exception) {
 					try {
 						valueBytes = HttpServerUtility.UrlTokenDecode(value);
 						using (ICryptoTransform decryptor = cipher.CreateDecryptor(keyBytes, vectorBytes)) {
-							using (MemoryStream from = new MemoryStream(valueBytes)) {
+                            MemoryStream from = new MemoryStream(valueBytes);
 								using (CryptoStream reader = new CryptoStream(from, decryptor, CryptoStreamMode.Read)) {
 									decrypted = new byte[valueBytes.Length];
 									decryptedByteCount = reader.Read(decrypted, 0, decrypted.Length);
 								}
-							}
+							
 						}
 					} catch (Exception) {
 						return String.Empty;

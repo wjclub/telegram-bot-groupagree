@@ -39,7 +39,7 @@ namespace WJClubBotFrame.Methods {
 				try {
 					response = await client.GetAsync(url, cancellationToken:cancellationTokenSource.Token);
 				} catch (WebException ex) {
-					Notifications.log($"GetUpdatesAsync WebException for URL: {url}");
+					Notifications.log($"GetUpdatesAsync WebException for URL: {url}\n" + ex.ToString());
 					throw;
 				} catch (TaskCanceledException ex) {
 					if (ex.CancellationToken == cancellationTokenSource.Token) {

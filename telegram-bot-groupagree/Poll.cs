@@ -489,15 +489,15 @@ namespace telegrambotgroupagree {
 			return false;
 		}
 
-		public void Send(string apikey, Strings strings, long chatId, bool fromChannel = false) {
+		public async Task Send(string apikey, Strings strings, long chatId, bool fromChannel = false) {
 			FinishCreation();
 			ContentParts content = GetContent(strings, apikey, noApproximation: true);
-			Api.SendMessageAsync(apikey, chatId, content.Text, replyMarkup: (fromChannel ? content.InlineKeyboard : GenerateUserMarkup(strings, apikey)));
+            await Api.SendMessageAsync(apikey, chatId, content.Text, replyMarkup: (fromChannel ? content.InlineKeyboard : GenerateUserMarkup(strings, apikey)));
         }
 
-		public void Send(string apikey, Strings strings, long chatId, int pagOffset) {
+		public async Task Send(string apikey, Strings strings, long chatId, int pagOffset) {
 			ContentParts content = GetContent(strings, apikey, noApproximation: true, offset: pagOffset);
-			Api.SendMessageAsync(apikey, chatId, content.Text, replyMarkup: content.InlineKeyboard);
+			await Api.SendMessageAsync(apikey, chatId, content.Text, replyMarkup: content.InlineKeyboard);
 		}
 
 		public void FinishCreation() {
@@ -507,7 +507,7 @@ namespace telegrambotgroupagree {
 
 		public async Task Update(string apikey, Strings strings, long chatId, int messageID, int pagOffset, bool noApproximation) {
 			ContentParts content = GetContent(strings, apikey, noApproximation, offset: pagOffset);
-			Api.EditMessageTextAsync(apikey, content.Text, content.InlineKeyboard, chatId, messageID);
+			await Api.EditMessageTextAsync(apikey, content.Text, content.InlineKeyboard, chatId, messageID);
 		}
 
 		public async Task Update(List<Instance> instances, long currentBotChatID, Strings strings, bool noApproximation, string currentInlineMessageID = null, int? messageId = null, string currentText = null, long? newChatId = null, bool voteButtonPressed = false) {
@@ -525,14 +525,14 @@ namespace telegrambotgroupagree {
 				if (messageId != null) {
 					//User voted in private chat and is not the poll owner
 					if (newChatId != null && newChatId != this.chatId) {
-						Api.EditMessageTextAsync(apikey, strings.GetString(Strings.StringsList.votedSuccessfully), null, newChatId, messageId);
+						await Api.EditMessageTextAsync(apikey, strings.GetString(Strings.StringsList.votedSuccessfully), null, newChatId, messageId);
 						getsAVote = true;
 						//User requests to vote on his own poll
 					} else if (voteButtonPressed) {
-						Api.EditMessageTextAsync(apikey, content.Text, content.InlineKeyboard, this.chatId, messageId);
+						await Api.EditMessageTextAsync(apikey, content.Text, content.InlineKeyboard, this.chatId, messageId);
 						//Poll owner voted in private chat
 					} else {
-						Api.EditMessageTextAsync(apikey, content.Text, GenerateUserMarkup(strings, apikey), this.chatId, messageId);
+						await Api.EditMessageTextAsync(apikey, content.Text, GenerateUserMarkup(strings, apikey), this.chatId, messageId);
 						getsAVote = true;
 					}
 				}
@@ -643,14 +643,14 @@ namespace telegrambotgroupagree {
 			return allDone;
 		}
 
-		internal void UpdateWithOptionsPane(string apikey, Strings strings, int messageID, string text) {
+		internal async Task UpdateWithOptionsPane(string apikey, Strings strings, int messageID, string text) {
 			ContentParts content = GetContent(strings, apikey, noApproximation:true);
-			Api.EditMessageTextAsync(apikey, "<b>" + HtmlSpecialChars.Encode(strings.GetString(Strings.StringsList.optionsForPoll)) + "</b>\n\n" + content.Text, this.GenerateOptionsMarkup(strings), chatId, messageID);
+			await Api.EditMessageTextAsync(apikey, "<b>" + HtmlSpecialChars.Encode(strings.GetString(Strings.StringsList.optionsForPoll)) + "</b>\n\n" + content.Text, this.GenerateOptionsMarkup(strings), chatId, messageID);
 		}
 
-		internal void UpdateWithModeratePane(string apikey, Strings strings, int messageId, string text) {
+		internal async Task UpdateWithModeratePane(string apikey, Strings strings, int messageId, string text) {
 			ContentParts content = GetContent(strings, apikey, noApproximation:true,  moderatePane:true);
-			Api.EditMessageTextAsync(apikey, content.Text, content.InlineKeyboard, chatId, messageId);
+			await Api.EditMessageTextAsync(apikey, content.Text, content.InlineKeyboard, chatId, messageId);
 		}
 
 		public InlineQueryResultArticle Result(Strings strings, string apikey, bool channel) {
