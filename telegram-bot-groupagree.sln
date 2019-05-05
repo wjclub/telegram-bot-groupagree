@@ -12,7 +12,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8D0EE667-4711-46B7-9D44-49B728E80C2A}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
-		groupagreebot_v_4_0_database.sql = groupagreebot_v_4_0_database.sql
+		DEPRECATED_groupagreebot_v_4_0_database.sql.bak = DEPRECATED_groupagreebot_v_4_0_database.sql.bak
+		groupagreebot_database_05_05_2019.sql = groupagreebot_database_05_05_2019.sql
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
