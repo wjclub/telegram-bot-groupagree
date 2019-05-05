@@ -14,7 +14,7 @@ namespace telegrambotgroupagree {
 				dbname = args[2];
 				//TODO this: DBHandler.TestCredentials();
 			} catch (Exception) { //TODO Specify
-				Console.WriteLine("Syntax: telegram-bot-groupagree.exe <dbuser> <dbpw> <dbname> [logging_chat_id] [logging_bot_apikey]");
+				Console.WriteLine("Syntax: telegram-bot-groupagree.exe <dbuser> <dbpw> <dbname> [logging_chat_id logging_bot_apikey]");
 				//Windows ERROR_BAD_ARGUMENTS error code
 				Environment.Exit(0xA0);
 				return;
