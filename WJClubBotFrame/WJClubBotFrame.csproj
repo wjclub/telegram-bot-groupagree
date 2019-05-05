@@ -67,7 +67,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="Globals.cs.template" />
     <None Include="packages.config" />
   </ItemGroup>
 </Project>

@@ -73,6 +73,8 @@ namespace WJClubBotFrame {
 		}
 
 		public static void log(string messageText, string chatId, string botkey) {
+            if (chatId == null || botkey == null)
+                return;
 			#if DEBUG
 			string origin = "DEBUG";
 			#else

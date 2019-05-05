@@ -87,7 +87,7 @@ namespace telegrambotgroupagree {
                 int offset = currentInstance.offset;
                 Globals.GlobalOptions.Apikey = currentInstance.apikey;
                 Globals.GlobalOptions.Botname = currentInstance.botUser.Username;
-                if (currentInstance.retryAt != null || currentInstance.retryAt >= DateTime.UtcNow) {
+                if (currentInstance.retryAt == null || currentInstance.retryAt <= DateTime.UtcNow) {
                     if (updates != null)
                     {
                         foreach (Update update in updates)
@@ -304,7 +304,7 @@ namespace telegrambotgroupagree {
                                                 LangMessage.Send(apikey, strings, pointer);
                                                 break;
                                             case "debug_missing_strings":
-                                                if (update.Message.From.Id == 133909606)
+                                                if (update.Message.From.Id == currentInstance.creator.Id)
                                                 {
                                                     var missingStrings = strings.GetMissingStrings();
                                                     for (int i = 0; i < missingStrings.Count; i++)
@@ -315,38 +315,38 @@ namespace telegrambotgroupagree {
                                                 }
                                                 break;
                                             case "debug_strings_en":
-                                                if (update.Message.From.Id == 133909606)
+                                                if (update.Message.From.Id == currentInstance.creator.Id)
                                                 {
                                                     Notifications.log(CustomJsonStuff.JsonEnhancer.FormatJson(JsonConvert.SerializeObject(strings.StringsEn)));
                                                 }
                                                 break;
                                             case "crc32":
-                                                if (update.Message.From.Id == 133909606)
+                                                if (update.Message.From.Id == currentInstance.creator.Id)
                                                 {
                                                     await Api.SendMessageAsync(apikey, update.Message.Chat.Id, "/" + ((update.Message.From.FirstName + update.Message.From.LastName).HashCRC32()));
                                                 }
                                                 break;
                                             case "base53":
-                                                if (update.Message.From.Id == 133909606)
+                                                if (update.Message.From.Id == currentInstance.creator.Id)
                                                 {
                                                     await Api.SendMessageAsync(apikey, update.Message.Chat.Id, string.Format("/{0}", HttpServerUtility.UrlTokenEncode(Encoding.GetEncoding("UTF-8").GetBytes(string.Format("13:5:{0}", "hey there".HashCRC32()).ToCharArray()))));
                                                 }
                                                 break;
                                             case "addinstance":
-                                                if (update.Message.From.Id == 133909606)
+                                                if (update.Message.From.Id == currentInstance.creator.Id)
                                                 {
                                                     pointer.Needle = ENeedle.addInstanceToken;
                                                     await Api.SendMessageAsync(apikey, update.Message.Chat.Id, strings.GetString(Strings.StringsList.addInstanceSendToken));
                                                 }
                                                 break;
                                             case "testurl":
-                                                if (update.Message.From.Id == 133909606)
+                                                if (update.Message.From.Id == currentInstance.creator.Id)
                                                 {
                                                     await Api.SendMessageAsync(Globals.GlobalOptions.Apikey, update.Message.Chat.Id, "INTERNAL TEST MESSAGE", replyMarkup: InlineMarkupGenerator.GetOneButtonMarkup(InlineKeyboardButton.Create("TEST THIS NOW", callbackData: "comm:url:t.me/" + Globals.GlobalOptions.Botname + "?start=from_inline")));
                                                 }
                                                 break;
                                             case "burstme":
-                                                if (update.Message.From.Id == 133909606)
+                                                if (update.Message.From.Id == currentInstance.creator.Id)
                                                 {
                                                     for (int i = 0; i < 40; i++)
                                                     {
