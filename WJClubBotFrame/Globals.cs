@@ -1,7 +1,16 @@
 ﻿namespace WJClubBotFrame {
-	public class Globals {
-		//Add your logging chat and botkey here
-		public static string LoggingKey = null;
-		public static string LoggingChat = null;
-	}
+    public static class Globals
+    {
+        public static string LoggingKey { get { return GlobalOptions.LoggingKey; } }
+        public static string LoggingChat { get { return GlobalOptions.LoggingChat; } }
+
+        public class Options
+        {
+            public string LoggingKey = null;
+            public string LoggingChat = null;
+        }
+
+        public static Options GlobalOptions;
+
+    }
 }
