@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using WJClubBotFrame.Types;
 using System.Threading.Tasks;
 using System.Net.Http;
+using Mono.Unix.Native;
 
 namespace WJClubBotFrame.Methods {
 	public class Api {
@@ -32,6 +33,7 @@ namespace WJClubBotFrame.Methods {
 
 		public static async Task<Update[]> GetUpdatesAsync(string apikey, int offset) {
 			int timeoutSeconds = 60;
+			Syscall.alarm((uint)(timeoutSeconds * 2 + 2));  // process will kill itself on Unix if inactive for timeout*2+2 sec
 			using (HttpClient client = new HttpClient { Timeout = TimeSpan.FromSeconds(timeoutSeconds) }) {
 				string url = $"https://api.telegram.org/bot{apikey}/getUpdates?timeout={timeoutSeconds}&offset={offset}";
 				HttpResponseMessage response;
