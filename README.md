@@ -9,7 +9,72 @@ Just try it out yourself: Visit https://telegram.me/groupagreebot
  
 The **license** for this project is AGPLv3, please read the license file in this repo before modifying or cloning this repo.
 
-# How to set it up:
+# Quick start using Docker:
+
+### 1. Clone this Git repo, install [Docker](https://docs.docker.com/install/) and [Docker-compose](https://docs.docker.com/compose/install/)
+
+### 2. Create a new bot through [@botfather](https://t.me/botfather)
+    /newbot
+    Group Agree Test  (your displayed bot name here)
+    groupagreetestbot   (your bot username here)
+    
+    /setinline
+    @groupagreetestbot
+    Search polls...
+    
+    /setinlinefeedback
+    @groupagreetestbot
+    Enabled
+    
+    /setjoingroups
+    @groupagreetestbot
+    Disable
+    
+    /setcommands
+    @groupagreetestbot
+    
+    start - 📝 Create a new poll
+    list - 📋 List all polls
+    cancel - 🚫 Cancel the current operation
+    help - ℹ️ Get help
+    lang - 🗣Change language
+
+### 3. Specify your bot id and token in `groupagreebot_database_05_05_2019.sql`
+    INSERT INTO `instances` VALUES (
+            **BOT_ID_HERE**, '**BOT_TOKEN_HERE**',
+            '{\"id\":1333337,\"first_name\":\"John\",\"username\":\"johndoe\"}',
+            0,0,'2019-01-01 00:00:00',0,'[]',NULL
+    );
+
+### 4. Run!
+    docker-compose up --build -d --scale adminer=0
+    
+    (on first run bot might come alive in 20 seconds or so because of MySQL initialization)
+
+## Debugging Docker setup
+
+### Looking at logs, Start/Stop
+Bot logs: `docker-compose logs -f` — you should see "beacon ..." line for every message your bot receives.
+
+Bot containers will restart automatically on system reboot, alongside Docker daemon.  
+Manual stop: `docker-compose stop`  
+Manual start: `docker-compose start db groupagree`
+
+### Accessing the database
+    docker-compose up adminer
+    # access web interface at http://your-ip:8080/, username: gab, password: gab
+    Ctrl-C or `docker-compose stop adminer` when you're finished
+
+### Database backup and restore
+Backup: `docker-compose exec -T db mysqldump -ugab -pgab groupagreebot_beta > backup.sql`
+
+Restore: re-create the containers from scratch, replacing `groupagreebot_database_05_05_2019.sql` with your `backup.sql` 
+
+### Containers teardown and cleanup
+To remove all containers and data (!): `docker-compose down -v --rmi local`
+
+
+# How to set it up manually:
 
 **You need**
 
