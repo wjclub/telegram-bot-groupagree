@@ -200,7 +200,7 @@ namespace WJClubBotFrame.Types {
 	}
 
 	public enum EEntityType {
-		mention, hashtag, bot_command, url, email , bold, italic, code, pre, text_link, text_mention, cashtag, phone_number
+		mention, hashtag, bot_command, url, email , bold, italic, underline, code, pre, text_link, text_mention, cashtag, phone_number
 	}
 
 	public class MessageEntity {
