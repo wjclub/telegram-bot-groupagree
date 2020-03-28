@@ -39,6 +39,20 @@ CREATE TABLE `instances` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `instances`
+--
+
+LOCK TABLES `instances` WRITE;
+/*!40000 ALTER TABLE `instances` DISABLE KEYS */;
+INSERT INTO `instances` VALUES (
+	123456789,'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
+	'{\"id\":1333337,\"first_name\":\"John\",\"username\":\"johndoe\"}',
+	0,0,'2019-01-01 00:00:00',0,'[]',NULL
+);
+/*!40000 ALTER TABLE `instances` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `pointer`
 --
 

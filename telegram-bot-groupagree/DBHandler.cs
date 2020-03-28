@@ -15,7 +15,7 @@ namespace telegrambotgroupagree {
 			pollQueue = new List<QueueObject>();
 			pointerQueue = new List<Pointer>();
 			MySqlConnectionStringBuilder connectionStringBuilder = new MySqlConnectionStringBuilder {
-				Server = "127.0.0.1", //for compatability reasons... this forces TCP for MariaDB
+				Server = Environment.GetEnvironmentVariable("GROUPAGREE_DB_HOST") ?? "127.0.0.1", //127.0.0.1 is for compatability reasons... this forces TCP for MariaDB
 				UserID = dbUser,
 				Password = dbPassword,
 				Database = dbName,
