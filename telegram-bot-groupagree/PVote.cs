@@ -8,15 +8,15 @@ using StringEdit = System.Globalization.CultureInfo;
 
 namespace telegrambotgroupagree {
 	public class PVote : Poll {
-		public PVote(int chatId, int pollId, string pollText, EAnony anony, DBHandler dBHandler, Strings.Langs lang) : base(chatId, pollId, pollText, null, anony, false, PercentageBars.Bars.none, false, false, false, dBHandler, new Dictionary<string, List<User>>(), new List<MessageID>(), lang, EPolls.vote) {
+		public PVote(long chatId, long pollId, string pollText, EAnony anony, DBHandler dBHandler, Strings.Langs lang) : base(chatId, pollId, pollText, null, anony, false, PercentageBars.Bars.none, false, false, false, dBHandler, new Dictionary<string, List<User>>(), new List<MessageID>(), lang, EPolls.vote) {
 
 		}
 
-		public PVote(int chatId, int pollId, string pollText, string pollDescription, EAnony anony, bool closed, PercentageBars.Bars percentageBar, bool appendable, bool sorted, bool archived, Dictionary<string, List<User>> pollVotes, List<MessageID> messageIds, DBHandler dBHandler, Strings.Langs lang) : base(chatId, pollId, pollText, pollDescription, anony, closed, percentageBar, appendable, sorted, archived, dBHandler, pollVotes, messageIds, lang, EPolls.vote) {
+		public PVote(long chatId, long pollId, string pollText, string pollDescription, EAnony anony, bool closed, PercentageBars.Bars percentageBar, bool appendable, bool sorted, bool archived, Dictionary<string, List<User>> pollVotes, List<MessageID> messageIds, DBHandler dBHandler, Strings.Langs lang) : base(chatId, pollId, pollText, pollDescription, anony, closed, percentageBar, appendable, sorted, archived, dBHandler, pollVotes, messageIds, lang, EPolls.vote) {
 
 		}
 
-		/*protected ContentParts GetContent2(Strings strings, string apikey, bool channel = false, int? offset = null, bool moderatePane = true) {
+		/*protected ContentParts GetContent2(Strings strings, string apikey, bool channel = false, long? offset = null, bool moderatePane = true) {
 			Strings.langs oldLang = strings.CurrentLang;
 			strings.SetLanguage(lang);
 			string text;

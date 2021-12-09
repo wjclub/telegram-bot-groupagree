@@ -31,7 +31,7 @@ namespace WJClubBotFrame.Types {
 
 	public class Update {
 		[JsonProperty(PropertyName = "update_id",  Required = Required.Always)]
-		public int UpdateId;
+		public long UpdateId;
 		[JsonProperty(PropertyName = "message",  Required = Required.Default)]
 		public Message Message;
 		[JsonProperty(PropertyName = "edited_message",  Required = Required.Default)]
@@ -46,7 +46,7 @@ namespace WJClubBotFrame.Types {
 
 	public class User {
 		[JsonProperty(PropertyName = "id",  Required = Required.Always)]
-		public int Id;
+		public long Id;
 		[JsonProperty(PropertyName = "first_name",  Required = Required.Always)]
 		public string FirstName;
 		[JsonProperty(PropertyName = "last_name",  Required = Required.Default)]
@@ -75,7 +75,7 @@ namespace WJClubBotFrame.Types {
 
 	public class Message {
 		[JsonProperty(PropertyName = "message_id",  Required = Required.Always)]
-		public int MessageId;
+		public long MessageId;
 		[JsonProperty(PropertyName = "from",  Required = Required.Default)]
 		public User From;
 		[JsonProperty(PropertyName = "date",  Required = Required.Always)]
@@ -138,7 +138,7 @@ namespace WJClubBotFrame.Types {
 
 	public class ReplyMessage {
 		[JsonProperty(PropertyName = "message_id",  Required = Required.Always)]
-		public int MessageId;
+		public long MessageId;
 		[JsonProperty(PropertyName = "from",  Required = Required.Default)]
 		public User From;
 		[JsonProperty(PropertyName = "date",  Required = Required.Always)]
@@ -306,7 +306,7 @@ namespace WJClubBotFrame.Types {
 		[JsonProperty(PropertyName = "last_name",  Required = Required.Default)]
 		public string LastName;
 		[JsonProperty(PropertyName = "user_id",  Required = Required.Default)]
-		public int UserId;
+		public long UserId;
 	}
 
 	public class Location {

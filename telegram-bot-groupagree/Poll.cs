@@ -13,7 +13,7 @@ using System.Runtime.Serialization;
 
 namespace telegrambotgroupagree {
 	public abstract class Poll {
-		protected Poll(int chatId, int pollId, string pollText, string pollDescription, EAnony anony, bool closed, PercentageBars.Bars percentageBar, bool appendable, bool sorted, bool archived, DBHandler dBHandler, Dictionary<string, List<User>> pollVotes, List<MessageID> messageIds, Strings.Langs lang, EPolls pollType = EPolls.vote) {
+		protected Poll(long chatId, long pollId, string pollText, string pollDescription, EAnony anony, bool closed, PercentageBars.Bars percentageBar, bool appendable, bool sorted, bool archived, DBHandler dBHandler, Dictionary<string, List<User>> pollVotes, List<MessageID> messageIds, Strings.Langs lang, EPolls pollType = EPolls.vote) {
 			this.chatId = chatId;
 			this.pollId = pollId;
 			this.pollText = pollText;
@@ -31,10 +31,10 @@ namespace telegrambotgroupagree {
 			this.Sorted = sorted;
 		}
 
-		protected int chatId;
-		public int ChatId { get { return this.chatId; } }
-		protected int pollId;
-		public int PollId { get { return this.pollId; } }
+		protected long chatId;
+		public long ChatId { get { return this.chatId; } }
+		protected long pollId;
+		public long PollId { get { return this.pollId; } }
 		protected string pollText;
 		public string PollText { get { return this.pollText; } }
 		protected string pollDescription;
@@ -78,7 +78,7 @@ namespace telegrambotgroupagree {
 			dBHandler.AddToQueue(this, false);
 		}
 
-		public virtual void Close(List<Instance> instances, long currentBotChatID, Strings strings, int messageId) {
+		public virtual void Close(List<Instance> instances, long currentBotChatID, Strings strings, long messageId) {
 			closed = true;
 			dBHandler.AddToQueue(this, change: true, forceNoApproximation: true);
 			//TODO catch stuff
@@ -100,14 +100,14 @@ namespace telegrambotgroupagree {
 			dBHandler.AddToQueue(this, change: true);
 		}
 
-		public virtual void Reopen(List<Instance> instances, long currentBotChatID, Strings strings, int messageId) {
+		public virtual void Reopen(List<Instance> instances, long currentBotChatID, Strings strings, long messageId) {
 			closed = false;
 			dBHandler.AddToQueue(this, change: true);
 			//TODO catch stuff
 			Update(instances, currentBotChatID, strings, true, messageId: messageId).Wait();
 		}
 
-		public virtual void Delete(List<Instance> instances, long currentBotChatID, Strings strings, int messageId) {
+		public virtual void Delete(List<Instance> instances, long currentBotChatID, Strings strings, long messageId) {
 			delete = true;
 			dBHandler.AddToQueue(this, change: true, forceNoApproximation: true);
 			//TODO catch stuff
@@ -119,7 +119,7 @@ namespace telegrambotgroupagree {
 			dBHandler.AddToQueue(this, change: true, forceNoApproximation: true);
 		}
 
-		protected virtual ContentParts GetContent(Strings strings, string apikey = null, bool noApproximation = true, bool channel = false, int? offset = null, bool moderatePane = false) {
+		protected virtual ContentParts GetContent(Strings strings, string apikey = null, bool noApproximation = true, bool channel = false, long? offset = null, bool moderatePane = false) {
 			List<int> pollVotesCount = CountVotes(out int peopleCount);
 			ContentParts output;
 			if (moderatePane) {
@@ -229,7 +229,7 @@ namespace telegrambotgroupagree {
 			return string.Format(strings.GetString(peopleCount == 0 ? Strings.StringsList.rendererZeroVotedSoFar : (peopleCount == 1 ? Strings.StringsList.rendererSingleVotedSoFar : Strings.StringsList.rendererMultiVotedSoFar)), RenderNumberUpdateFriendly(peopleCount, noApproximation));
 		}
 
-		public virtual string RenderNumberUpdateFriendly(int input, bool skipApproximation) {
+		public virtual string RenderNumberUpdateFriendly(long input, bool skipApproximation) {
 			double inputDouble = input;
 			if (skipApproximation) {
 				return input.ToString();
@@ -495,7 +495,7 @@ namespace telegrambotgroupagree {
             await Api.SendMessageAsync(apikey, chatId, content.Text, replyMarkup: (fromChannel ? content.InlineKeyboard : GenerateUserMarkup(strings, apikey)));
         }
 
-		public async Task Send(string apikey, Strings strings, long chatId, int pagOffset) {
+		public async Task Send(string apikey, Strings strings, long chatId, long pagOffset) {
 			ContentParts content = GetContent(strings, apikey, noApproximation: true, offset: pagOffset);
 			await Api.SendMessageAsync(apikey, chatId, content.Text, replyMarkup: content.InlineKeyboard);
 		}
@@ -505,12 +505,12 @@ namespace telegrambotgroupagree {
 			this.archived = true;
 		}
 
-		public async Task Update(string apikey, Strings strings, long chatId, int messageID, int pagOffset, bool noApproximation) {
+		public async Task Update(string apikey, Strings strings, long chatId, long messageID, long pagOffset, bool noApproximation) {
 			ContentParts content = GetContent(strings, apikey, noApproximation, offset: pagOffset);
 			await Api.EditMessageTextAsync(apikey, content.Text, content.InlineKeyboard, chatId, messageID);
 		}
 
-		public async Task Update(List<Instance> instances, long currentBotChatID, Strings strings, bool noApproximation, string currentInlineMessageID = null, int? messageId = null, string currentText = null, long? newChatId = null, bool voteButtonPressed = false) {
+		public async Task Update(List<Instance> instances, long currentBotChatID, Strings strings, bool noApproximation, string currentInlineMessageID = null, long? messageId = null, string currentText = null, long? newChatId = null, bool voteButtonPressed = false) {
 			//If a user pressed the update button, the messageId is not null (so nobody voted)
 			bool getsAVote = messageId == null;
 			Instance currentInstance = instances.Find(x => x.chatID == currentBotChatID);
@@ -643,12 +643,12 @@ namespace telegrambotgroupagree {
 			return allDone;
 		}
 
-		internal async Task UpdateWithOptionsPane(string apikey, Strings strings, int messageID, string text) {
+		internal async Task UpdateWithOptionsPane(string apikey, Strings strings, long messageID, string text) {
 			ContentParts content = GetContent(strings, apikey, noApproximation:true);
 			await Api.EditMessageTextAsync(apikey, "<b>" + HtmlSpecialChars.Encode(strings.GetString(Strings.StringsList.optionsForPoll)) + "</b>\n\n" + content.Text, this.GenerateOptionsMarkup(strings), chatId, messageID);
 		}
 
-		internal async Task UpdateWithModeratePane(string apikey, Strings strings, int messageId, string text) {
+		internal async Task UpdateWithModeratePane(string apikey, Strings strings, long messageId, string text) {
 			ContentParts content = GetContent(strings, apikey, noApproximation:true,  moderatePane:true);
 			await Api.EditMessageTextAsync(apikey, content.Text, content.InlineKeyboard, chatId, messageId);
 		}

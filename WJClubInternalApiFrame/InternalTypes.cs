@@ -8,7 +8,7 @@ namespace WJClubInternalApiFrame {
 
 	public class InternalUpdate {
 		[JsonProperty(PropertyName = "id", Required = Required.Always)]
-		public int ID;
+		public long ID;
 		[JsonProperty(PropertyName = "data", Required = Required.Always)]
 		public string Data;
 	}

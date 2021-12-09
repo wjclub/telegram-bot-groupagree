@@ -11,12 +11,12 @@ public class Instance {
             return $"{chatID}:{key}";
         } set {
             string[] valuesplit = value.Split(':');
-            this.chatID = int.Parse(valuesplit[0]);
+            this.chatID = long.Parse(valuesplit[0]);
             this.key = valuesplit[1];
         }
     }
 
-    public int offset;
+    public long offset;
     public User botUser;
     public User creator;
     public Task<Update[]> update;

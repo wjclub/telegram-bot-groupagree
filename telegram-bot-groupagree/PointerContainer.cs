@@ -15,7 +15,7 @@ namespace telegrambotgroupagree {
 			return "NOT IMPLEMENTED";
 		}
 
-		public void Add(int chatId, string languageCode) {
+		public void Add(long chatId, string languageCode) {
 			Pointer pointer = new Pointer(chatId, languageCode);
 			dBHandler.AddToQueue(pointer);
 		}
@@ -24,7 +24,7 @@ namespace telegrambotgroupagree {
 			dBHandler.AddToQueue(pointer);
 		}
 
-		public Pointer GetPointer (int chatId, string languageCode) {
+		public Pointer GetPointer (long chatId, string languageCode) {
 			Pointer pointer = dBHandler.PointerQueue.Find(x => x.ChatId == chatId);
 			if (pointer == null) {
 				pointer = dBHandler.GetPointer(chatId);
@@ -38,7 +38,7 @@ namespace telegrambotgroupagree {
 			return pointer;
 		}
 
-		/*public void SetPointer(int chatId, ENeedle? needle = null, EPolls? pollType = null, EAnony? anony = null) {
+		/*public void SetPointer(long chatId, ENeedle? needle = null, EPolls? pollType = null, EAnony? anony = null) {
 			Pointer pointer = pointerDB.Find(x => x.ChatId == chatId);
 			if (needle != null)pointer.Needle = (ENeedle)needle;
 			if (pollType != null) pointer.PollType = (EPolls)pollType;

@@ -9,7 +9,7 @@ namespace telegrambotgroupagree {
 			string[] botsplit = apikey.Split(':');
 			conn_string.Server = "localhost";
 			conn_string.UserID = botsplit[0];
-			chat_id = int.Parse(botsplit[0]);
+			chat_id = long.Parse(botsplit[0]);
 			conn_string.Password = botsplit[1];
 			conn_string.Database = "botstats";
 			conn_string.Port = 3306;
@@ -17,7 +17,7 @@ namespace telegrambotgroupagree {
 			connection = new MySqlConnection(conn_string.ToString());
 		}
 
-		private int chat_id;
+		private long chat_id;
 		private string apikey;
 		private MySqlConnection connection;
 

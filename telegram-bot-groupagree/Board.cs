@@ -12,21 +12,21 @@ using System.IO;
 
 namespace telegrambotgroupagree {
 	public class Board:Poll {
-		public Board(int chatId, int pollId, string pollText, EAnony anony, DBHandler dBHandler, Strings.Langs lang) : this(chatId, pollId, pollText, null, anony, false, false, dBHandler, new Dictionary<int, BoardVote>(), new List<MessageID>(), lang) {
+		public Board(long chatId, long pollId, string pollText, EAnony anony, DBHandler dBHandler, Strings.Langs lang) : this(chatId, pollId, pollText, null, anony, false, false, dBHandler, new Dictionary<long, BoardVote>(), new List<MessageID>(), lang) {
 			this.pollType = EPolls.board;
 		}
 
-		public Board(int chatId, int pollId, string pollText, string pollDescription, EAnony anony, bool closed, bool archived, DBHandler dBHandler, Dictionary<int, BoardVote> pollVotes, List<MessageID> messageIds, Strings.Langs lang) : base(chatId, pollId, pollText, pollDescription, anony, closed, PercentageBars.Bars.none, false, false, archived, dBHandler, null, messageIds, lang, EPolls.board) {
+		public Board(long chatId, long pollId, string pollText, string pollDescription, EAnony anony, bool closed, bool archived, DBHandler dBHandler, Dictionary<long, BoardVote> pollVotes, List<MessageID> messageIds, Strings.Langs lang) : base(chatId, pollId, pollText, pollDescription, anony, closed, PercentageBars.Bars.none, false, false, archived, dBHandler, null, messageIds, lang, EPolls.board) {
 			this.pollType = EPolls.board;
 			this.pollVotes = pollVotes;
 		}
 
-		new private Dictionary<int, BoardVote> pollVotes;
-		new public Dictionary<int, BoardVote> PollVotes { get { return pollVotes; } }
+		new private Dictionary<long, BoardVote> pollVotes;
+		new public Dictionary<long, BoardVote> PollVotes { get { return pollVotes; } }
 
 		public override string RenderVotes(List<int> pollVotesCount, int peopleCount, bool noApproximation) {
 			string votesString = "";
-			foreach (KeyValuePair<int, BoardVote> x in pollVotes) {
+			foreach (KeyValuePair<long, BoardVote> x in pollVotes) {
 				string toAdd = (anony == EAnony.personal ? "\n\u200E<b>" + HtmlSpecialChars.Encode(x.Value.Name.Replace("\u200F", "").Replace("\u202B", "").Replace("\u202E", "").Truncate(25)) + ": </b>" : "\n\ud83d\udc64 ") + HtmlSpecialChars.Encode(x.Value.Text) + "\n";
 				if (votesString.Length + toAdd.Length <= 4000) {
 					votesString += toAdd;
@@ -107,7 +107,7 @@ namespace telegrambotgroupagree {
 
 		protected override string RenderModerationVotes() {
 			string output = "";
-			foreach (KeyValuePair<int, BoardVote> currentOption in PollVotes) {
+			foreach (KeyValuePair<long, BoardVote> currentOption in PollVotes) {
 				output += "\n" + RenderUserForModeration(currentOption.Key, currentOption.Value.Name) + currentOption.Value.Text
 					+ "\n  /delete_" + HashWorker.Base53Encode(PollId + ":" + currentOption.Key + ":" + CRC32.HashCRC32(currentOption.Value.Text)) + "\n";
 			}
@@ -129,7 +129,7 @@ namespace telegrambotgroupagree {
 			}
 			inlineDescription = StringEdit.CurrentCulture.TextInfo.ToTitleCase(anony.ToString()) + " " + pollType + ": " + pollText + ": ";
 			text = "\ud83d\udcdd <b>" + HtmlSpecialChars.Encode(pollText).UnmarkupUsernames() + "</b>" + (!string.IsNullOrEmpty(pollDescription) ? ("\n" + HtmlSpecialChars.Encode(pollDescription) + "\n") : "\n");
-			foreach (KeyValuePair<int, BoardVote> x in pollVotes) {
+			foreach (KeyValuePair<long, BoardVote> x in pollVotes) {
 				string toAdd = (anony == EAnony.personal ? "\n\u200E<b>" + HtmlSpecialChars.Encode(x.Value.Name.Replace("\u200F", "").Replace("\u202B", "").Replace("\u202E", "").Truncate(25)) + ": </b>" : "\n\ud83d\udc64 ") + HtmlSpecialChars.Encode(x.Value.Text) + "\n";
 				if (text.Length + toAdd.Length <= 4000) {
 					text += toAdd;

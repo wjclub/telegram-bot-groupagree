@@ -20,7 +20,7 @@ namespace telegrambotgroupagree {
 			});
 		}
 
-		public Poll Add(Pointer pointer, int chatId, string pollText) {
+		public Poll Add(Pointer pointer, long chatId, string pollText) {
 			Poll poll;
 			switch (pointer.PollType) {
 				case EPolls.vote:
@@ -63,11 +63,11 @@ namespace telegrambotgroupagree {
 			return poll;
 		}
 
-		public List<Poll> GetPolls(int chatId, string searchFor = null) {
+		public List<Poll> GetPolls(long chatId, string searchFor = null) {
 				return dBHandler.GetPolls(chatId, searchFor: searchFor);
 		}
 
-		public List<Poll> GetPollsReverse(int chatId, int limit, string searchFor = null) {
+		public List<Poll> GetPollsReverse(long chatId, int limit, string searchFor = null) {
 			List<Poll> relevantPolls = GetPolls(chatId, searchFor);
 			List<Poll> resultPolls = new List<Poll>();
 			int count = relevantPolls.Count;
@@ -77,7 +77,7 @@ namespace telegrambotgroupagree {
 			return resultPolls;
 		}
 
-		public string GetPollPretty(int chatId) {
+		public string GetPollPretty(long chatId) {
 			string text = strings.GetString(Strings.StringsList.listYourPolls);
 			List<Poll> polls = GetPolls(chatId);
 			if (polls.Count == 0) {
@@ -91,7 +91,7 @@ namespace telegrambotgroupagree {
 			return text;
 		}
 
-		public Poll GetPoll(int chatId, int pollId) {
+		public Poll GetPoll(long chatId, long pollId) {
 			Poll poll;
 			poll = pollDB.Find(x => (x.ChatId == chatId && x.PollId == pollId));
 			if (poll == null) {
@@ -113,7 +113,7 @@ namespace telegrambotgroupagree {
 			return poll;
 		}
 
-		public void RemoveLastPoll(int chatId) {
+		public void RemoveLastPoll(long chatId) {
 			pollDB.RemoveAt(pollDB.FindLastIndex(x => x.ChatId == chatId));
 		}
 
