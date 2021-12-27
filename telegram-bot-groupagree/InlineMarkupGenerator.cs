@@ -14,7 +14,7 @@ namespace telegrambotgroupagree {
 			return inlineKeyboard;
 		}
 
-		public static InlineKeyboardMarkup GetTheModerationKeyboard(Strings strings, long chatID, int pollID) {
+		public static InlineKeyboardMarkup GetTheModerationKeyboard(Strings strings, long chatID, long pollID) {
 			return GetOneButtonMarkup(InlineKeyboardButton.Create(strings.GetString(Strings.StringsList.moderate), callbackData:String.Format("comm:moderate:{0}:{1}", chatID, pollID)));
 		}
 	}

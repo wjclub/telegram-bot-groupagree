@@ -23,9 +23,9 @@ namespace telegrambotgroupagree {
 	}
 
 	public class Pointer {
-		public Pointer(int chatId, string ieftLang) : this(chatId, EPolls.vote, ENeedle.pollText, EAnony.personal, null, null, 0, Strings.GetLangFromIEFT(ieftLang), new List<DateTime>()) { }
+		public Pointer(long chatId, string ieftLang) : this(chatId, EPolls.vote, ENeedle.pollText, EAnony.personal, null, null, 0, Strings.GetLangFromIEFT(ieftLang), new List<DateTime>()) { }
 
-		public Pointer(int chatId, EPolls pollType, ENeedle needle, EAnony anony, int? boardChatId, int? boardPollId, int lastPollId, Strings.Langs lang, List<DateTime> lastRequests) {
+		public Pointer(long chatId, EPolls pollType, ENeedle needle, EAnony anony, long? boardChatId, long? boardPollId, long lastPollId, Strings.Langs lang, List<DateTime> lastRequests) {
 			this.ChatId = chatId;
 			this.PollType = pollType;
 			this.Needle = needle;
@@ -37,13 +37,13 @@ namespace telegrambotgroupagree {
             this.LastRequests = lastRequests;
 		}
 
-		public int ChatId;
+		public long ChatId;
 		public EPolls PollType;
 		public ENeedle Needle;
 		public EAnony Anony;
-		public int? BoardChatId;
-		public int? BoardPollId;
-		public int LastPollId;
+		public long? BoardChatId;
+		public long? BoardPollId;
+		public long LastPollId;
 		public Strings.Langs Lang;
         public List<DateTime> LastRequests;
 

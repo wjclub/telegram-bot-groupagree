@@ -31,7 +31,7 @@ namespace WJClubBotFrame.Methods {
 			return (await Requester.MakeRequestNonAsync(apikey, JsonConvert.SerializeObject(new { method = "deleteWebhook" }))).Ok;
 		}
 
-		public static async Task<Update[]> GetUpdatesAsync(string apikey, int offset) {
+		public static async Task<Update[]> GetUpdatesAsync(string apikey, long offset) {
 			int timeoutSeconds = 60;
 			Syscall.alarm((uint)(timeoutSeconds * 2 + 2));  // process will kill itself on Unix if inactive for timeout*2+2 sec
 			using (HttpClient client = new HttpClient { Timeout = TimeSpan.FromSeconds(timeoutSeconds) }) {
@@ -55,7 +55,7 @@ namespace WJClubBotFrame.Methods {
 			}
 		}
 
-		public static async Task<Message> SendMessageAsync(string apikey, long chatID, string messageText, bool disableWebPagePreview = true, bool disableNotification = false, int? replyToMessageID = null, ReplyMarkup replyMarkup = null) {
+		public static async Task<Message> SendMessageAsync(string apikey, long chatID, string messageText, bool disableWebPagePreview = true, bool disableNotification = false, long? replyToMessageID = null, ReplyMarkup replyMarkup = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "sendMessage",
 				chat_id = chatID,
@@ -76,7 +76,7 @@ namespace WJClubBotFrame.Methods {
 			}
 		}
 
-		public static async Task<Message> ForwardMessage(string apikey, long chatID, long fromChatID, int messageID, bool disableNotification = false) {
+		public static async Task<Message> ForwardMessage(string apikey, long chatID, long fromChatID, long messageID, bool disableNotification = false) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "forwardMessage",
 				chat_id = chatID,
@@ -92,7 +92,7 @@ namespace WJClubBotFrame.Methods {
 			}
 		}
 
-		public static async Task<Message> SendPhoto(string apikey, long chatID, string photo, string caption, bool disableNotification = false, int? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
+		public static async Task<Message> SendPhoto(string apikey, long chatID, string photo, string caption, bool disableNotification = false, long? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "sendPhoto",
 				chat_id = chatID,
@@ -110,7 +110,7 @@ namespace WJClubBotFrame.Methods {
 			}
 		}
 
-		public static async Task<Message> SendAudio(string apikey, long chatId, string audio, int? duration = null, string performer = null, string title = null, bool silent = false, int? replyToId = null, ReplyKeyboardMarkup replyMarkup = null) {
+		public static async Task<Message> SendAudio(string apikey, long chatId, string audio, int? duration = null, string performer = null, string title = null, bool silent = false, long? replyToId = null, ReplyKeyboardMarkup replyMarkup = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "sendAudio",
 				chat_id = chatId,
@@ -130,7 +130,7 @@ namespace WJClubBotFrame.Methods {
 			}
 		}
 
-		public static async Task<Message> SendDocument(string apikey, long chatID, string document, string caption, bool disableNotification = false, int? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
+		public static async Task<Message> SendDocument(string apikey, long chatID, string document, string caption, bool disableNotification = false, long? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "sendDocument",
 				chat_id = chatID,
@@ -148,7 +148,7 @@ namespace WJClubBotFrame.Methods {
 			}
 		}
 
-		public static async Task<Message> SendSticker(string apikey, long chatID, string sticker, bool disableNotification = false, int? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
+		public static async Task<Message> SendSticker(string apikey, long chatID, string sticker, bool disableNotification = false, long? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "sendSticker",
 				chat_id = chatID,
@@ -165,7 +165,7 @@ namespace WJClubBotFrame.Methods {
 			}
 		}
 
-		public static async Task<Message> SendVideo(string apikey, long chatID, string video, int? duration = null, int? width = null, int? height = null, string caption = null, bool disableNotifications = false, int? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
+		public static async Task<Message> SendVideo(string apikey, long chatID, string video, int? duration = null, int? width = null, int? height = null, string caption = null, bool disableNotifications = false, long? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "sendVideo",
 				chat_id = chatID,
@@ -186,7 +186,7 @@ namespace WJClubBotFrame.Methods {
 			}
 		}
 
-		public static async Task<Message> SendVoice(string apikey, long chatID, string voice, int? duration = null, bool disableNotifications = false, int? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
+		public static async Task<Message> SendVoice(string apikey, long chatID, string voice, int? duration = null, bool disableNotifications = false, long? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "sendVoice",
 				chat_id = chatID,
@@ -204,7 +204,7 @@ namespace WJClubBotFrame.Methods {
 			}
 		}
 
-		public static async Task<Message> SendLocation(string apikey, long chatID, int latitude, int longitude, bool disableNotifications = false, int? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
+		public static async Task<Message> SendLocation(string apikey, long chatID, int latitude, int longitude, bool disableNotifications = false, long? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "sendLocation",
 				chat_id = chatID,
@@ -222,7 +222,7 @@ namespace WJClubBotFrame.Methods {
 			}
 		}
 
-		public static async Task<Message> SendVenue(string apikey, long chatID, int latitude, int longitude, string title, string adress, string foursquareId, bool disableNotifications = false, int? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
+		public static async Task<Message> SendVenue(string apikey, long chatID, int latitude, int longitude, string title, string adress, string foursquareId, bool disableNotifications = false, long? replyToMessageID = null, ReplyKeyboardMarkup replyMarkup = null) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "sendVenue",
 				chat_id = chatID,
@@ -284,7 +284,7 @@ namespace WJClubBotFrame.Methods {
 		/// <exception cref="Exceptions.MessageIDInvalid"></exception>
 		/// <exception cref="Exceptions.MessageTooLong"></exception>
 		/// <exception cref="Exceptions.TooManyRequests"></exception>
-		public static async Task EditMessageTextAsync(string apikey, string text, ReplyMarkup replyMarkup = null, long? chatID = null, int? messageID = null, string inlineMessageID = null, bool disableWebPagePreview = true) {
+		public static async Task EditMessageTextAsync(string apikey, string text, ReplyMarkup replyMarkup = null, long? chatID = null, long? messageID = null, string inlineMessageID = null, bool disableWebPagePreview = true) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "editMessageText",
 				chat_id = chatID,
@@ -312,7 +312,7 @@ namespace WJClubBotFrame.Methods {
 			}
 		}
 
-		public static async Task<bool> EditMessageReplyMarkup(string apikey, long chatID, int messageID, object replyMarkup) {
+		public static async Task<bool> EditMessageReplyMarkup(string apikey, long chatID, long messageID, object replyMarkup) {
 			string json = JsonConvert.SerializeObject(new {
 				method = "editMessageReplyMarkup",
 				chat_id = chatID,

@@ -11,11 +11,11 @@ using StringEdit = System.Globalization.CultureInfo;
 
 namespace telegrambotgroupagree {
 	public class Doodle : Poll {
-		public Doodle(int chatId, int pollId, string pollText, EAnony anony, DBHandler dBHandler, Strings.Langs lang) : this(chatId, pollId, pollText, null, anony, false, PercentageBars.Bars.none, false, false, false, new Dictionary<string, List<User>>(), new List<MessageID>(), new List<User>(), dBHandler, lang) {
+		public Doodle(long chatId, long pollId, string pollText, EAnony anony, DBHandler dBHandler, Strings.Langs lang) : this(chatId, pollId, pollText, null, anony, false, PercentageBars.Bars.none, false, false, false, new Dictionary<string, List<User>>(), new List<MessageID>(), new List<User>(), dBHandler, lang) {
 			
 		}
 
-		public Doodle(int chatId, int pollId, string pollText, string pollDescription, EAnony anony, bool closed, PercentageBars.Bars percentageBar, bool appendable, bool sorted, bool archived, Dictionary<string, List<User>> pollVotes, List<MessageID> messageIds, List<User> people, DBHandler dBHandler, Strings.Langs lang) : base(chatId, pollId, pollText, pollDescription, anony, closed, percentageBar, appendable, sorted, archived, dBHandler, pollVotes, messageIds, lang, EPolls.doodle) {
+		public Doodle(long chatId, long pollId, string pollText, string pollDescription, EAnony anony, bool closed, PercentageBars.Bars percentageBar, bool appendable, bool sorted, bool archived, Dictionary<string, List<User>> pollVotes, List<MessageID> messageIds, List<User> people, DBHandler dBHandler, Strings.Langs lang) : base(chatId, pollId, pollText, pollDescription, anony, closed, percentageBar, appendable, sorted, archived, dBHandler, pollVotes, messageIds, lang, EPolls.doodle) {
 			this.people = people;
 		}
 

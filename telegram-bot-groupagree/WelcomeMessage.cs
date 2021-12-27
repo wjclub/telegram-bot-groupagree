@@ -16,7 +16,7 @@ namespace telegrambotgroupagree {
 			inlineKeyboard.InlineKeyboard[1].Add(InlineKeyboardButton.Create(String.Format(strings.GetString(Strings.StringsList.startMessageAnonyButton), (pointer.Anony == EAnony.anonymous ? "✅" : "☑")), callbackData:"comm:anony"));
 			return new ContentParts(text, inlineKeyboard, null, null);
 		}
-		public static void Refresh (string apikey, Strings strings, Pointer pointer, long chatId, int messageId) {
+		public static void Refresh (string apikey, Strings strings, Pointer pointer, long chatId, long messageId) {
 			ContentParts content = prepare(strings, pointer);
 			Api.EditMessageTextAsync(apikey,content.Text, content.InlineKeyboard, chatId, messageId);
 		}

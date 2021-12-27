@@ -24,7 +24,7 @@ namespace telegrambotgroupagree {
 			});
 			return new ContentParts(text, inlineKeyboard, null, null);
 		}
-		public static void Refresh (string apikey, Strings strings, Pointer pointer, long chatId, int messageId) {
+		public static void Refresh (string apikey, Strings strings, Pointer pointer, long chatId, long messageId) {
 			ContentParts content = prepare(strings, pointer);
 			Api.EditMessageTextAsync(apikey,content.Text, content.InlineKeyboard, chatId, messageId);
 		}

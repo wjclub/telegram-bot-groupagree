@@ -11,16 +11,16 @@ using StringEdit = System.Globalization.CultureInfo;
 namespace telegrambotgroupagree {
 	public class LimitedDoodle : Doodle {
 		#region constructors
-		public LimitedDoodle(int chatId, int pollId, string pollText, EAnony anony, DBHandler dBHandler, Strings.Langs lang) : base(chatId, pollId, pollText, anony, dBHandler, lang) {
+		public LimitedDoodle(long chatId, long pollId, string pollText, EAnony anony, DBHandler dBHandler, Strings.Langs lang) : base(chatId, pollId, pollText, anony, dBHandler, lang) {
 			this.pollType = EPolls.limitedDoodle;
 		}
-		public LimitedDoodle(int chatId, int pollId, string pollText, string pollDescription, EAnony anony, bool closed, PercentageBars.Bars percentageBar, bool appendable, bool sorted, bool archived, Dictionary<string, List<User>> pollVotes, List<MessageID> messageIds, List<User> people, int maxVotes, DBHandler dBHandler, Strings.Langs lang) : base(chatId, pollId, pollText, pollDescription, anony, closed, percentageBar, appendable, sorted, archived, pollVotes, messageIds, people, dBHandler, lang) {
+		public LimitedDoodle(long chatId, long pollId, string pollText, string pollDescription, EAnony anony, bool closed, PercentageBars.Bars percentageBar, bool appendable, bool sorted, bool archived, Dictionary<string, List<User>> pollVotes, List<MessageID> messageIds, List<User> people, long maxVotes, DBHandler dBHandler, Strings.Langs lang) : base(chatId, pollId, pollText, pollDescription, anony, closed, percentageBar, appendable, sorted, archived, pollVotes, messageIds, people, dBHandler, lang) {
 			this.pollType = EPolls.limitedDoodle;
 			this.MaxVotes = maxVotes;
 		}
 		#endregion
 
-		public int MaxVotes;
+		public long MaxVotes;
 
 		public bool Vote(string apikey, int optionNr, User user, Message message, out bool tooMuchVotes, string inlineMessageId = null) {
 			dBHandler.AddToQueue(this);
@@ -37,7 +37,7 @@ namespace telegrambotgroupagree {
 					people.RemoveAll(z => z.Id == user.Id);
 				result = false;
 			} else {
-				int votedCount = 0;
+				long votedCount = 0;
 				foreach (KeyValuePair<string, List<User>> x in pollVotes) {
 					if (x.Value.Exists(y => y.Id == user.Id))
 						votedCount++;

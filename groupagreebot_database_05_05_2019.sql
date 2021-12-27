@@ -25,13 +25,13 @@ DROP TABLE IF EXISTS `instances`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
 CREATE TABLE `instances` (
-  `chat_id` int(64) NOT NULL,
+  `chat_id` bigint(64) NOT NULL,
   `key` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `owner` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `uses_24` int(64) DEFAULT NULL,
   `uses_month` int(64) DEFAULT NULL,
   `creation_date` datetime DEFAULT NULL,
-  `offset` int(64) NOT NULL DEFAULT '0',
+  `offset` bigint(64) NOT NULL DEFAULT '0',
   `last_30_updates` json DEFAULT NULL,
   `retry_at` int(64) DEFAULT NULL,
   PRIMARY KEY (`chat_id`)
@@ -60,13 +60,13 @@ DROP TABLE IF EXISTS `pointer`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
 CREATE TABLE `pointer` (
-  `chatId` int(32) NOT NULL,
+  `chatId` bigint(32) NOT NULL,
   `needle` int(8) DEFAULT NULL,
   `anony` bit(1) DEFAULT NULL,
   `pollType` int(8) DEFAULT NULL,
-  `boardChatId` int(32) DEFAULT NULL,
-  `boardPollId` int(32) DEFAULT NULL,
-  `lastPollId` int(32) NOT NULL DEFAULT '0',
+  `boardChatId` bigint(32) DEFAULT NULL,
+  `boardPollId` bigint(32) DEFAULT NULL,
+  `lastPollId` bigint(32) NOT NULL DEFAULT '0',
   `lang` int(8) NOT NULL DEFAULT '0',
   PRIMARY KEY (`chatId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -80,8 +80,8 @@ DROP TABLE IF EXISTS `polls`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
  SET character_set_client = utf8mb4 ;
 CREATE TABLE `polls` (
-  `chatid` int(32) NOT NULL,
-  `pollid` int(32) NOT NULL,
+  `chatid` bigint(32) NOT NULL,
+  `pollid` bigint(32) NOT NULL,
   `pollText` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `pollDescription` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `pollVotes` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
