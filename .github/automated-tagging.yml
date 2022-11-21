@@ -1,0 +1,12 @@
+name: Automated Tagging
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Conventional Changelog Action
+      uses: TriPSs/conventional-changelog-action@v3.17.1
