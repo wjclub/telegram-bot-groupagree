@@ -1,34 +1,52 @@
-version: "2"
+# template to deploy a new complete instance of the application
+
+# now say it with me
+# 👏🏽 docker 👏🏽 compose 👏🏽 is 👏🏽 not 👏🏽 a 👏🏽 production 👏🏽 grade 👏🏽 orchestrator 👏🏽
+# you have been warned
 
 services:
+    groupagreebot:
+        image: ghcr.io/wjclub/telegram-bot-groupagree:latest
+        restart: unless-stopped
+        depends_on:
+        - db
+        networks:
+            - backend
     db:
-        image: mysql:5.7
+        image: docker.io/mysql:latest
         restart: unless-stopped
+        # use docker secrets to store the password
+        environment:
+            MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+            MYSQL_DATABASE: groupagree
+            MYSQL_USER: groupagree
+            MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+        secrets:
+            - mysql_root_password
+            - mysql_password
         volumes:
-            - ./groupagreebot_database_05_05_2019.sql:/docker-entrypoint-initdb.d/init.sql
-            - mysql-data:/var/lib/mysql/
-        environment:
-            MYSQL_USER: gab
-            MYSQL_PASSWORD: gab
-            MYSQL_DATABASE: groupagreebot_beta
-            MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-
-    groupagree:
-        build: .
-        stop_grace_period: 1s
-        restart: unless-stopped
-        depends_on:
-            - db
-        environment:
-            GROUPAGREE_DB_HOST: db
-
+            - db_data:/var/lib/mysql
+        networks:
+            - backend
     adminer:
-        image: adminer
+        image: adminer:latest
         restart: unless-stopped
-        depends_on:
-            - db
+        profiles:
+          - adminer
         ports:
             - 8080:8080
+        depends_on:
+            - db
+        environment:
+            ADMINER_DEFAULT_SERVER: db
+        networks:
+            - backend
+
+secrets:
+    mysql_root_password:
+        file: ./secrets/mysql_root_password
+    mysql_password:
+        file: ./secrets/mysql_password
 
 volumes:
-    mysql-data:
+    db_data:       

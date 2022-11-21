@@ -1,20 +1,13 @@
-FROM ubuntu:19.04
+# super standard dockerfile for dotnet
+# more info here: https://docs.microsoft.com/en-us/dotnet/core/docker/building-net-docker-images
 
-ENV DEBIAN_FRONTEND=noninteractive
+FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
 
-RUN apt update && \
-    apt install -yq mono-complete wget
+COPY *.csproj ./
+RUN dotnet restore
+COPY . ./
+RUN dotnet publish -c Release -o out
 
-WORKDIR /app
-
-ADD . .
-
-RUN mkdir packages && \
-    cd packages/ && \
-    wget https://dist.nuget.org/win-x86-commandline/v3.3.0/nuget.exe && \
-    for PKGCONF in ../*/packages.config ; do mono nuget.exe install $PKGCONF ; done && \
-    cd .. && \
-    xbuild telegram-bot-groupagree.sln
-
-CMD cd telegram-bot-groupagree/bin/Debug/ && \
-    while true ; do mono ./telegram-bot-groupagree.exe gab gab groupagreebot_beta ; done
+FROM mcr.microsoft.com/dotnet/runtime:7.0 AS runtime
+COPY --from=build /out ./
+ENTRYPOINT ["dotnet", "groupagreebot.dll"]
