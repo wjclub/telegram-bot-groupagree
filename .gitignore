@@ -477,3 +477,5 @@ $RECYCLE.BIN/
 *.lnk
 
 secrets/
+.vscode/
+*.code-workspace
