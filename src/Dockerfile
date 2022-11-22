@@ -11,5 +11,5 @@ RUN dotnet publish -c Release -o out
 
 FROM mcr.microsoft.com/dotnet/runtime:7.0 AS runtime
 WORKDIR /app
-COPY --from=build /out ./
+COPY --from=build /app/out ./
 ENTRYPOINT ["dotnet", "groupagreebot.dll"]
