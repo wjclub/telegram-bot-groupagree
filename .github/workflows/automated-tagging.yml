@@ -2,6 +2,8 @@ name: Automated Tagging
 
 on:
   push:
+    branches:
+      - v3
 
 jobs:
   tag:
@@ -17,3 +19,4 @@ jobs:
         skip-version-file: 'true'
         tag-prefix: 'v'
         git-message: 'chore(release): 🔖 {version}'
+        skip-ci: 'false'
