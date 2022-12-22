@@ -17,8 +17,15 @@ public sealed class PollService {
         _now = now;
     }
 
-    public Task<Result> CreatePollAsync(Poll poll) {
-        return _storage.StorePollAsync(poll);
+    public async Task<Result> CreatePollAsync(Poll poll) {
+        if ((await _storage.GetPollAsync(poll.Id)).HasValue) {
+            return Result.Failure("Poll already exists");
+        }
+        return await _storage.StorePollAsync(poll);
+    }
+
+    public Task<Maybe<Poll>> GetPollAsync(Guid id) {
+        return _storage.GetPollAsync(id);
     }
 
     public async Task<Result> DeletePollAsync(Guid id) {
@@ -70,7 +77,7 @@ public sealed class PollService {
         return await _storage.StorePollAsync(poll, unmodifiedPoll);
     }
 
-    public async Task<Result> AddOptionAsync(Poll poll, PollOption option, GroupAgreeBotUser user) {
+    public async Task<Result> AddOptionAsync(Poll poll, PollOption option, GroupAgreeBotUser addedByUser) {
         var unmodifiedPoll = poll.Duplicate();
         if (poll.IsExpired(_now)) {
             return Result.Failure("Poll is expired");
@@ -80,7 +87,14 @@ public sealed class PollService {
             return Result.Failure("Option already exists");
         }
 
-        if (poll.Creator != user && !poll.PollSettings.TryGetValue(PollSetting.AddVoteOptions, out _)) {
+        bool usersCanAddOptions = false; // TODO make configurable using config file or database
+        // get setting value from poll settings and try to parse it to bool, assume false
+        if (poll.PollSettings.TryGetValue(PollSetting.UsersCanAddOptions, out var usersCanAddOptionsString)
+            && !bool.TryParse(usersCanAddOptionsString, out usersCanAddOptions)) {
+            _logger.LogWarning("Invalid UsersCanAddOptions setting for poll {PollId}", poll.Id);
+        }
+
+        if (poll.Creator != addedByUser && !usersCanAddOptions) {
             return Result.Failure("You are not allowed to add options");
         }
 

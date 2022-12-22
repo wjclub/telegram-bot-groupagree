@@ -31,7 +31,7 @@ public sealed class PollOption {
     public required Guid Id { get; init; }
     public required string Title { get; set; }
     public required string Description { get; set; }
-    public required ICollection<PollVote> Votes { get; set; }
+    public ICollection<PollVote> Votes { get; set; } = new List<PollVote>();
 }
 
 public sealed class PollVote {
@@ -42,7 +42,7 @@ public sealed class PollVote {
 public enum PollSetting {
     MaxVotesPerUser,
     Anonymous,
-    AddVoteOptions,
+    UsersCanAddOptions,
 }
 
 public enum PollVoteSetting {
