@@ -38,9 +38,9 @@ public class MockupStorage : IGroupAgreeBotStorage {
         throw new NotImplementedException();
     }
 
-    public async Task<Maybe<Poll>> GetPollAsync(Guid id) {
+    public Task<Maybe<Poll>> GetPollAsync(Guid id) {
         var poll = _polls.Find(p => p.Id == id);
-        return poll ?? Maybe<Poll>.None;
+        return Task.FromResult(poll ?? Maybe<Poll>.None);
     }
 
     public async Task<Result> StorePollAsync(Poll poll, Poll? oldPoll)
